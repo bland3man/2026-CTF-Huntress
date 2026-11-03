@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Main Character Energy - Day 22 write-up</title>
+<meta name="description" content="Day 22 Metadata Forensics write-up: Recognize: metadata-forensics family, &quot;Determine &lt;format&gt;.&lt;field&gt; for &lt;file&gt;&quot; question shape. The field key names the extractor. Bind/Extrac">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-22.html">Day 22</a> / Main Character Energy</p><p class="telemetry"><span>DAY 22</span><span class="sep">//</span><span>LANE: METADATA FORENSICS</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Main Character Energy</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-metadata" href="../lanes/metadata.html">Metadata Forensics</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
+<h1 id="main-character-energy-metadata-forensics-day-22">Main Character Energy (metadata-forensics, Day 22)</h1>
+<p>Entry id: metadata-forensics-day-22-main-character-energy Agent: agent-4 (lane metadata-forensics)</p>
+<h2 id="result">Result</h2>
+<p>All three modes were solved by the lane's banked autosolver (autosolve_metadata.py) before any manual work. No extractor changes were needed. No manual GM calls were made by the agent.</p>
+<div class="table-wrap"><table><thead><tr><th>Mode</th><th>Result</th><th>Time</th><th>Flag</th></tr></thead><tbody><tr><td>Single Solve</td><td>CORRECT</td><td>3.2 s</td><td><span class="flag" data-flag><span class="fl">Token</span><span class="fv">b2afd9582b8bd2b21e757dcaede407da</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td></tr><tr><td>Time Trial</td><td>CORRECT</td><td>2.5 s</td><td><span class="flag" data-flag><span class="fl">Token</span><span class="fv">f89dbbe50abb9bd4a57ec52682ea7370</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td></tr><tr><td>Mastery</td><td>CORRECT</td><td>3.8 s</td><td><span class="flag" data-flag><span class="fl">Token</span><span class="fv">498109e4bf5ecc9099301d7fba69a866</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td></tr></tbody></table></div>
+<p>The Time Trial and Mastery flags were recorded by AUTOSOLVE as ranked attempts. The task policy says never to use the run_for_time entry; the agent did not start them. AUTOSOLVE's own hof_policy opened them after its readiness gate.</p>
+<h2 id="method">Method</h2>
+<ul><li>Recognize: metadata-forensics family, "Determine &lt;format&gt;.&lt;field&gt; for &lt;file&gt;" question shape. The field key names the extractor.</li><li>Bind/Extract: the autosolver read the answer from the claimed artifact's raw bytes using the registered handler (legacy_deterministic path, no new capabilities).</li><li>Validate/Submit: one submit per mode under the GM's answer_ids; the GM result was the verification.</li><li>Evidence: SURE (accepted by the GM in all three modes).</li></ul>
+<h2 id="notes">Notes</h2>
+<ul><li>Today's layer was not predicted by the progression table (no candidate matched), but the existing spine covered it.</li><li>Source of the results: Day 22/_board/metadata-forensics-day-22-main-character-energy.autosolve.json and timeline.jsonl.</li></ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#result">Result</a></li><li class="l2"><a href="#method">Method</a></li><li class="l2"><a href="#notes">Notes</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-22-deflated-ego.html">&lt; Deflated Ego</a><a href="day-22-next-next-finish.html">Next Next Finish &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

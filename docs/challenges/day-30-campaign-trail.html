@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Campaign Trail - Day 30 write-up</title>
+<meta name="description" content="Day 30 Binary RE write-up: The lane spine already answered 413/420 of the Single&#x27;s ids by catalog (d01..d29 shapes + d30 structural / artifactsha256N / Neko-based elf-">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-30.html">Day 30</a> / Campaign Trail</p><p class="telemetry"><span>DAY 30</span><span class="sep">//</span><span>LANE: BINARY RE</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Campaign Trail</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-binary" href="../lanes/binary.html">Binary RE</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
+<h1 id="day-30-campaign-trail-binary-reverse-engineering">Day 30 - Campaign Trail (binary-reverse-engineering)</h1>
+<p>All three modes CORRECT.</p>
+<ul><li>single_solve flag: <span class="flag" data-flag><span class="fl">Token</span><span class="fv">1b280bfe17571044b2a167d4357aa10e</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li><li>time_trial  flag: <span class="flag" data-flag><span class="fl">Token</span><span class="fv">627a0e29763c885c37c564ad37ff6cb3</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li><li>mastery     flag: <span class="flag" data-flag><span class="fl">Token</span><span class="fv">bbdb3a10de9716eb6c542c634a8221b2</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li></ul>
+<h2 id="what-the-day-added">What the day added</h2>
+<p>Day 30 is a cumulative recap (d01..d30, 14 fields/day = 420 TT ids, x14 sets = 5880 MM ids). The only genuinely new layer is d30 itself: a NEKO-bytecode campaign of three role-named members per set:</p>
+<ul><li>d30--sample-loader.n</li><li>d30--sample-library.n</li><li>d30--sample-config.n</li></ul>
+<p>Each file is a Neko bytecode module (magic <code>NEKO</code>) carrying an appended HGRF trailer that uses the same 12-byte layout as HCFG, differing only in the magic bytes:</p>
+<pre class="code"><code>+0  magic 'HGRF'   (4)
++4  version        (1)
++5  xor key        (1)
++6  length le16    (2)
++8  crc32  le32    (4)
++12 xor-encoded utf-8 json payload (length bytes)</code></pre>
+<p>The JSON is a <code>huntress.binary.campaign_graph.v1</code> capsule with <code>graph.nodes</code>, <code>graph.edges</code>, <code>graph.load_order</code>, <code>graph.config.{campaign,domain,ipv4,url,mutex, windows_path,linux_path,service,host_model}</code> and a per-member <code>this_role</code> tag (loader / library / config). All three role copies carry an identical graph.config when <code>this_role</code> is removed, as the question text asserts.</p>
+<h2 id="the-7-unresolved-fields-on-first-run">The 7 unresolved fields on first run</h2>
+<p>The lane spine already answered 413/420 of the Single's ids by catalog (d01..d29 shapes + d30 structural / artifact_sha256_N / Neko-based elf-less inventory). The 7 residues were the new d30 class:</p>
+<ul><li>d30_analysis_loader_format          -&gt; <code>neko_bytecode</code></li><li>d30_analysis_library_format         -&gt; <code>neko_bytecode</code></li><li>d30_analysis_config_capsule_format  -&gt; <code>neko_bytecode</code></li><li>d30_analysis_config_campaign        -&gt; <code>BR30-000</code>               (from loader.n HGRF)</li><li>d30_analysis_config_domain          -&gt; ...example.invalid       (from loader.n HGRF)</li><li>d30_analysis_config_mutex           -&gt; <code>Global\HuntressBR30-000</code>(from loader.n HGRF)</li><li>d30_analysis_config_url             -&gt; <code>https://...</code>            (from loader.n HGRF)</li></ul>
+<p>...and in MM each set also asks the capsule_graph_config_* variants that select the <code>config</code> role member instead of the loader. All variants decode to the same shared config object; what differs is only which role-named member supplies the HGRF record.</p>
+<h2 id="patch-in-binary-wip-py-answer-before-the-member-picker">Patch (in binary_wip.py <code>answer()</code>, before the member-picker)</h2>
+<p>Added an explicit d30 fast path that:</p>
+<ol><li>Picks the role-named member by basename (<code>endswith(role + '.n')</code>).</li><li>Classifies it as <code>neko_bytecode</code> when its first 4 bytes are <code>NEKO</code>.</li><li>For a <code>analysis_config_capsule_graph_config_&lt;name&gt;</code> suffix, reads the HGRF record from the config member and returns <code>graph.config.&lt;name&gt;</code>.</li><li>For a plain <code>analysis_config_&lt;name&gt;</code> suffix (non-capsule), reads the HGRF record from the loader member and returns <code>graph.config.&lt;name&gt;</code>.</li></ol>
+<p>The HGRF scan starts from <code>rfind(b'HGRF')</code> (the question says "scan backward from the end"), bounds-checks the length, CRC32-validates the XOR-decoded payload before accepting it, and never guesses.</p>
+<p>With that one extractor added, SS went 420 sure / 0 probe / 0 unknown; the runner then opened the TT and MM windows and both passed CORRECT first try.</p>
+<h2 id="lessons-d-1">Lessons + D+1</h2>
+<ul><li><strong>Specific extractor/opcode missing</strong>: HGRF capsule records on NEKO bytecode. The 12-byte layout is identical to HCFG except the magic. Keep this in the shared kit so a future day that reuses the exact capsule can be answered by the spine without a clone edit.</li><li><strong>Stall time</strong>: ~5 minutes. The 413 pre-answered fields proved the lane spine was already correct for d01..d29 end to end; the only build was the d30 role picker + HGRF decode.</li><li><strong>Keep in clone vs port to shared</strong>: port. The role-named-member picker (<code>loader.n</code> / <code>library.n</code> / <code>config.n</code>) and the HGRF decoder are both generic shapes - a future day that bundles role-named members or ships a capsule with a 1-byte-magic twin of HCFG will reuse exactly this logic. The clone copy is fine for today; shared autosolve_binary should pick up a small <code>_hgrf_scan</code> sibling of <code>_hcfg_scan</code> and wire the three format-suffixes + the two config-suffix families.</li></ul>
+<h2 id="reproducibility">Reproducibility</h2>
+<ul><li>Artifact: <code>single_0.bin</code> (evidence.zip, zip-crypto password <code>infected</code>).</li><li>Members (per set): <code>d30--sample-{loader,library,config}.n</code>, each ~20.9 KB.</li><li>HGRF trailer offsets observed on single_0.bin: loader off=20173 ver=1 key=0xF1 crc=0xC41517FB, library off=20182 ver=1 key=0xF1 crc=0x8E1F39C8, config  off=20209 ver=1 key=0xF1 crc=0x76C956E7.</li><li>All three decode to the same <code>graph.config</code> modulo the <code>this_role</code> field.</li></ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#what-the-day-added">What the day added</a></li><li class="l2"><a href="#the-7-unresolved-fields-on-first-run">The 7 unresolved fields on first run</a></li><li class="l2"><a href="#patch-in-binary-wip-py-answer-before-the-member-picker">Patch (in binary_wip.py answer(), before the member-picker)</a></li><li class="l2"><a href="#lessons-d-1">Lessons + D+1</a></li><li class="l2"><a href="#reproducibility">Reproducibility</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-29-white-box-key-recovery.html">&lt; White Box Key Recovery</a><a href="day-30-layered-protections.html">Layered Protections &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

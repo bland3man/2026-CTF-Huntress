@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Emulator Alibi - Day 24 write-up</title>
+<meta name="description" content="Day 24 Mobile Android write-up: All three modes CORRECT: singlesolve, timetrial (ranked), mastery (8 APKs, ranked attempt window).">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-24.html">Day 24</a> / Emulator Alibi</p><p class="telemetry"><span>DAY 24</span><span class="sep">//</span><span>LANE: MOBILE ANDROID</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Emulator Alibi</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-mobile" href="../lanes/mobile.html">Mobile Android</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout"><article class="prose">
+<h1 id="day-24-emulator-alibi-mobile-android-blandman3-agent-5">Day 24 - Emulator Alibi (mobile-android) - Blandman3 / agent-5</h1>
+<p>All three modes CORRECT: single_solve, time_trial (ranked), mastery (8 APKs, ranked attempt window).</p>
+<p>Method: static read of each APK (never executed). Most variants hold the answer via Release.code() long arithmetic in classes.dex, evaluated by challenges/_lib/smali_static.py (baksmali + tiny interpreter).</p>
+<p>Mastery set 7 (package d20) differed: Core.lateModule14 loads assets/payload.dex through InMemoryDexClassLoader and calls com.huntress.arena.payload.Module.share(long) by reflection. smali_static could not follow the reflection (unsupported op sget-object), so autosolve HELD. Fix: baksmali assets/payload.dex, splice Module.share into the interpreter and override Core.lateModule14 with a direct call (scripts/set7.py). Result for set 7 matched the GM (CORRECT).</p>
+<p>Mastery answers (accepted): set1 <span class="flag" data-flag><span class="fl">Answer</span><span class="fv">ANS-8A41F3FF2C42F552</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span>, set2 <span class="flag" data-flag><span class="fl">Answer</span><span class="fv">ANS-205C6B35DA07F4BE</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span>, set3 <span class="flag" data-flag><span class="fl">Answer</span><span class="fv">ANS-7B42D6C18BC706D3</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span>, set4 <span class="flag" data-flag><span class="fl">Answer</span><span class="fv">ANS-C307D5982932529C</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span>, set5 <span class="flag" data-flag><span class="fl">Answer</span><span class="fv">ANS-09C9ACC6231FADF2</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span>, set6 <span class="flag" data-flag><span class="fl">Answer</span><span class="fv">ANS-F6CF747EE615C389</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span>, set7 <span class="flag" data-flag><span class="fl">Answer</span><span class="fv">ANS-02BDB99AED760792</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span>, set8 <span class="flag" data-flag><span class="fl">Answer</span><span class="fv">ANS-BF3996BA3E93C65C</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span>.</p>
+<h2 id="lessons-and-recommended-improvements">Lessons and recommended improvements</h2>
+<ol><li>DONE: smali_static.py follows assets/payload.dex reflective (J)J calls (_patch_payload_loaders) and autosolve_mobile.py passes the payload. All 9 saved Day 24 APKs decode to the GM-accepted answers.</li><li>Add a regression test with a saved payload.dex APK fixture. The existing mobile test skips itself inside the 08:45-10:30 ET window, so it proved nothing for this change.</li><li>Replay every APK dumped by Single and Time Trial through the extractor before a ranked Mastery start; a failure on any variant should HOLD with no attempt spent.</li><li>The AUTOSOLVE failure line printed only the exception class (ValueError). Print the message too (unsupported op 'sget-object') so the missing feature is visible at once.</li><li>_analysis_uncached writes its APK dumps to a hardcoded Day 23 scripts folder; use the current day.</li><li>CLAUDE.md says we never use the run_for_time (Hall-of-Fame) entry, yet autosolve opened RANKED attempts under its own hof_policy. The Commander should decide which rule wins.</li><li>claim_next.py returned WAIT_TIMEOUT while the GM already listed the lane's challenge; a fallback that claims from the GM list (lane from seats.json) would avoid the wait.</li><li>With a live ranked Mastery window and a failed extractor, autosolve reported HELD (no ended attempt) instead of finishing the live attempt; the only fix was a manual submit with about 2 minutes left.</li></ol></article></div><nav class="pager" aria-label="Write-up navigation"><a href="day-23-page-me-maybe.html">&lt; Page Me Maybe</a><a href="day-24-event-horizon.html">Event Horizon &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>
