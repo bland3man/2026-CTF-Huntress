@@ -1,0 +1,1 @@
+{"status": "done", "modes_done": ["single_solve", "time_trial", "mastery"], "current_step": "complete", "blocker": null, "solver": "scripts/solve_webview_bridge.py", "notes": "huntress_puzzle.json codec=caesar key=10: chr(ord(c)-key) over data -> ANS-<16 hex>. Mastery = multiple APKs, one answer id each (set1.answer...)."}

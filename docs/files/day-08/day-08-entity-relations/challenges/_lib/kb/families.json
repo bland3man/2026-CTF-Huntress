@@ -1,0 +1,859 @@
+{
+ "_about": "Recurring Huntress CTF 2026 challenge FAMILIES, hand-built from Days 1-3 (writeups under challenges/Day NN/). kb.py match scores a new challenge against 'tells' and prints the recipe, saved solver and gotchas. PROGRESSION RULE: inside each lane every day EXTENDS the previous day (3 PowerShell files -> +9 JScript -> +9 Batch; ELF -> C++ ELF+PE -> managed .NET), so expect Day N+1 = Day N's family + one new layer: reuse the saved solver and work ONLY the new layer. Add lessons with: kb.py note <family_id> \"one line\".",
+ "families": [
+  {
+   "id": "script_inventory",
+   "name": "Multi-field script-triage inventory (PowerShell / JScript / Batch fixtures)",
+   "lane": [
+    "script-analysis"
+   ],
+   "tells": {
+    "id_patterns": [
+     "*-scenario",
+     "*-attack",
+     "*-url",
+     "jscript-*",
+     "batch-*",
+     "set1.*",
+     "set2.*",
+     "ps1-*"
+    ],
+    "keywords": [
+     "never run",
+     "read them",
+     "classify",
+     "att&ck",
+     "indicator",
+     "inspect",
+     "expansion",
+     "batch",
+     "jscript",
+     "powershell",
+     "campaign",
+     "staged chain",
+     "interpreter"
+    ],
+    "artifact_ext": [
+     ".ps1",
+     ".js",
+     ".cmd",
+     ".bat"
+    ],
+    "zip_password": "infected"
+   },
+   "asks": "Statically triage inert script fixtures and answer ~3-160 per-field questions (scenario/role, MITRE technique id, adapter, campaign id, url, wallet, mutex, JScript function/invocation/property style, Batch expansion + control form). Time Trial / Mastery re-randomize the files per attempt (Mastery = 318 ids over two sets).",
+   "recipe": [
+    "unzip with password infected (WinZip-AES: use 7z x -pinfected or pyzipper, stock unzip fails); never execute anything",
+    "PowerShell: each file holds a base64 literal -> decode -> JSON with keys a-h",
+    "JScript: run ONLY inspect_*() in node with eval replaced by JSON.parse and ActiveXObject/WScript blocked",
+    "Batch: concatenate the SET fragmentN lines (unescape ^| to |) or decode HUNTRESS-MATERIAL per HUNTRESS-CODEC; read steps= adapter= campaign_id= file_path=",
+    "role comes from the steps signature (relay-handoff is staged_chain, NOT relay); control + expansion come from the RECOVERY REGION (between :HUNTRESS_SEPARATOR_DONE and echo()",
+    "submit byte-derived fields as one batch, then probe enumerable fields with prober.py + families/script_inventory.values.json (<=12 threads)"
+   ],
+   "alternatives": [
+    "CyberChef From Base64 + JSON beautify for the PS1 blobs",
+    "PowerDecode for obfuscated PowerShell",
+    "node + vm module sandbox for JScript instead of cscript"
+   ],
+   "gotchas": [
+    "GM accumulates accepted fields inside an attempt but rejects a whole batch if ANY field is wrong: bank solids, probe the rest per field",
+    "24 parallel threads caused 429 false no-matches on Day 3; 12 is fine",
+    "timed windows are SECONDS: one automated run, one runner, never debug during a timed window",
+    "the single-solve per-slot labels do NOT carry over: control and expansion are per-attempt in timed modes",
+    "the GM lists no accepted_values for the Batch control/expansion fields; the question prose names the expansion forms",
+    "Day06 Bash layer: Material_/Codec_ in .sh, codecs re-randomize per retry; decode generically via challenges/_lib/decode_bash.py; Mastery has 2 deliveries (op=artifact&delivery=i); timed window ~7s so run retry+solver in ONE wsl call",
+    "Day07 Node/Python layer (cost us ~10 min before found): the SAME Material_<id>/Codec_<id> self-describing-codec pattern from Day06 Bash generalizes to .mjs (Node) AND several embedded-Python-packer-recovery formats (cxfreeze, pyarmor, pyinstaller onedir/onefile, py2exe, zipapp, wheel, pyc38). Codec_<id> is a literal pipe-delimited string NAMING its own decode steps (e.g. base64_chunks|reverse_bytes, escaped_octets|rolling_xor|<xorkey>); each fixture also defines load_/decode_/recover_/inspect_/plan_<id> functions implementing exactly that pipeline with safe transforms only (base64, byte-reverse, xor, hex-escape - confirmed no exec/network/file sinks). DO NOT hand-derive each codec: just RUN each fixture's own built-in recovery - HUNTRESS_INSPECT_ONLY=1 python3 <file>.py (Python) or HUNTRESS_INSPECT_ONLY=1 node <file>.mjs (JS/mjs) prints the decoded pipe-delimited key=value fields via inspect_<id>(); plan_<id>() also returns a semantic field mapping (adapter/operation/arch/url/path/service) where some fields (like adapter name) are hardcoded literals in source, not even encoded. Check PS1/VBS/CMD fixtures for the same env-var-gated inspect-branch convention before assuming it's Node/Python-only. role mapping also shifted this round: relay-handoff AND staged-handoff both grade as staged_chain (GM-confirmed Day07); 'relay' is reserved for the distinct 3-step decode_configuration,locate_interpreter,dispatch_next_stage signature."
+   ],
+   "solver": [
+    "challenges/_lib/solve_shell_we_begin.py",
+    "challenges/_lib/solve_script_inventory.py",
+    "challenges/_lib/decode_node.py",
+    "challenges/Day 07/Node by Node/scripts/solve_node_by_node.py",
+    "challenges/Day 03/Expansion Pack/scripts/solve_expansion.py",
+    "challenges/Day 03/Expansion Pack/scripts/fast_mastery.py",
+    "challenges/Day 02/Host With the Most/scripts/solve_host.js",
+    "challenges/Day 04/Dim and Dimmer/scripts/solve_dim_dimmer.py",
+    "challenges/Day 05/Hatch_Careful/scripts/solve_hatch.py"
+   ],
+   "known_hard": true,
+   "start_tier": "opus-4.8-high",
+   "expected_minutes": 20,
+   "seen": [
+    {
+     "day": 1,
+     "challenge": "Power Play",
+     "writeup": "challenges/Day 01/Power Play/Power_Play_Writeup.md",
+     "note": "3 PowerShell fixtures; classify + MITRE + indicators"
+    },
+    {
+     "day": 2,
+     "challenge": "Host With the Most",
+     "writeup": "challenges/Day 02/Host With the Most/Host_With_the_Most_Writeup.md",
+     "note": "+9 JScript, ~87 fields"
+    },
+    {
+     "day": 3,
+     "challenge": "Expansion Pack",
+     "writeup": "challenges/Day 03/Expansion Pack/Expansion_Pack_Writeup.md",
+     "note": "+9 Batch, 159/318 fields; the 62-minute solve"
+    },
+    {
+     "day": 4,
+     "challenge": "Dim and Dimmer",
+     "writeup": "challenges/Day 04/Dim and Dimmer/Dim_and_Dimmer_Writeup.md",
+     "note": "+VBScript"
+    },
+    {
+     "day": 5,
+     "challenge": "Hatch Careful",
+     "writeup": "challenges/Day 05/Hatch_Careful/Hatch_Careful_Writeup.md",
+     "note": "+Python carriers"
+    },
+    {
+     "day": 6,
+     "challenge": "Shell We Begin",
+     "writeup": "challenges/Day 06/Shell_We_Begin/Shell_We_Begin_Writeup.md"
+    },
+    {
+     "day": 7,
+     "challenge": "Node by Node",
+     "note": "+.mjs (Node) and several embedded-Python-packer-recovery formats (cxfreeze/pyarmor/pyinstaller/py2exe/zipapp/wheel/pyc38); ~60 fixtures, self-decoding Material_/Codec_ pattern generalizes cleanly; cost ~10 min before recognized - see gotcha.",
+     "writeup": "challenges/Day 07/Node by Node/Node_by_Node_Writeup.md"
+    },
+    {
+     "day": 8,
+     "challenge": "Lost in Translation",
+     "note": "+PHP polyglot/host-container v=3 descriptors (B64/HEX/FRAG/HB64 marker kinds) and 'bash-advanced' fixtures (associative-arrays, array-slicing) using xor_hex/percent_hex codecs not previously seen - new handler in solve_poly_d8.py. GM id is cross-language-iocs (displayed name 'Lost in Translation' - do not confuse with a separate challenge).",
+     "writeup": "challenges/Day 08/Lost_in_Translation/Lost_in_Translation_Writeup.md"
+    },
+    {
+     "day": 9,
+     "challenge": "All the World's a Stager",
+     "note": "D09 Stager Relationships: +stage relationship-graph layer (impossible lineage); script adapter, all 3 modes CORRECT",
+     "writeup": "challenges/Day 09/All the World's a Stager/All_the_Worlds_a_Stager_Writeup.md"
+    },
+    {
+     "day": 10,
+     "challenge": "Bind Over Matter",
+     "note": "D10 WMI persistence reconstruction: +.mof (WMI Managed Object Format) polyglots carrying the same Material_/Codec_ descriptor inside 'instance of' blocks - NO adapter change needed (the generic extractor already decodes them, and MOF has no dedicated T1059 sub-technique so the technique comes from the role, not the interpreter). All 3 modes CORRECT (753 / 753 / 1506 fields, 0 unresolved, 0 wrong). The only real blocker was a GM request-shape trap, not the content: this route is LEGACY single-pool, so run_for_time (true OR false) answers 409 timed_intent_not_available while a plain start with the property omitted opens a normal hall_of_fame_eligible attempt - fixed in ctf_gm.GM.start + autosolve_script.start.",
+     "writeup": "challenges/Day 10/Bind Over Matter/Bind_Over_Matter_Writeup.md"
+    },
+    {
+     "day": 14,
+     "challenge": "Trust the Process (msbuild .proj, T1127.001 trusted-utility)"
+    },
+    {
+     "day": 15,
+     "challenge": "Crumb Trail (script-analysis, 1026-field AES-encrypted evidence.zip)",
+     "writeup": "challenges/Day 15/Crumb Trail/",
+     "note": "all 3 modes CORRECT; cumulative catalog over d01..d15 script families; TT incorrect->CORRECT +23m, mastery +30m - DEFECT, fix = Day-16 field catalog + confirm() extractors"
+    },
+    {
+     "day": 16,
+     "challenge": "Same Same, But Different (script-analysis, obfuscation-equivalence)",
+     "writeup": "challenges/Day 16/Same Same, But Different/",
+     "note": "all 3 modes CORRECT by autosolve at first contact (Single 5.7 s, Time Trial 59.7 s, DONE 3/3 at 09:01:49 ET); no new handler needed"
+    },
+    {
+     "day": 17,
+     "challenge": "Fetch Quest (script-analysis, download-graph)",
+     "writeup": "challenges/Day 17/Fetch Quest/",
+     "note": "all 3 modes CORRECT at first contact (Single T+7.4s, TT T+12.5s ranked, Mastery T+24.4s). +AutoHotKey .ahk polyglot carrier with the unchanged Material_/Codec_ descriptor schema (44 fields); GM question text redirects the mapping to the browser credential store so the technique is T1555.003 not T1059. Mastery 5695 fields across 5 sets in 13.0s - banking field formats on the Single made each later mode start warm."
+    }
+   ],
+   "next_layer_guess": "another runtime/packer format added to the same self-decoding Material_/Codec_ bundle (Perl/Ruby/Go, or a new packer), or another xor_hex/percent_hex-style codec on a fixture type not yet covered",
+   "autosolve": "challenges/_lib/autosolve_script.py",
+   "autosolve_validated": "call run(); offline vs GM-confirmed answers: D07 469/469, D06 399/399 single + 2 TT attempts, D08 all 3 modes CORRECT (3075/3075 mastery fields across 5 sets after extending solve_poly_d8.py's bash_adv_desc for xor_hex/percent_hex), 0 diffs; unknown language degrades (only 'attack' unresolved) ; D09 all 3 modes CORRECT ; D10 all 3 modes CORRECT (753/753 TT, 1506/1506 mastery, 0 unresolved; .mof layer needed no new handler) | D14 msbuild: CORRECT all modes; latent XML-comment marker bug fixed + 49-combo matrix; recognize routes .proj/.csproj/.xsl->script | D15 Crumb Trail: all 3 modes CORRECT (GM 15/15); 1026-field AES-zip; TT/MM slow -> Day-16 confirm() extractors + spec_solver dispatch | D16 Same Same, But Different: all 3 modes CORRECT (GM 15/15 for the day); autosolve first contact, Single 5.7 s, TT 59.7 s; no new handler ; D17 Fetch Quest all 3 modes CORRECT (AutoHotKey .ahk carrier, T1555.003 via question text, Mastery 5695/5695 across 5 sets 13.0s)"
+  },
+  {
+   "id": "dual_format_re",
+   "name": "Binary RE orientation -> C++ ELF+PE forensic inventory -> managed (.NET) config",
+   "lane": [
+    "binary-reverse-engineering"
+   ],
+   "tells": {
+    "id_patterns": [
+     "elf_*",
+     "cpp_*",
+     "c_*",
+     "*_has_symtab",
+     "*_recover_code",
+     "*_machine",
+     "set1.*",
+     "set2.*"
+    ],
+    "keywords": [
+     "elf",
+     "readelf",
+     "symbol",
+     "section",
+     "mangled",
+     "demangle",
+     "vtable",
+     "typeinfo",
+     "hcfg",
+     "symtab",
+     "pe",
+     "managed",
+     ".net",
+     "metadata",
+     "configuration",
+     "trench coat"
+    ],
+    "artifact_ext": [
+     ".elf",
+     ".exe",
+     ".dll",
+     ".bin"
+    ],
+    "artifact_magic": [
+     "ELF",
+     "PE (MZ)"
+    ]
+   },
+   "asks": "A multi-field forensic inventory of one or two binaries per attempt: header facts, section table, symbol table, a recover_code constant, a custom marker section, demangled C++ names, vtable/typeinfo, an embedded single-byte-XOR config (HCFG).",
+   "recipe": [
+    "file -b + readelf -h -S -s -W + objdump -d -M intel first (ELF); parse PE sections + CLR header for PE/.NET; strings for the marker",
+    "use the SHORT family labels the grader uses (elf, not ELF64), decimal ints, x86-64 machine string, true/false strings, lowercase 0x hex",
+    "HCFG section = magic + version + 1-byte XOR key + LE length + LE crc32 + single-byte-XOR JSON: brute 256 keys, keep the one whose JSON starts with the campaign key, CRC-validate",
+    "recover_code: the mov imm in the named function (objdump), report as decimal",
+    "lock every field format on the untimed Single Solve (submit one field at a time: the GM is partial-credit and reports remaining), reuse for Time Trial / Mastery"
+   ],
+   "alternatives": [
+    "radare2 / rizin (r2 -A)",
+    "ghidra headless",
+    "pefile + LIEF in python",
+    "dnSpy / ilspycmd for .NET",
+    "c++filt for Itanium demangling",
+    "re_kit.py one-command recipes (install once: challenges/_lib/install_re_kit.sh): id/strings/xref/decompile/emulate/solve/dotnet"
+   ],
+   "gotchas": [
+    "the PE cpp_format string was never resolved on Day 2 (pe32+/pe both wrong): probe it on the untimed lane",
+    "do not reuse ELF logic on the PE; Mastery mixes a PE and an ELF delivery",
+    "a field whose value matches a known public sample (same sha256) is proven without submitting",
+    "GM-confirmed 2026-10-07: native PE deliverables grade format 'pe' and architecture 'x86-64' (Day 05 + Day 07 TT); several '.exe' deliverables are really ELF - classify by bytes",
+    "re_kit.py emulate <bin> recover_code returns the constant by executing the stub (unicorn); confirmed 1337 on ELF Aware slot-0 and 4099 on a stripped stub by address - use it when the 'mov eax,imm; ret' regex is ambiguous or the slot is stripped (BR01-STRIPPED-PROFILE)",
+    "re_kit.py dotnet <bin> (ilspycmd) recovers the managed config mechanism directly - on Table Manners it showed Config[] with XOR key Config[5], len Config[6..7], JSON 'campaign'"
+   ],
+   "solver": [
+    "challenges/Day 03/Table Manners/scripts/solve_tm.py",
+    "challenges/Day 02/Mangled/scripts/solve_mangled.py",
+    "challenges/Day 02/Mangled/scripts/decode_hcfg.py",
+    "challenges/Day 04/Go Fish/scripts/solve_gf.py",
+    "challenges/Day 05/Rust_Belt/scripts/solve_rb.py",
+    "challenges/Day 07/Routine Check/scripts/solve_routine.py"
+   ],
+   "known_hard": true,
+   "start_tier": "opus-4.8-high",
+   "expected_minutes": 25,
+   "seen": [
+    {
+     "day": 1,
+     "challenge": "ELF Aware",
+     "writeup": "challenges/Day 01/ELF Aware/ELF_Aware_Writeup.md",
+     "note": "plain C ELF, 9 header/symbol fields"
+    },
+    {
+     "day": 2,
+     "challenge": "Mangled",
+     "writeup": "challenges/Day 02/Mangled/Mangled_Writeup.md",
+     "note": "C++ ELF + PE, 17-34 fields, HCFG XOR config"
+    },
+    {
+     "day": 3,
+     "challenge": "Table Manners",
+     "writeup": "challenges/Day 03/Table Manners/Table_Manners_Writeup.md",
+     "note": ".NET managed config, 24 fields"
+    },
+    {
+     "day": 4,
+     "challenge": "Go Fish",
+     "writeup": "challenges/Day 04/Go Fish/Go_Fish_Writeup.md",
+     "note": "+Go runtime"
+    },
+    {
+     "day": 5,
+     "challenge": "Rust Belt",
+     "writeup": "challenges/Day 05/Rust_Belt/Rust_Belt_Writeup.md",
+     "note": "+Rust runtime"
+    },
+    {
+     "day": 6,
+     "challenge": "Pool Party",
+     "writeup": "challenges/Day 06/Pool Party/Pool_Party_Writeup.md",
+     "note": "+Java bytecode (no local solver saved; autosolve_binary solved TT+mastery live)"
+    },
+    {
+     "day": 7,
+     "challenge": "Routine Check",
+     "writeup": "challenges/Day 07/Routine Check/Routine_Check_Writeup.md",
+     "note": "+Kotlin; mastery 2 sets x 56 fields"
+    },
+    {
+     "day": 8,
+     "challenge": "Swift Justice",
+     "writeup": "challenges/Day 08/Swift Justice/Swift_Justice_Writeup.md",
+     "note": "+Swift (64 MB static ELF); the evidence zip bundles d01-d08 variants TOGETHER in one attempt (80 fields spanning every prior day's binary layer, not just the new one); HCFG config base64-encoded in .rodata (HuntressDay08.encodedConfig/decodeConfig symbols)"
+    },
+    {
+     "day": 9,
+     "challenge": "Nimble",
+     "note": "D09 Nimble: Nim-compiled ELF, +hcfg_offset field (byte offset of the validated HCFG record, e.g. 30696; decoys at nearby HCFG strings); handler added to autosolve_binary, all 3 modes CORRECT",
+     "writeup": "challenges/Day 09/Nimble/Nimble_Writeup.md"
+    },
+    {
+     "day": 10,
+     "challenge": "Zig Zag",
+     "note": "D10 Zig cross-platform services: +Zig-compiled d10 that ROTATES ELF <-> native PE per attempt. Two new handlers in autosolve_binary: (1) analysis_has_hcfg_section = true iff a named .hcfg PROGBITS section exists in the ELF section header table (fallback: a successful HCFG header parse); (2) integer-kind analysis_machine must also cover PE - return the decimal COFF machine (0x8664 = 34404) the way the ELF branch already returned e_machine (0x3e = 62); the string path's 'x86-64'/'amd64' tokens are all rejected by the integer grader. All 3 modes CORRECT.",
+     "writeup": "challenges/Day 10/Zig Zag/Zig_Zag_Writeup.md"
+    },
+    {
+     "day": 14,
+     "challenge": "Selective Memory (Objective-C / GNUstep libobjc2)"
+    },
+    {
+     "day": 15,
+     "challenge": "Stripped (binary-reverse-engineering, ELF symbolized/stripped pair)",
+     "writeup": "challenges/Day 15/Stripped/Stripped_Writeup.md",
+     "note": "all 3 modes CORRECT (GM 15/15); new layer = dNN deliverable is a PAIR of ELFs (-symbolized.elf + -stripped.elf, same build with .symtab removed); autosolve_binary extended with _variant_tags()/mains(); 6 field_formats.confirm() entries banked for d15_analysis_{stripped,symbolized}_{format,machine,architecture}; first CORRECT +4m39s - DEFECT, fix = Day-16 field catalog + gtool_probe tool-first on stripped"
+    },
+    {
+     "day": 16,
+     "challenge": "Wasm Up (binary-reverse-engineering, direct+compact WebAssembly pair)",
+     "writeup": "challenges/Day 16/Wasm Up/",
+     "note": "all 3 modes CORRECT (GM 15/15); new layer = a pair of .wasm modules (magic 00 61 73 6d 01 00 00 00) with an XOR-keyed HCFG config in a data segment; first autosolve answered 156/160 at T+8 s and HELD on the 4 format/architecture fields because kind() did not know wasm; agent-2 added kind wasm, format token 'wasm' and _wasm_arch; Single CORRECT T+6m03s, TT +9 s, MM 09:06:24"
+    },
+    {
+     "day": 17,
+     "challenge": "Decoder Ring (binary, encoded-configuration-recovery)",
+     "writeup": "challenges/Day 17/Decoder Ring/Decoder_Ring_Writeup.md",
+     "note": "all 3 modes CORRECT (GM 15/15). One archive bundles d01-d17 (every prior binary day) with 6 HCFG storage variants. New field analysis_hcfg_storage is an enum the GM added post-release: {raw, base64, raw_const_array, raw_hcfg_section, wasm_data_segment} - .data=raw_const_array, .hcfg=raw_hcfg_section, base64-carrier=base64, wasm data segment=wasm_data_segment. Mastery held on d02 C++ symbol fields for the MinGW PE sets: the GM wants the COFF COMDAT section-prefixed form (.rdata$_ZTI15DiscoveryEngine, .text$_ZNK15DiscoveryEngine5scoreEPKc) while ELF keeps the bare Itanium name; adapter now derives the prefix from the bytes (_comdat_name/_cpp_symbol_candidates). d01 stripped variant: recover_code=none. Mastery localized 8 held fields of 1020 via partial-submit oracle (banked accepted_ids, baseline-first). COST: first CORRECT +~3h due to the post-release enum + the un-encoded COMDAT representation - both now fixed in 5e9d8bf."
+    }
+   ],
+   "next_layer_guess": "another runtime/format (Go/Rust/native with packer) with the same inventory-style questions",
+   "autosolve": "challenges/_lib/autosolve_binary.py",
+   "autosolve_validated": "call run(); live CORRECT: TT D03-D07, mastery D05-D07, D08 single+mastery CORRECT (time_trial CORRECT per done-ledger; its attempt expired post-solve so op=status no longer returns the flag); 0 diffs vs Routine Check solver over 208 fields; kind by bytes not extension ; D09 all 3 modes CORRECT ; D10 all 3 modes CORRECT (Zig d10 ELF<->PE rotation: +has_hcfg_section handler, +integer-kind machine for PE = decimal COFF machine) | D14 objc: CORRECT all modes; ZERO new HCFG slots; EARLY-slot TT worked; objc toolchain in re_kit lang-guess | D15 Stripped: all 3 modes CORRECT (GM 15/15); ELF pair layer; 6 confirm() entries banked (format/machine/architecture both members); gtool_probe planned for Day-16 | D16 Wasm Up: all 3 modes CORRECT (GM 15/15); WebAssembly pair layer; 156/160 at T+8 s then kind()/format/architecture added in-run; the wasm architecture spelling was not known before the GM accepted it ; D17 Decoder Ring all 3 modes CORRECT (hcfg_storage enum raw_const_array/raw_hcfg_section/wasm_data_segment; PE COFF COMDAT .rdata$/.text$ symbol forms derived from bytes; recover_code=none when stripped; 1020-field Mastery localized via partial-submit oracle)"
+  },
+  {
+   "id": "android_puzzle",
+   "name": "Android APK with an embedded puzzle asset (exported activity / deep link / intent extras)",
+   "lane": [
+    "mobile-android"
+   ],
+   "tells": {
+    "id_patterns": [
+     "answer"
+    ],
+    "keywords": [
+     "apk",
+     "intent",
+     "deep link",
+     "exported",
+     "extras",
+     "activity",
+     "manifest",
+     "navigation",
+     "case",
+     "package",
+     "backend answer code",
+     "ans-"
+    ],
+    "artifact_ext": [
+     ".apk"
+    ],
+    "answer_regex": "ANS-[0-9A-F]{16}"
+   },
+   "asks": "One answer per APK: ANS- followed by exactly 16 uppercase hex characters, for the case reference named in the question.",
+   "recipe": [
+    "unzip the APK; read assets/huntress_puzzle.json = {schema, day, codec, data}",
+    "apply the declared codec to data (plain = the data IS the answer; reverse = reverse the string; base64 = decode) -> ANS-<16 hex>",
+    "cross-check with the manifest: the exported Activity + intent filter + embedded client credential explain WHY (writeup material)",
+    "submit exactly the string the codec yields, under answer_id answer (exact normalization)"
+   ],
+   "alternatives": [
+    "apktool d / jadx for the manifest + decompiled Activity",
+    "aapt dump xmltree for the binary manifest"
+   ],
+   "gotchas": [
+    "the puzzle is per-attempt: derive it from the attempt's own APK, never hard-code",
+    "Mastery delivers several APKs: one answer each"
+   ],
+   "solver": [
+    "challenges/Day 03/Intent Injection/solve_intent_injection.py",
+    "challenges/Day 02/Deep Link Drift/scripts/solve_deep_link_drift.py",
+    "challenges/Day 04/Pending Intent Relay/scripts/solve_pending_intent_relay.py",
+    "challenges/Day 05/Backup Spill/scripts/solve_backup_spill.py",
+    "challenges/Day 06/Provider Paths/scripts/solve_provider_paths.py",
+    "challenges/Day 07/WebView Bridge/scripts/solve_webview_bridge.py"
+   ],
+   "known_hard": false,
+   "start_tier": "sonnet-medium",
+   "expected_minutes": 5,
+   "seen": [
+    {
+     "day": 1,
+     "challenge": "Exported Trust",
+     "writeup": "challenges/Day 01/Exported Trust/Exported_Trust_Writeup.md",
+     "note": "codec plain"
+    },
+    {
+     "day": 2,
+     "challenge": "Deep Link Drift",
+     "writeup": "challenges/Day 02/Deep Link Drift/Deep_Link_Drift_Writeup.md",
+     "note": "codec reverse"
+    },
+    {
+     "day": 3,
+     "challenge": "Intent Injection",
+     "writeup": "challenges/Day 03/Intent Injection/Intent_Injection_Writeup.md",
+     "note": "reused the Day 2 method"
+    },
+    {
+     "day": 4,
+     "challenge": "Pending Intent Relay",
+     "writeup": "challenges/Day 04/Pending Intent Relay/Pending_Intent_Relay_Writeup.md",
+     "note": "PendingIntent"
+    },
+    {
+     "day": 5,
+     "challenge": "Backup Spill",
+     "writeup": "challenges/Day 05/Backup Spill/Backup_Spill_Writeup.md",
+     "note": "allowBackup"
+    },
+    {
+     "day": 6,
+     "challenge": "Provider Paths",
+     "writeup": "challenges/Day 06/Provider Paths/Provider_Paths_Writeup.md",
+     "note": "content providers"
+    },
+    {
+     "day": 7,
+     "challenge": "WebView Bridge",
+     "writeup": "challenges/Day 07/WebView Bridge/WebView_Bridge_Writeup.md",
+     "note": "WebView JS bridge; huntress_puzzle.json codec dispatch"
+    },
+    {
+     "day": 8,
+     "challenge": "Cleartext Session",
+     "writeup": "challenges/Day 08/Cleartext Session/Cleartext_Session_Writeup.md",
+     "note": "cleartext traffic replay theme; autosolve_mobile.compute resolved it directly from the APK bytes with no new codec named in the record - treat this as a straightforward instance, not evidence of a new codec, unless disproven"
+    },
+    {
+     "day": 9,
+     "challenge": "Trust Everyone",
+     "note": "D09 Trust Everyone: permissive-CA trust APK; mobile adapter all 3 modes CORRECT",
+     "writeup": "challenges/Day 09/Trust Everyone/Trust_Everyone_Writeup.md"
+    },
+    {
+     "day": 10,
+     "challenge": "Network Config Split",
+     "note": "D10 Network Security Config split: assets/huntress_puzzle.json codec 'split' - data empty, answer spread over parts reassembled by the order index list into ANS-<16 hex>. Already supported by the adapter, no change needed; the Android manifest / cleartext-exception theme is flavour, the puzzle asset decides. All 3 modes CORRECT.",
+     "writeup": "challenges/Day 10/Network Config Split/Network_Config_Split_Writeup.md"
+    },
+    {
+     "day": 14,
+     "challenge": "Predictable Crypto",
+     "writeup": "challenges/Day 14/Predictable Crypto/Predictable_Crypto_Writeup.md",
+     "note": "mobile-android XOR/repeating-key crypto puzzle; agent solved all 3 modes"
+    },
+    {
+     "day": 15,
+     "challenge": "Native Library Secrets",
+     "writeup": "challenges/Day 15/Native Library Secrets/Native_Library_Secrets_Writeup.md",
+     "note": "all 3 modes CORRECT"
+    },
+    {
+     "day": 16,
+     "challenge": "JNI Boundary",
+     "writeup": "challenges/Day 16/JNI Boundary/JNI_Boundary_Writeup.md",
+     "note": "all 3 modes CORRECT at first contact (autosolve), challenge DONE 3 s after release; no adapter change"
+    },
+    {
+     "day": 17,
+     "challenge": "Name Collapse",
+     "writeup": "challenges/Day 17/Name Collapse/Name_Collapse_Writeup.md",
+     "note": "assets/huntress_puzzle.json codec 'indexed' = a permutation (char i of data -> position order[i], scatter); result ANS-<16 hex> confirms direction. First autosolve error-other (unknown codec), agent added an _indexed decoder (aliases index/permute/permuted/scatter) to autosolve_mobile.py validating order is a permutation and matching ANS-<16 hex>; all 3 modes CORRECT (Single 1.1 s, TT 3.5 s, Mastery 2.6 s)"
+    }
+   ],
+   "next_layer_guess": "a new codec value or a second asset layer; read the codec field before assuming",
+   "autosolve": "challenges/_lib/autosolve_mobile.py",
+   "autosolve_validated": "live CORRECT 14/14 TT+mastery D01-D07, D08 all 3 modes CORRECT; single vs accepted answers; huntress_puzzle.json codecs incl caesar/xor/split ; D09 all 3 modes CORRECT ; D10 all 3 modes CORRECT (split codec, no adapter change) | D14 Predictable Crypto: CORRECT (agent) | D15 Native Library Secrets: all 3 modes CORRECT (GM 15/15) | D16 JNI Boundary: all 3 modes CORRECT at first contact (autosolve, 3 s after release) | D17 Name Collapse: all 3 modes CORRECT at first contact (Single 1.1 s/TT 3.5 s/Mastery 2.6 s); new 'indexed' permutation codec added to autosolve_mobile"
+  },
+  {
+   "id": "metadata_bytes",
+   "name": "Metadata forensics: the answer is a function of the assigned file's raw bytes (evidence-note is a decoy)",
+   "lane": [
+    "metadata-forensics"
+   ],
+   "tells": {
+    "id_patterns": [
+     "*-filename",
+     "*-size-bytes",
+     "*-md5",
+     "*-sha1",
+     "*-sha256",
+     "*-hex",
+     "*first*"
+    ],
+    "keywords": [
+     "evidence",
+     "bytes",
+     "hash",
+     "identity",
+     "label",
+     "metadata",
+     "bom",
+     "encoding",
+     "export",
+     "pipeline",
+     "trustworthy",
+     "file"
+    ],
+    "artifact_ext": [
+     ".zip",
+     ".csv",
+     ".txt"
+    ]
+   },
+   "asks": "Compute a deterministic property of the assigned file's bytes: hash inventory (Day 1), first 16 bytes as hex (Day 2), encoding/BOM facts (Day 3).",
+   "recipe": [
+    "ignore evidence-note.txt prose (CASE-/WS-/sequence labels are a decoy; high-entropy strings decode to nothing)",
+    "read the GM question text: it names exactly which property of which file is scored",
+    "compute from the bytes: sha256sum/md5sum/sha1sum, wc -c, head -c16 | xxd -p, file -b, xxd for BOM (EF BB BF / FF FE / FE FF)",
+    "per attempt: start -> download -> compute -> submit (timed modes assign different files); never hard-code"
+   ],
+   "alternatives": [
+    "python hashlib one-liners",
+    "exiftool / file --mime-encoding for encoding questions",
+    "iconv -f to test encodings"
+   ],
+   "gotchas": [
+    "filename answers want the full base name with extension (a parser returning just 'csv' failed Day 1)",
+    "hex answers are lowercase unless stated",
+    "timed windows are 1-4 seconds on Day 1: one HTTP session, one run"
+   ],
+   "solver": [
+    "challenges/Day 03/BOM Voyage/solve.py",
+    "challenges/Day 03/BOM Voyage/solve_mastery.py",
+    "challenges/Day 04/Picture This/scripts/sof_dims.py",
+    "challenges/Day 07/Seven-Zip, No Relation/scripts/run.py"
+   ],
+   "known_hard": false,
+   "start_tier": "sonnet-medium",
+   "expected_minutes": 6,
+   "seen": [
+    {
+     "day": 1,
+     "challenge": "You Must Be This Hash to Ride",
+     "writeup": "challenges/Day 01/You Must Be This Hash to Ride/You_Must_Be_This_Hash_to_Ride_Writeup.md",
+     "note": "hash inventory"
+    },
+    {
+     "day": 2,
+     "challenge": "Looks Can Be Deceiving",
+     "writeup": "challenges/Day 02/Looks Can Be Deceiving/Looks_Can_Be_Deceiving_Writeup.md",
+     "note": "first 16 bytes hex"
+    },
+    {
+     "day": 3,
+     "challenge": "BOM Voyage",
+     "writeup": "challenges/Day 03/BOM Voyage/BOM_Voyage_Writeup.md",
+     "note": "text export / BOM"
+    },
+    {
+     "day": 4,
+     "challenge": "Picture This",
+     "writeup": "challenges/Day 04/Picture This/Picture_This_Writeup.md",
+     "note": "jpeg.sof_dimensions_pixels"
+    },
+    {
+     "day": 5,
+     "challenge": "Chunk Norris",
+     "writeup": "challenges/Day 05/Chunk_Norris/Chunk_Norris_Writeup.md",
+     "note": "png.ihdr_dimensions_pixels (no local solver saved; autosolve_metadata covers it)"
+    },
+    {
+     "day": 6,
+     "challenge": "Portable Deception",
+     "writeup": "challenges/Day 06/Portable Deception/Portable_Deception_Writeup.md",
+     "note": "pdf.header_version (no local solver saved; autosolve_metadata solved it live)"
+    },
+    {
+     "day": 7,
+     "challenge": "Seven-Zip, No Relation",
+     "writeup": "challenges/Day 07/Seven-Zip, No Relation/Seven-Zip_No_Relation_Writeup.md",
+     "note": "zip EOCD total entries"
+    },
+    {
+     "day": 8,
+     "challenge": "What's in the Box?",
+     "writeup": "challenges/Day 08/Whats in the Box/Whats_in_the_Box_Writeup.md",
+     "note": "zip.central_directory_member_names - compact JSON list of member names in stored order; new field handler added to autosolve_metadata.py (was the Day 07 zip.eocd_total_entries challenge's natural next layer)"
+    },
+    {
+     "day": 9,
+     "challenge": "Built Different",
+     "note": "D09 Built Different: multi-arch drop + extension decoys; metadata adapter all 3 modes CORRECT",
+     "writeup": "challenges/Day 09/Built Different/Built_Different_Writeup.md"
+    },
+    {
+     "day": 10,
+     "challenge": "Where Do We Begin?",
+     "note": "D10 pe.address_of_entry_point_rva_hex: u32 at e_lfanew+40 of the PE32 in the evidence zip. FORMAT GOTCHA - bare 0x65bd0 was REJECTED; the GM wants the RVA zero-padded to 8 hex digits (0x%08x -> 0x00065bd0). Banked in autosolve_metadata.py. All 3 modes CORRECT.",
+     "writeup": "challenges/Day 10/Where Do We Begin/Where_Do_We_Begin_Writeup.md"
+    },
+    {
+     "day": 14,
+     "challenge": "The Shortcut Home",
+     "writeup": "challenges/Day 14/The Shortcut Home/The_Shortcut_Home_Writeup.md",
+     "note": "LNK (Shell Link Binary File Format) target-path extraction; lnk_meta.py prebuilt (LinkInfo LocalBasePath + CommonPathSuffix + IDList fallback) + resolve_field/exif_meta generic field resolver"
+    },
+    {
+     "day": 15,
+     "challenge": "A Word to the Wise",
+     "writeup": "challenges/Day 15/A Word to the Wise/A_Word_to_the_Wise_Writeup.md",
+     "note": "ooxml.external_relationship_targets new; d04-d14 fields HELD then recovered; mastery incorrect->CORRECT +241s (DEFECT; Day-16 field catalog)"
+    },
+    {
+     "day": 16,
+     "challenge": "Return to Sender",
+     "writeup": "challenges/Day 16/Return to Sender/Return_to_Sender_Writeup.md",
+     "note": "email.message_id: the GM spells the FORMAT 'email', our registry had eml.message_id, so autosolve HELD (agent finished +70 s; TT +73.7 s, MM +79.3 s); fix _FMT_ALIAS email->eml in autosolve_metadata + _test_fmt_alias (0b7c0a9)"
+    },
+    {
+     "day": 17,
+     "challenge": "Hear Me Out",
+     "writeup": "challenges/Day 17/Hear Me Out/Hear_Me_Out_Writeup.md",
+     "note": "media.primary_audio_codec_name: RIFF/WAVE in a zip, codec from the fmt chunk (format tag 1, 16-bit mono 16 kHz) = pcm_s16le (ffprobe spelling), not a filename. First autosolve HELD (agent +58 s); new media_codec.py extractor (ffprobe first, pure-python fmt-tag fallback) registered + media.* aliases. MASTERY evidence-note-copy-filename = the zip member whose SHA-256 equals evidence-note.txt under a different name; CORRECT +140 s"
+    }
+   ],
+   "next_layer_guess": "another byte-level property (magic, trailer, metadata block) of the assigned file",
+   "autosolve": "challenges/_lib/autosolve_metadata.py",
+   "autosolve_validated": "live CORRECT: D02 mastery, D03 TT, D04 TT+mastery, D05 TT, D06 TT (Portable Deception), D07 mastery, D08 all 3 modes CORRECT (zip.central_directory_member_names); dispatches on question text; unknown question = clear error ; D09 all 3 modes CORRECT ; D10 all 3 modes CORRECT (pe.address_of_entry_point_rva_hex, 0x%08x zero-padded) | D14 The Shortcut Home: CORRECT all modes; lnk.target_path_windows via lnk_meta.py + resolve_field/exif_meta generic field resolver | D15 A Word to the Wise: all 3 modes CORRECT (GM 15/15); NEW ooxml.external_relationship_targets; single/TT HELD on uncatalogued d04-d14 fields (recovered), mastery incorrect->CORRECT +241s - DEFECT, fix=Day-16 field catalog | D16 Return to Sender: all 3 modes CORRECT; email.message_id HELD at first contact because the format prefix was spelled 'email' (registered eml); fixed by _FMT_ALIAS, offline value verified on the real artifact | D17 Hear Me Out: all 3 modes CORRECT; media.primary_audio_codec_name=pcm_s16le via new media_codec.py; HELD->CORRECT +58 s; Mastery evidence-note-copy-filename by SHA-256 match +140 s"
+  },
+  {
+   "id": "warmup_decode",
+   "name": "Warmup decode: a blob whose final decoded line names the answer slug",
+   "lane": [
+    "warmups"
+   ],
+   "tells": {
+    "id_patterns": [
+     "message"
+    ],
+    "keywords": [
+     "decode",
+     "blob",
+     "slug",
+     "base",
+     "sixty-four",
+     "thirteen",
+     "hex",
+     "rot",
+     "fingers",
+     "decoded line"
+    ],
+    "artifact_ext": [
+     ".txt"
+    ]
+   },
+   "asks": "Decode the assigned blob completely; submit the exact answer slug (three lowercase words + hyphen + two digits) its final non-empty decoded line instructs.",
+   "recipe": [
+    "the title/prompt is a pun naming the encoding (sixty-four = Base64, half a turn / thirteen = ROT13, sixteen fingers = hex)",
+    "decode fully (loop while it still looks encoded); the LAST non-empty decoded line says what to submit",
+    "submit the slug only, trimmed"
+   ],
+   "alternatives": [
+    "CyberChef Magic",
+    "python base64/codecs/binascii",
+    "while base64 -d loop"
+   ],
+   "gotchas": [
+    "the downloadable sample and the GM-assigned blob differ: solve the assigned blob",
+    "do not over-think: FAST PATH"
+   ],
+   "solver": [
+    "challenges/_lib/decode_chain.py",
+    "challenges/Day 03/Hex Appeal/scripts/solve_hex_all.py",
+    "challenges/Day 04/Two of a Kind/scripts/solve_mastery.py",
+    "challenges/Day 05/Backup Spill/scripts/solve_by_numbers.py",
+    "challenges/Day 06/Eight Is Enough/scripts/solve.py",
+    "challenges/Day 07/Percent Chance/scripts/solve.py"
+   ],
+   "known_hard": false,
+   "start_tier": "sonnet-medium",
+   "expected_minutes": 2,
+   "seen": [
+    {
+     "day": 1,
+     "challenge": "A Little Based",
+     "writeup": "challenges/Day 01/A Little Based/A_Little_Based_Writeup.md",
+     "note": "Base64"
+    },
+    {
+     "day": 2,
+     "challenge": "Half a Turn",
+     "writeup": "challenges/Day 02/Half a Turn/Half_a_Turn_Writeup.md",
+     "note": "ROT13"
+    },
+    {
+     "day": 3,
+     "challenge": "Hex Appeal",
+     "writeup": "challenges/Day 03/Hex Appeal/Hex_Appeal_Writeup.md",
+     "note": "hex"
+    },
+    {
+     "day": 4,
+     "challenge": "Two of a Kind",
+     "writeup": "challenges/Day 04/Two of a Kind/Two_of_a_Kind_Writeup.md",
+     "note": "8-bit binary; mastery mixes base64/ROT13/hex/binary per line"
+    },
+    {
+     "day": 5,
+     "challenge": "By the Numbers",
+     "writeup": "challenges/Day 05/By the Numbers/By_the_Numbers_Writeup.md",
+     "note": "decimal"
+    },
+    {
+     "day": 6,
+     "challenge": "Eight Is Enough",
+     "writeup": "challenges/Day 06/Eight Is Enough/Eight_Is_Enough_Writeup.md",
+     "note": "octal"
+    },
+    {
+     "day": 7,
+     "challenge": "Percent Chance",
+     "writeup": "challenges/Day 07/Percent Chance/Percent_Chance_Writeup.md",
+     "note": "percent/URL encoding"
+    },
+    {
+     "day": 8,
+     "challenge": "Entity Relations",
+     "writeup": "challenges/Day 08/Entity Relations/Entity_Relations_Writeup.md",
+     "note": "title/prompt ('The browser understands') - resolved fully by the generic decode_chain.py layered decoder in one automated pass; no single new encoding individually named in the record. First Blood: all 3 modes CORRECT 3-7s after release. Mastery = 38 new dynamic tasks."
+    },
+    {
+     "day": 9,
+     "challenge": "Escape Room",
+     "note": "D09 Escape Room: escape-sequence decode layer; warmups adapter all 3 modes CORRECT",
+     "writeup": "challenges/Day 09/Escape Room/Escape_Room_Writeup.md"
+    },
+    {
+     "day": 10,
+     "challenge": "Thirty-Two Below",
+     "note": "D10 Thirty-Two Below: title pun = Base32 ('smaller alphabet' than Day 09's). Single base32 layer in blob.txt whose plaintext names the slug to submit (groovy-starfish-willow-93). Existing base32 support, no adapter change. All 3 modes CORRECT.",
+     "writeup": "challenges/Day 10/Thirty-Two Below/Thirty-Two_Below_Writeup.md"
+    },
+    {
+     "day": 14,
+     "challenge": "Seven Steps",
+     "writeup": "challenges/Day 14/Seven Steps/Seven_Steps_Writeup.md",
+     "note": "warmups: 14 numbered lines = Day 13 thirteen + line 14 caesar+7; POSITIONAL_D14 added to autosolve_warmups.py + no-gibberish guard"
+    },
+    {
+     "day": 15,
+     "challenge": "Room Forty-Seven",
+     "writeup": "challenges/Day 15/Room Forty-Seven/Room_Forty-Seven_Writeup.md",
+     "note": "ROT47 line-15 ladder growth; mastery first-wrong->CORRECT +167s (DEFECT; Day-16 self-extend)"
+    },
+    {
+     "day": 16,
+     "challenge": "Dot Com",
+     "writeup": "challenges/Day 16/Dot Com/Dot_Com_Writeup.md",
+     "note": "morse layer; mastery 16th line = morse spelling hex bytes; agent added morsehex to LADDER_NAMES; autosolve mastery error-other, agent finished +160 s (Day-17 prebuild: morsehex in the self-extending ladder + test)"
+    },
+    {
+     "day": 17,
+     "challenge": "Bacon Bits",
+     "writeup": "challenges/Day 17/Bacon Bits/Bacon_Bits_Writeup.md",
+     "note": "Baconian layer (a=0 b=1, 5 symbols/letter) whose plaintext letters A..P are hex nibbles (two letters/byte); Single/TT a passphrase, MASTERY line 17 = baconhex on top of the D16 ladder. First autosolve mastery error-other (line 17 missing), agent added LINE_DECODERS[baconhex] + LADDER_NAMES in autosolve_warmups.py and a nibble-AP candidate; CORRECT +180 s"
+    }
+   ],
+   "next_layer_guess": "a chained encoding (two or three layers) or a less common base (32/85/58)",
+   "autosolve": "challenges/_lib/autosolve_warmups.py",
+   "autosolve_validated": "offline vs accepted answers: D01/D05/D06/D07 single + D04/D07 mastery PASS, D08 all 3 modes CORRECT live; percent/binary/octal/decimal/hex/base64/base32/a85/rot13/reverse, nested to depth 14 ; D09 all 3 modes CORRECT ; D10 all 3 modes CORRECT (base32, existing support) | D14 Seven Steps: CORRECT all modes; POSITIONAL_D14 + no-gibberish (self-extend) | D15 Room Forty-Seven: all 3 modes CORRECT (GM 15/15); ROT47 line-15 ladder growth, mastery first-wrong->CORRECT +167s - DEFECT, fix=Day-16 self-extending ladder | D16 Dot Com: all 3 modes CORRECT; new morse/morsehex ladder layer, mastery needed the agent (+160 s) | D17 Bacon Bits: all 3 modes CORRECT; new baconhex ladder line 17 (Baconian a/b -> hex nibbles); mastery needed the agent (+180 s)"
+  },
+  {
+   "id": "web_app",
+   "name": "Web / API / cloud exploitation (command injection, LFI/traversal, SSTI, SQLi, SSRF, JWT, timing side-channel)",
+   "lane": [
+    "web"
+   ],
+   "tells": {
+    "keywords": [
+     "http",
+     "url",
+     "host",
+     "port",
+     "login",
+     "api",
+     "injection",
+     "command injection",
+     "ssti",
+     "template",
+     "sqli",
+     "lfi",
+     "traversal",
+     "jwt",
+     "token",
+     "upload",
+     "ssrf",
+     "x-forwarded-for",
+     "x-response-time",
+     "timing",
+     "cookie",
+     "deserialization",
+     "cve"
+    ],
+    "artifact_ext": [
+     ".js",
+     ".php",
+     ".py",
+     ".html",
+     ".har",
+     ".eml"
+    ],
+    "live_target": true,
+    "gm_extra_fields": [
+     "url",
+     "host",
+     "port"
+    ]
+   },
+   "asks": "Reach a live web/API target (the GM start prints url/host/port) and recover the flag with the simplest working primitive; dynamic per attempt - derive every value from THIS target, never a memorized/replayed one.",
+   "recipe": [
+    "recon FIRST (free): source, robots.txt, /.git/, headers, cookies, params; curl -sv; fuzz with ffuf/gobuster + a seclists wordlist",
+    "command injection into any param hitting a shell: ; | $() backticks & ; weak whitelist -> newline then cat flag.txt; blind -> time-based ; sleep 5  (python3 challenges/_lib/web_kit.py payloads cmdi)",
+    "simple-first ladder: LFI/traversal (../, php://filter, Windows ..%5c) -> SSTI ({{7*7}}, EJS include) -> SQLi (' OR 1=1, sqlmap) -> SSRF -> weak JWT alg=none (web_kit.py jwt <tok> --none) -> unsafe deserialization (web_kit.py payloads <cat>)",
+    "side channels: X-Response-Time / length leaks correctness -> brute per char with web_kit.py timing (slowest median = correct prefix char); --xff spoofs X-Forwarded-For to dodge per-IP bans",
+    "product recognition: fingerprint version -> known CVE (MOVEit/SysAid/ScreenConnect) but check an exposed eval/RCE param first",
+    "if the target is browser-only or VPN-only, write <agent>.needvm / <agent>.needuser and keep other work moving; the Commander has Chrome"
+   ],
+   "alternatives": [
+    "sqlmap (present) for SQLi; commix / jwt_tool / wfuzz / nikto via install_web_kit.sh",
+    "az ad ... --query \"contains(...,'flag{')\" for Entra/M365 identity sweeps",
+    "2025 refs (local archive): Day 08 Flag Checker timing brute, Day 06 Emotional XFF bypass, Day 04 ARIKA weak-whitelist command injection"
+   ],
+   "gotchas": [
+    "web is GM-DEFINED but NOT yet released as of Day 07; these tells are from docs/loadouts/web.md + 2025, confirm against the real start spec on first release",
+    "derive from THIS attempt's target; TT/Mastery now serves a FRESH variation from a finite rotation (Hammond 2026-10-07) - no replay / wrap-around / expired-as-free-lab",
+    "live target: one owner per attempt, respect scope (only the Huntress-provided host), track request budget for timing/brute loops"
+   ],
+   "solver": [
+    "challenges/_lib/web_kit.py",
+    "challenges/_intel/2025/Huntress_2025_CTF_Walkthroughs/Day 08/Flag Checker/fastFlag.py",
+    "challenges/_intel/2025/Huntress_2025_CTF_Walkthroughs/Day 06/Emotional/Day06_Emotional_Timing_Attack_Writeup.md",
+    "challenges/_intel/2025/Huntress_2025_CTF_Walkthroughs/Day 04/ARIKA/Day_04_ARIKA_README.md"
+   ],
+   "loadout": "docs/loadouts/web.md",
+   "known_hard": false,
+   "start_tier": "sonnet-5.5-high",
+   "expected_minutes": 15,
+   "seen": [],
+   "next_layer_guess": "first web release likely a single injection/SSTI/LFI or a JWT/auth bypass on a live container; extend the recon head-start into a concrete solver",
+   "recon": "challenges/_lib/autosolve_web.py",
+   "recon_note": "autosolve_web.first_moves(start) runs the opening moves at claim (GET / + quick-win paths, flag/JWT scan, web_kit payload catalogs) - a HEAD-START, not a guaranteed autosolve (web is a LIVE, variable target). web_kit.py has JWT decode/none/HS256 + the cmdi/lfi/traversal/ssti/sqli/ssrf payloads + timing side-channel.",
+   "autosolve_todo": "the FIRST real web solve is banked here as a concrete transform and validated live; until then autosolve_web is recon only"
+  }
+ ]
+}

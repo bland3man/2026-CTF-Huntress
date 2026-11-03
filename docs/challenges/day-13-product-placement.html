@@ -37,13 +37,13 @@
 <h1 id="product-placement-day-13-metadata-forensics">Product Placement (Day 13, metadata-forensics)</h1>
 <p>Question: <code>Determine msi.product_code_guid for installer-001.msi.</code></p>
 <h2 id="method">Method</h2>
-<ul><li>artifact_0.bin is a zip holding <code>installer-001.msi</code> (OLE2 compound file).</li><li>MSI streams use an encoded stream-name alphabet; the <code>Property</code> table is column-major, with string references into <code>_StringPool</code> / <code>_StringData</code>. Parsed these directly (olefile + struct) in <code>challenges/_lib/msi_meta.py</code>.</li><li>Property table: ProductCode = <code>{[id]}</code>, UpgradeCode = <code>{[id]}</code>, ProductVersion = 1.13.0. SummaryInformation Revision Number (package code) is a different GUID and is not the product code.</li></ul>
+<ul><li>artifact_0.bin is a zip holding <code>installer-001.msi</code> (challenge artifact, not published) (OLE2 compound file).</li><li>MSI streams use an encoded stream-name alphabet; the <code>Property</code> table is column-major, with string references into <code>_StringPool</code> / <code>_StringData</code>. Parsed these directly (olefile + struct) in <a href="../files/day-13/day-13-product-placement/challenges/_lib/msi_meta.py"><code>challenges/_lib/msi_meta.py</code></a>.</li><li>Property table: ProductCode = <code>{[id]}</code>, UpgradeCode = <code>{[id]}</code>, ProductVersion = 1.13.0. SummaryInformation Revision Number (package code) is a different GUID and is not the product code.</li></ul>
 <h2 id="answer-format-important">Answer format (important)</h2>
 <p>The GM rejected plain lowercase and plain uppercase GUIDs. It accepted the MSI-native braced uppercase form:</p>
 <p>{[id]}</p>
 <p>Single Solve flag: <span class="flag" data-flag><span class="fl">Token</span><span class="fv">4020c4ef38b46c4267843486a811ee1a</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></p>
 <h2 id="timed-modes">Timed modes</h2>
-<p>Extractor registered in <code>autosolve_metadata.py</code> (<code>msi_meta.register</code>). AUTOSOLVE solved Time Trial and Mastery (CORRECT).</p>
+<p>Extractor registered in <code>autosolve_metadata.py</code> (not found in any source) (<code>msi_meta.register</code> (reference kept as plain text; not an eligible file type)). AUTOSOLVE solved Time Trial and Mastery (CORRECT).</p>
 <h2 id="lesson">Lesson</h2>
 <p>Pattern text "8-4-4-4-12 incl. hyphens" did not mean unbraced; use the native form of the format.</p></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#method">Method</a></li><li class="l2"><a href="#answer-format-important">Answer format (important)</a></li><li class="l2"><a href="#timed-modes">Timed modes</a></li><li class="l2"><a href="#lesson">Lesson</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-13-opposite-day.html">&lt; Opposite Day</a><a href="day-13-zip-code.html">Zip Code &gt;</a></nav>
   </div>

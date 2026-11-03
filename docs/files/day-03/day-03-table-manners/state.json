@@ -1,0 +1,6 @@
+{"challenge":"Table Manners","day":"Day 03","gm_id":"binary-reverse-engineering-day-03-managed-configuration","status":"SOLVED__3of3_CORRECT",
+"modes_done":{"single_solve":"202f5e320acf2d7f7d5c0f3516464335","time_trial":"26f8f67ea85ea8c76d58798c698afd34","mastery":"00e7f7b147dc7747424aa92c7baa9f7c"},
+"modes_remaining":[],
+"locked_formats":{"sha256":"lowercase hex","d01_elf_class":"ELF64","d01_machine":"x86-64","d01_elf_type":"ET_EXEC","d01_endianness":"little","d02_format":"elf","d02_crc32_xor":"0x lowercase hex","d03_format":"pe_cli","d03_machine":"i386","d03_metadata_version":"v4.0.30319","section_names":"compact JSON array of ALL section names incl. leading empty string","symbols":"compact JSON array of all non-empty .symtab names in table order","disassembly":"[\"mov eax, 8100\",\"ret\"] (recover_code, imm DECIMAL)"},
+"gm_notes":"Partial single-field submits give accepted/remaining vs incorrect (oracle). Time Trial: per-field submits in one window (~4s of 6s) or batch. Mastery: 48 ids set1./set2.; submit each set as one 24-field batch; GM rate-limits (429) bursts - retry with sleep. Whole-24 batch in TT returned flat incorrect on an expired attempt - not re-diagnosed.",
+"solver":"scripts/solve_tm.py + scripts/solve_tm_m.py","updated":"2026-10-03"}

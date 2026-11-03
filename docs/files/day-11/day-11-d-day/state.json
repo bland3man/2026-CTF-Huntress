@@ -1,0 +1,136 @@
+{
+  "agent": "agent-7",
+  "day": 11,
+  "id": "binary-reverse-engineering-day-11-d-collection-planner",
+  "name": "D-Day",
+  "lane": "binary-reverse-engineering",
+  "toolchain_twist": "D language (dlang) binaries; same ~17 HCFG inventory slots; adapter needed no change",
+  "modes_done": [
+    "single_solve",
+    "time_trial",
+    "mastery"
+  ],
+  "current_step": "prober HOLDING: rehearsal fails, so no op=start is made (route binary-reverse-engineering-day-11-d-collection-planner/time_trial)",
+  "blocker": "rehearsal inputs unusable: no cached delivery bytes under [local path]",
+  "challenge": "D-Day",
+  "modes_remaining": [],
+  "status": "AWAITING_COMMANDER_MIDNIGHT_FIRE",
+  "synced_by": "board.py",
+  "synced_t": 1791723610,
+  "closeout": {
+    "reason": "organizer-side timed variant pool exhaustion",
+    "commander_live_msg": "FAILED - no session running (ECONNREFUSED, stale socket)",
+    "handoff": "durable _board files + KB note + lesson + writeup",
+    "done_marker_written": false,
+    "done_marker_withheld_because": "time_trial/mastery not accepted by GM; marking done would be false"
+  },
+  "notes": "COMMANDER LEAD 09:04 (measured from the GM, not guessed): D-Day TIME TRIAL attempt was OPENED 13:00:10Z with a 30 SECOND deadline (13:00:40Z) and EXPIRED while the solver was still computing. GM status of the TT now: result=expired, unique_attempts_remaining=0, hall_of_fame_eligible=false, next_op=practice. The 409 retry_variants_unavailable you see = no fresh variants left, NOT a pool outage. The expired attempt's artifacts are still downloadable = a free LAB. Mastery says prerequisite_required until TT is CORRECT. PLAN: (1) download the TT material from the expired attempt and TIME challenges/_lib/autosolve_binary.analyse on it (the TT answer set spans d01..dNN, far bigger than a single solve); (2) get the compute well under 30 s (parallel per artifact / skip unresolved probes); (3) then run the PRACTICE op (next_op) so start->download->compute->submit finishes inside the window; (4) m || COMMANDER 09:24: the USER POWERED ON the Homebase VM ([ip]) for your read-only status probe; VPN is UP (tun [ip]); SSH port 22 was not yet reachable at 09:23 (still booting). I will post here the moment 22 opens. DO: ONE read-only op=status on the VM-side GM for D-Day/time_trial; if unique_attempts_remaining>0 solve BOTH timed modes over SSH with your proven 110-field pipeline (start->download->analyse->submit in one pass, no probing), else say so and stop. RATE LIMIT RULE (user, firm): do NOT poll the bearer GM faster than every 60 s while this is open, back off on any 429/409, and never repeat an identical failing call without a new reason.",
+  "updated_by": "agent-2",
+  "updated_t": 1791817997,
+  "stood_down_at": "2026-10-11T17:41:38-0400",
+  "stood_down_note": "User ordered \"stop all things and just stop trying\". Prober (solve_timed.py, task b0m64tuq0) and route_watch.py pid 53145 both stopped; zero CTF python3 processes remain. time_trial and mastery left NOT COMPLETED deliberately; no done marker written. Do NOT restart any prober/watcher/solver on this challenge without a new explicit user instruction.",
+  "probing_active": false,
+  "readiness": {
+    "verified_at": "2026-10-11T18:00:11-0400",
+    "gm_calls_made": 0,
+    "time_trial": {
+      "ids": 110,
+      "resolved": 110,
+      "independently_verified": 110,
+      "conflicts": 0,
+      "residual_judgement": 0,
+      "analyse_secs": 2.3
+    },
+    "mastery": {
+      "ids": 330,
+      "resolved_on_test_substrate": 310,
+      "independently_verified": 310,
+      "conflicts": 0,
+      "residual_judgement_core_fields": 0,
+      "analyse_secs": 6.5,
+      "substrate_gaps": 20
+    },
+    "evidence_tiers_tt": {
+      "CRC32": 61,
+      "HEADER": 26,
+      "SHA256": 12,
+      "GM-GRADED": 6,
+      "STRUCTURE": 4,
+      "PATTERN": 1
+    },
+    "worst_case_in_window_secs": 11.4,
+    "residual_risk": "d10_analysis_has_hcfg_section has no oracle when that set member is a PE; no GM grading has ever been obtained for Day 11",
+    "doc": "challenges/Day 11/D-Day/READINESS.md",
+    "harnesses": [
+      "scripts/readiness.py",
+      "scripts/readiness_mm.py",
+      "scripts/config_oracle.py",
+      "scripts/contract_identity.py",
+      "scripts/mm_mixed_d11_proof.py"
+    ],
+    "verifier_tested": true,
+    "mutation_suite": {
+      "script": "scripts/_test_oracles.py",
+      "assertions": 58,
+      "result": "PASS",
+      "holes_found_on_first_run": 7,
+      "note": "an oracle that always agrees produces a clean census, so the census only counts once the oracle has been shown to FAIL on deliberately wrong input"
+    },
+    "one_command": "python3 \"challenges/Day 11/D-Day/scripts/verify_all.py\" -> OVERALL: PASS (10 of 10)",
+    "cross_mode_contract_finding": "the Mastery contract asks d01_analysis_machine and d01_analysis_elf_type as kind=pattern where the Time Trial asks them as kind=exact_text - contracts differ between MODES of one challenge, not only between days. Mastery is strictly more permissive, so the TT answers are safe for both."
+  },
+  "refused_doors_measured": [
+    "start run_for_time:true",
+    "start run_for_time:false (2nd identity, 409 timed_intent_not_available)",
+    "op=practice",
+    "op=retry"
+  ],
+  "stale_step_note": "An earlier read showed status=in_progress and \"prober HOLDING: rehearsal fails\" - that was the prober's dying write as it was killed MID-REHEARSAL, racing the stand-down write. Re-verified after: rehearse.py PASSES both routes (TT 110 fields 2.57s, MM 330 fields 7.13s, 0 unresolved, format_gate clean). The HOLDING line was an artifact of the kill, not a real failure.",
+  "standing_rules_set_today": {
+    "coverage": {
+      "rule": "100 percent of ids, every mode, every lane; under 99 percent is retried until optimised",
+      "source": "user 2026-10-11",
+      "implemented_in": "challenges/_lib/prebrief.py MIN_COVERAGE_PCT",
+      "test": "challenges/_lib/_test_coverage_rule.py (21 assertions PASS)",
+      "adjustable": "any agent or Commander may RAISE it; lowering needs the user"
+    },
+    "verifier": "never publish a verification result until the verifier has been shown to FAIL on deliberately wrong input",
+    "cross_mode": "never carry an answer across modes - ELF64 is CORRECT under Mastery and INCORRECT under Time Trial for d02_analysis_format"
+  },
+  "claim_time_method": {
+    "doc": "challenges/Day 11/D-Day/handoff/CLAIM_TIME_METHOD.md",
+    "measured_invariant_pct": 37,
+    "measured_variant_specific_pct": 63,
+    "proof": "challenges/Day 11/D-Day/scripts/invariance.py",
+    "conclusion": "values are mostly NOT precomputable, decisions are ~100 percent free; a window should pay for download+parse+submit and no decisions",
+    "relay": "workstation Commander to relay to homestation Commander (user request)"
+  },
+  "next_action": {
+    "who": "either Commander",
+    "when": "2026-10-12 00:00:01 EDT (rotation reset, NOT the 09:00 release)",
+    "command": "HUNTRESS_MIDNIGHT=go python3 \"challenges/Day 11/D-Day/scripts/midnight_fire.py\" --mode both",
+    "plan": "challenges/Day 11/D-Day/handoff/MIDNIGHT_FIRE_PLAN.md",
+    "safe": "first call is a FREE op=status; stops and spends nothing if unique_attempts_remaining is still 0; rehearsal must PASS before any write call",
+    "retry_note": "GM.start() calls retry internally on an expired attempt - that is what provisions a fresh variant and it SPENDS one of the refilled attempts; gated behind supply>=1",
+    "order": [
+      "FREE op=status (stops nothing, reads supply)",
+      "offline rehearsal must PASS (no GM calls)",
+      "op=practice FIRST - free, no variant, NO TIMER, documented to complete the mode; tried even when supply reads 0 because a 409 costs nothing",
+      "only if practice refuses AND supply>=1: op=start (may escalate to retry internally, which spends ONE refilled attempt)",
+      "download -> analyse -> ONE op=submit with every answer_id",
+      "Mastery only after the GM itself says the Time Trial is CORRECT"
+    ],
+    "no_hall_of_fame": "STRUCTURAL: ctf_gm.py:360-362 drops run_for_time from any outgoing body, True or False, at the one choke point every writer uses, including GM.start heal branches. _test_no_hall_of_fame.py PASS, and it asserts there is no env override. The ranked timed variant cannot be requested again."
+  },
+  "needuser_removed": "nothing requires the user; the midnight attempt is Commander work",
+  "route_regime": {
+    "measured": "2026-10-11 free reads (op=list + op=status), nothing spent",
+    "run_for_time_supported": "ABSENT from the op=list entry",
+    "ranked_attempts_remaining": "ABSENT",
+    "regular_variants_remaining": "ABSENT",
+    "variant_fresh": "ABSENT",
+    "only_counter_present": "unique_attempts_remaining = 0 (legacy)",
+    "conclusion": "D-Day is an OLDER route that does not advertise run_for_time_supported, so per the organisers published docs it is timed-by-default with NO regular/untimed pool, and its documented variant-free path is op=practice. The advice that practice is unnecessary applies to run_for_time_supported routes only - this is not one.",
+    "defect": "docs say an exhausted older route answers retry with rotation_exhausted; live service answers retry_variants_unavailable, and refuses op=practice with the SAME string on all three targets while next_op still says practice"
+  }
+}

@@ -39,7 +39,7 @@
 <p>Artifact: zip with one .NET PE (managed-001.dll). Names/versions/version resource are shared across rebuilds, so only the Module table's Mvid identifies the build; strings and the version resource are decoys.</p>
 <p>Method: PE -&gt; CLR data directory (index 14) -&gt; CLR header -&gt; metadata root (BSJB) -&gt; #~ stream, Module table row 0 (Generation u16, Name strings idx, Mvid GUID idx, EncId, EncBaseId; index widths from HeapSizes) -&gt; #GUID heap entry (idx-1)*16, decoded as a mixed-endian GUID (uuid.UUID(bytes_le=...)), lowercase.</p>
 <p>Single-solve value for the staged artifact: [id] (raw bytes f310e421 77c9 5c46 80eb ...).</p>
-<p>Result: Single Solve, Time Trial and Mastery all CORRECT via autosolve after adding the extractor. Solver: challenges/_lib/dotnet_meta.py (registered in autosolve_metadata.py as dotnet.mvid_guid and aliases).</p></article></div><nav class="pager" aria-label="Write-up navigation"><a href="day-12-back-at-you.html">&lt; Back at You</a><a href="day-12-pascal-s-wager.html">Pascal&#x27;s Wager &gt;</a></nav>
+<p>Result: Single Solve, Time Trial and Mastery all CORRECT via autosolve after adding the extractor. Solver: challenges/_lib/dotnet_meta.py (registered in autosolve_metadata.py (not found in any source) as dotnet.mvid_guid and aliases).</p></article></div><nav class="pager" aria-label="Write-up navigation"><a href="day-12-back-at-you.html">&lt; Back at You</a><a href="day-12-pascal-s-wager.html">Pascal&#x27;s Wager &gt;</a></nav>
   </div>
 </main>
 <footer class="site">

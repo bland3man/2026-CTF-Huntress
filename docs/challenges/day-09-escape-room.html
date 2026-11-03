@@ -42,7 +42,7 @@
 <h2 id="triage">Triage</h2>
 <p>Warmup-decode family. The title is the hint: the day's new layer is <strong>escape sequences</strong> - the "characters would like to escape" means the blob is an escaped encoding (e.g. backslash/hex/unicode/HTML escapes) to unescape, on top of the usual base/rot/xor chain.</p>
 <h2 id="investigation">Investigation</h2>
-<p>Solved by the generic adapter <code>challenges/_lib/autosolve_warmups.py</code> / <code>decode_chain.py</code> at claim: it auto-peels the encoding chain (base64/32/45/58/62/85, hex, binary, octal, rot13/47, caesar, xor, zlib/gzip/bz2/lzma) and the escape-sequence layer, then submits the final non-empty decoded line as <code>message</code>.</p>
+<p>Solved by the generic adapter <a href="../files/day-09/day-09-escape-room/challenges/_lib/autosolve_warmups.py"><code>challenges/_lib/autosolve_warmups.py</code></a> / <code>decode_chain.py</code> (not found in any source) at claim: it auto-peels the encoding chain (base64/32/45/58/62/85, hex, binary, octal, rot13/47, caesar, xor, zlib/gzip/bz2/lzma) and the escape-sequence layer, then submits the final non-empty decoded line as <code>message</code>.</p>
 <h2 id="flags-gm-completion-tokens">Flags (GM completion tokens)</h2>
 <ul class="flag-list"><li><span class="count">mastery</span> <span class="flag" data-flag><span class="fl">Token</span><span class="fv">3e881cefa3e58316fc88ddecfb5966bc</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li></ul>
 <p>(Single Solve and Time Trial also CORRECT per the done-ledger; their per-mode tokens were not captured in the autosolve record.)</p>

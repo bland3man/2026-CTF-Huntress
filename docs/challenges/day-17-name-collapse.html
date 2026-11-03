@@ -41,7 +41,7 @@
 <h2 id="mechanism">Mechanism</h2>
 <p>assets/huntress_puzzle.json in the APK: <code>{"codec":"indexed","data":"-2FE1A2D163AA1N51SC0","order":[3,10,17,4,11,18,5,12,19,6,13,0,7,14,1,8,15,2,9,16]}</code>. New codec "indexed" = a permutation: character i of <code>data</code> goes to position <code>order[i]</code> (scatter). The result starts with <code>ANS-</code>, which confirms the direction. The inverse (gather) direction does not give the ANS- prefix.</p>
 <h2 id="fix">Fix</h2>
-<p>Added <code>_indexed</code> decoder (aliases index/permute/permuted/scatter) to <code>challenges/_lib/autosolve_mobile.py</code>. It validates that <code>order</code> is a permutation, and returns whichever of scatter/gather matches <code>ANS-&lt;16 hex&gt;</code>.</p>
+<p>Added <code>_indexed</code> decoder (aliases index/permute/permuted/scatter) to <a href="../files/day-17/day-17-name-collapse/challenges/_lib/autosolve_mobile.py"><code>challenges/_lib/autosolve_mobile.py</code></a>. It validates that <code>order</code> is a permutation, and returns whichever of scatter/gather matches <code>ANS-&lt;16 hex&gt;</code>.</p>
 <h2 id="notes">Notes</h2>
 <p>Mastery was recorded by the tool as a RANKED attempt (autosolve chose it); I did not start any timed mode by hand.</p></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#result">Result</a></li><li class="l2"><a href="#mechanism">Mechanism</a></li><li class="l2"><a href="#fix">Fix</a></li><li class="l2"><a href="#notes">Notes</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-17-hear-me-out.html">&lt; Hear Me Out</a><a href="day-18-encrypted-strings.html">Encrypted Strings &gt;</a></nav>
   </div>

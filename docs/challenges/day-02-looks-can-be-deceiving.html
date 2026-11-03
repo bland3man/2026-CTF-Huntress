@@ -40,14 +40,14 @@
 <p>The assigned artifact is a ZIP containing a plausible-looking forensic "evidence note". The note is written to make the reader believe the case identifiers in its <em>text</em> are the evidence. They are the deception named in the title: the grader scores the <strong>raw leading bytes of the assigned file</strong>, not anything parsed from the note's prose.</p>
 <h2 id="artifacts">Artifacts</h2>
 <p>Local sample (one attempt's copy; the Game Master assigns fresh bytes per attempt):</p>
-<ul><li><code>looks_can_be_deceiving.zip</code> - 287 bytes, SHA-256 <code>c356020d0dafda86d80d000b3e3e1c0524f3a0c1a84ade856a74959047c1be67</code></li><li><code>extracted/evidence-note.txt</code> - 126 bytes, the single ZIP member</li></ul>
+<ul><li><code>looks_can_be_deceiving.zip</code> (challenge artifact, not published) - 287 bytes, SHA-256 <code>c356020d0dafda86d80d000b3e3e1c0524f3a0c1a84ade856a74959047c1be67</code></li><li><a href="../files/day-02/day-02-looks-can-be-deceiving/evidence-note.txt"><code>extracted/evidence-note.txt</code></a> - 126 bytes, the single ZIP member</li></ul>
 <p>Sample note contents (decoy):</p>
 <pre class="code"><code>Huntress Metadata Forensics evidence note
 Case marker: CASE-52F88184C9D3
 Endpoint: WS-8ADC1123
 Collected sequence: 5558590970</code></pre>
 <h2 id="triage">Triage</h2>
-<ul><li>Theme "Metadata Forensics" + title "Looks Can Be Deceiving" -&gt; the note text is almost certainly a decoy; the real channel is file bytes/metadata.</li><li>This is the Day 02 sibling of Day 01 "You Must Be This Hash to Ride", which used the same <code>evidence-note.txt</code> shell and also scored the file's own bytes (hashes), never the note's prose.</li><li>Specialist lane: deterministic Game Master solver (no deep RE needed); the owning session drove it with GPT-6 Luna inside the AI Homebase VM, which is where the Game Master is reachable.</li></ul>
+<ul><li>Theme "Metadata Forensics" + title "Looks Can Be Deceiving" -&gt; the note text is almost certainly a decoy; the real channel is file bytes/metadata.</li><li>This is the Day 02 sibling of Day 01 "You Must Be This Hash to Ride", which used the same <code>evidence-note.txt</code> (not found in any source) shell and also scored the file's own bytes (hashes), never the note's prose.</li><li>Specialist lane: deterministic Game Master solver (no deep RE needed); the owning session drove it with GPT-6 Luna inside the AI Homebase VM, which is where the Game Master is reachable.</li></ul>
 <h2 id="investigation">Investigation</h2>
 <p>The decoy was confirmed by exhausting the "note text encodes the flag" hypothesis and getting nothing:</p>
 <ul><li>ZIP container metadata is clean and self-consistent (one member, matching local/central headers, no archive comment, plain <code>2026-01-01 00:00</code> DOS time and matching <code>UT</code> extended timestamp). The container is not the channel.</li><li>The three identifiers (<code>52F88184C9D3</code>, <code>8ADC1123</code>, <code>5558590970</code>) were swept through hex/base32/ base64/base85, int-in-base-{10,16,32,36,58,62}, little/big-endian, reversals, every concatenation order, single-byte and known-plaintext repeating-key XOR (forcing <code>flag{</code> only yielded garbage tails), and recursive base decoding. No <code>flag{</code>, no <code>huntress</code>, no readable plaintext. The decoded hex bytes are high-entropy, i.e. they were never meant to be decoded.</li></ul>
@@ -64,7 +64,7 @@ $ head -c16 looks_can_be_deceiving.zip | xxd -p
 <ol><li><code>start</code> the challenge -&gt; receive the <code>answer_ids</code> and the capability/download reference.</li><li>Download the assigned file for that attempt.</li><li>Read its first 16 bytes and hex-encode them (lowercase).</li><li>Submit that hex under the attempt's <code>answer_id</code>; the Game Master validates and auto-completes the matching CourseStack question.</li></ol>
 <p>Because each attempt is assigned different bytes, the submitted value is computed live from the attempt's own file - never reused from another attempt or from this local sample.</p>
 <h2 id="flag">Flag</h2>
-<p>This challenge has no <code>flag{...}</code> token; each mode's answer is the computed first-16-byte hex of that attempt's assigned file, submitted via the Game Master. Example value, computed from the local sample <code>evidence-note.txt</code>:</p>
+<p>This challenge has no <code>flag{...}</code> token; each mode's answer is the computed first-16-byte hex of that attempt's assigned file, submitted via the Game Master. Example value, computed from the local sample <code>evidence-note.txt</code> (not found in any source):</p>
 <ul class="flag-list"><li><span class="flag" data-flag><span class="fl">Token</span><span class="fv">48756e7472657373204d657461646174</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li></ul>
 <p>Outcome (owning session, verified in CourseStack): Single Solve, Time Trial, and Mastery all <code>CORRECT</code> -&gt; SUBMITTED_ACCEPTED, 3/3 (10 pts).</p>
 <h2 id="minimal-reproduction">Minimal Reproduction</h2>

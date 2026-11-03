@@ -1,0 +1,4 @@
+Huntress Metadata Forensics evidence note
+Case marker: CASE-52F88184C9D3
+Endpoint: WS-8ADC1123
+Collected sequence: 5558590970

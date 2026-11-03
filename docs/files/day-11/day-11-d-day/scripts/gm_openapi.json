@@ -1,0 +1,289 @@
+{
+ "openapi": "3.1.0",
+ "info": {
+  "title": "Huntress CTF 2026 Game Master",
+  "version": "1.0.0",
+  "description": "Authenticated player API for listing, starting, resuming, downloading, checking, and submitting generic challenge attempts. Every selected active compounding challenge returns a questions array aligned one-for-one with answer_ids; each question names its artifact, exact objective, normalization, and answer_format without exposing the private expected value. Pairing: POST ?op=pair through the trusted CourseStack proxy to receive one personal bearer for your enabled event. Use that bearer for direct HTTPS access from any compatible device. Repeated pairing returns already_paired; only explicit reset replaces a credential."
+ },
+ "paths": {
+  "/": {
+   "get": {
+    "operationId": "readChallengeState",
+    "summary": "List challenges, inspect an attempt, download an assigned artifact, or read this API description.",
+    "parameters": [
+     {
+      "name": "op",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "enum": [
+        "openapi",
+        "list",
+        "status",
+        "artifact",
+        "download"
+       ]
+      }
+     },
+     {
+      "name": "challenge",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "delivery",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "minimum": 0
+      }
+     },
+     {
+      "name": "capability",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{64}$"
+      }
+     },
+     {
+      "name": "day",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "pattern": "^([0-9]|[12][0-9]|3[01])$"
+      },
+      "description": "List one release day (0 = welcome lane) instead of the smart default."
+     },
+     {
+      "name": "lane",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "enum": [
+        "warmups",
+        "metadata",
+        "script-analysis",
+        "mobile",
+        "binary",
+        "web",
+        "welcome"
+       ]
+      },
+      "description": "List one lane instead of the smart default."
+     },
+     {
+      "name": "all",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "enum": [
+        "true",
+        "1",
+        "yes"
+       ]
+      },
+      "description": "List every released challenge instead of the smart default."
+     },
+     {
+      "name": "search",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "minLength": 2,
+       "maxLength": 64
+      },
+      "description": "List challenges whose id contains this text."
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "JSON result, including the public questions contract for a selected challenge, or private artifact bytes when op is artifact."
+     },
+     "400": {
+      "description": "Invalid request."
+     },
+     "401": {
+      "description": "CourseStack proxy authentication required."
+     },
+     "409": {
+      "description": "Attempt state conflict. Selected-challenge conflicts such as start_required still include the public questions contract."
+     }
+    },
+    "security": [
+     {
+      "playerBearer": []
+     },
+     {
+      "courseStackProxy": []
+     }
+    ]
+   },
+   "post": {
+    "operationId": "changeChallengeState",
+    "summary": "Start or resume, submit answers, or retry. On routes with separate qualified pools, regular untimed play is the default; run_for_time:true opts into a fresh timed Hall of Fame attempt. Pair once through the authenticated proxy.",
+    "requestBody": {
+     "required": false,
+     "content": {
+      "application/json": {
+       "schema": {
+        "oneOf": [
+         {
+          "type": "object",
+          "required": [
+           "op",
+           "challenge"
+          ],
+          "properties": {
+           "op": {
+            "type": "string",
+            "enum": [
+             "start",
+             "submit",
+             "retry",
+             "practice"
+            ],
+            "description": "practice is a legacy continuation operation; new dual-pool routes use start or retry without run_for_time for regular play."
+           },
+           "challenge": {
+            "type": "string"
+           },
+           "run_for_time": {
+            "type": "boolean",
+            "default": false,
+            "description": "On a dual-pool route, true selects a fresh timed ranking attempt; omitted or false selects regular untimed play. Single Solve and legacy routes do not accept this property."
+           },
+           "answers": {
+            "type": "object",
+            "additionalProperties": {
+             "type": "string"
+            }
+           }
+          },
+          "additionalProperties": false
+         },
+         {
+          "type": "object",
+          "description": "Use query op=pair when op is omitted from the JSON body; an empty body needs no JSON header.",
+          "properties": {
+           "op": {
+            "const": "pair"
+           },
+           "reset": {
+            "type": "boolean",
+            "default": false
+           }
+          },
+          "additionalProperties": false
+         }
+        ]
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Attempt/answer result, or token and expires_at for first proxy-authenticated pairing.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "$ref": "#/components/schemas/PairingResponse"
+          },
+          {
+           "type": "object",
+           "not": {
+            "required": [
+             "token"
+            ]
+           }
+          }
+         ]
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "Invalid request."
+     },
+     "401": {
+      "description": "CourseStack proxy authentication required."
+     },
+     "409": {
+      "description": "Attempt conflict, or already_paired. Repeating pair does not rotate or redisclose the credential. Explicit proxy-authenticated reset:true is required to replace it."
+     }
+    },
+    "security": [
+     {
+      "playerBearer": []
+     },
+     {
+      "courseStackProxy": []
+     }
+    ],
+    "description": "POST ?op=pair accepts an empty body with no Content-Type header, or application/json {}. Pairing and explicit reset require the trusted proxy; a direct bearer cannot issue credentials. Gameplay POSTs and nonempty pairing bodies require application/json. Normal pairing never rotates an existing token.",
+    "parameters": [
+     {
+      "name": "op",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "enum": [
+        "pair"
+       ]
+      },
+      "description": "Use pair for the header-free, empty-body pairing request through the authenticated proxy."
+     }
+    ]
+   }
+  }
+ },
+ "components": {
+  "securitySchemes": {
+   "playerBearer": {
+    "type": "http",
+    "scheme": "bearer",
+    "bearerFormat": "gm1.<id>.<secret>"
+   },
+   "courseStackProxy": {
+    "type": "apiKey",
+    "in": "header",
+    "name": "x-vercel-oidc-token",
+    "description": "Trusted workload authentication plus provider-supplied player identity headers; not a player-issued JWT."
+   }
+  },
+  "schemas": {
+   "PairingResponse": {
+    "type": "object",
+    "required": [
+     "token",
+     "expires_at"
+    ],
+    "properties": {
+     "token": {
+      "type": "string",
+      "pattern": "^gm1\\.[a-f0-9]{32}\\.[a-f0-9]{64}$",
+      "description": "Private credential returned once. Never put it in chat, logs or shared files."
+     },
+     "expires_at": {
+      "type": "string",
+      "format": "date-time"
+     }
+    },
+    "additionalProperties": false
+   }
+  }
+ }
+}

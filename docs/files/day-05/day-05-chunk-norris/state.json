@@ -1,0 +1,14 @@
+{
+ "challenge": "Chunk Norris",
+ "id": "metadata-forensics-day-05-chunk-norris",
+ "lane": "metadata-forensics",
+ "modes_done": [
+  "single_solve",
+  "time_trial",
+  "mastery"
+ ],
+ "modes_remaining": [],
+ "status": "SOLVED",
+ "synced_by": "layout_audit.py backfill",
+ "synced_t": 1791643327
+}

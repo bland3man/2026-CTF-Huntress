@@ -39,7 +39,7 @@
 <ul><li>Category / lane: Metadata Forensics (Huntress CTF 2026, Day 08)</li><li>GM id: <code>metadata-forensics-day-08-whats-in-the-box</code></li><li>Prompt: "The count was only the beginning. Inventory every stored path, preserve directory context, and identify the archive whose names reveal an impossible provenance claim."</li><li>Modes: Single Solve, Time Trial, Mastery</li><li>Answers are submitted as per-field <code>answer_ids</code> through the Game Master; flags are returned by the GM on a correct submission.</li></ul>
 <p>This challenge extends the Day 02-07 metadata-forensics lane with one new layer: ZIP end-of-central-directory inspection (<code>zip.eocd_total_entries</code> and <code>zip.central_directory_member_names</code>), including an archive nested inside the bundle.</p>
 <h2 id="artifacts">Artifacts</h2>
-<ul><li><code>metadata-day-08-evidence.zip</code> (3308 bytes, sha256 <code>12f42a7fcd717ee6105698873b38b6144ac698b7a6a145dbb2c0a5af7110c9c6</code>) - the Single Solve bundle, saved in this folder.</li></ul>
+<ul><li><code>metadata-day-08-evidence.zip</code> (challenge artifact, not published) (3308 bytes, sha256 <code>12f42a7fcd717ee6105698873b38b6144ac698b7a6a145dbb2c0a5af7110c9c6</code>) - the Single Solve bundle, saved in this folder.</li></ul>
 <p>Bundle members (central directory order):</p>
 <pre class="code"><code>evidence-note.txt
 camera-001.jpg
@@ -51,12 +51,12 @@ evidence-drop-001.zip   (nested archive)</code></pre>
 <h2 id="investigation">Investigation</h2>
 <p>All values derived from the real downloaded bytes (never retyped):</p>
 <p>evidence-note.txt</p>
-<ul><li>filename: <code>evidence-note.txt</code></li><li>size: <code>33</code> bytes</li><li>MD5: <code>cd836b3a174d0ab06510b15c8a9877a0</code></li><li>SHA-1: <code>44afd711074d6af55f5f3c17766a71322993d036</code></li><li>SHA-256: <code>017617c9fe59ab6cc5fab5a6672ca02b7d12b09988a429e022654451d84b1a40</code></li><li>first 16 bytes (hex): <code>43617365204139373036454146314535</code></li><li>UTF-8 BOM present: <code>false</code></li></ul>
+<ul><li>filename: <code>evidence-note.txt</code> (not found in any source)</li><li>size: <code>33</code> bytes</li><li>MD5: <code>cd836b3a174d0ab06510b15c8a9877a0</code></li><li>SHA-1: <code>44afd711074d6af55f5f3c17766a71322993d036</code></li><li>SHA-256: <code>017617c9fe59ab6cc5fab5a6672ca02b7d12b09988a429e022654451d84b1a40</code></li><li>first 16 bytes (hex): <code>43617365204139373036454146314535</code></li><li>UTF-8 BOM present: <code>false</code></li></ul>
 <p>image / document headers</p>
 <ul><li>camera-001.jpg JPEG SOF dimensions: <code>257x146</code></li><li>panel-001.png PNG IHDR dimensions: <code>269x153</code></li><li>document-001.pdf header version: <code>%PDF-1.4</code></li></ul>
 <p>nested archive evidence-drop-001.zip (the new layer)</p>
 <ul><li>EOCD total entries: <code>2</code></li><li>central-directory member names (compact JSON, stored order): <code>["room-01/item-1.txt","room-02/item-1.txt"]</code></li></ul>
-<p>The single-solve values were produced by the lane adapter <code>challenges/_lib/autosolve_metadata.py</code> (extended this day for <code>zip.central_directory_member_names</code>) and cross-checked by the derivation script in <code>scripts/</code>.</p>
+<p>The single-solve values were produced by the lane adapter <a href="../files/day-08/day-08-whats-in-the-box/challenges/_lib/autosolve_metadata.py"><code>challenges/_lib/autosolve_metadata.py</code></a> (extended this day for <code>zip.central_directory_member_names</code>) and cross-checked by the derivation script in <code>scripts/</code>.</p>
 <h2 id="flag-recovery">Flag Recovery</h2>
 <p>The Game Master validates each mode's per-field answers and returns a completion flag. Verified via <code>op=status</code> for each mode (solved_by <code>Blandman3</code>):</p>
 <ul><li>single_solve - CORRECT @ 2026-10-08T13:01:16Z</li><li>time_trial  - CORRECT @ 2026-10-08T13:23:52Z</li><li>mastery     - CORRECT @ 2026-10-08T13:23:53Z</li></ul>

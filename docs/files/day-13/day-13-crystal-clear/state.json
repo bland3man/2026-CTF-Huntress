@@ -1,0 +1,16 @@
+{
+ "challenge": "Crystal Clear",
+ "id": "binary-reverse-engineering-day-13-crystal-dns-configuration",
+ "lane": "binary-reverse-engineering",
+ "modes_done": [
+  "single_solve",
+  "time_trial",
+  "mastery"
+ ],
+ "modes_remaining": [],
+ "status": "SOLVED",
+ "synced_by": "board.py",
+ "synced_t": 1791896677,
+ "blocker": null,
+ "current_step": "all three modes CORRECT (state synced from the done ledger)"
+}

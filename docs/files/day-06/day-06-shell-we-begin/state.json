@@ -1,0 +1,16 @@
+{
+  "challenge": "Shell We Begin",
+  "gm_id": "script-analysis-day-06-bash-behavior-graphs",
+  "status": "SOLVED",
+  "modes": {
+    "single": {"status": "CORRECT", "note": "solved by agent-4 earlier; token on the GM / CourseStack"},
+    "time_trial": {"status": "CORRECT", "token": "4719474ed61b3f73bb6ba7c2d8aaa8a3"},
+    "mastery": {"status": "CORRECT", "token": "2cbf6f4e73a888928d6f1507be701e29"}
+  },
+  "solver": "scripts/solve_shell.py",
+  "failed_approaches": [
+    "Time Trial attempt 1: decoder lacked hex_compact/decimal_colon/repeating_key_xor",
+    "Time Trial attempt 2 (retry): re-randomized draw added reverse_bytes; 7s window missed",
+    "Mastery attempt 1: solver fetched only delivery 1 of 2"
+  ]
+}

@@ -1,0 +1,64 @@
+{
+ "invariant": {
+  "analysis_elf_class": [
+   "64",
+   "ELF64"
+  ],
+  "analysis_elf_type": [
+   "ET_EXEC"
+  ],
+  "analysis_endianness": [
+   "little"
+  ],
+  "analysis_has_symtab": [
+   "true"
+  ],
+  "analysis_machine": [
+   "i386",
+   "x86-64"
+  ],
+  "analysis_format": [
+   "elf",
+   "jar",
+   "pe_cli"
+  ],
+  "analysis_has_cpp_typeinfo": [
+   "true"
+  ],
+  "analysis_has_cpp_vtable": [
+   "true"
+  ],
+  "analysis_metadata_version": [
+   "v4.0.30319"
+  ],
+  "analysis_architecture": [
+   "x86-64"
+  ],
+  "analysis_hcfg_version": [
+   "1"
+  ],
+  "analysis_compression_methods": [
+   "[0,8]"
+  ],
+  "analysis_has_hcfg_section": [
+   "true"
+  ]
+ },
+ "derived_suffixes": [
+  "analysis_config_campaign",
+  "analysis_config_crc32_hex",
+  "analysis_config_domain",
+  "analysis_config_mutex",
+  "analysis_config_url",
+  "analysis_disassembly",
+  "analysis_entry_point",
+  "analysis_hcfg_offset",
+  "analysis_section_names",
+  "analysis_symbols",
+  "analysis_xor_key_hex",
+  "artifact_sha256_1",
+  "artifact_sha256_2"
+ ],
+ "n_invariant_ids": 40,
+ "n_derived_ids": 80
+}
