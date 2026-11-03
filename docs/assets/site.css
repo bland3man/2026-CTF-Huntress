@@ -187,11 +187,12 @@ section + section { margin-top: var(--s-7); }
 
 /* ---------- badges, pips ---------- */
 .badge {
-  display: inline-flex; align-items: center; gap: 6px;
+  display: inline-flex; align-items: center; gap: 6px; max-width: 100%; min-width: 0;
   font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase;
-  padding: 3px 8px; border: 1px solid currentColor; border-radius: 2px; text-decoration: none; white-space: nowrap;
+  padding: 3px 8px; border: 1px solid currentColor; border-radius: 2px; text-decoration: none;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.badge::before { content: ""; width: 6px; height: 6px; background: currentColor; transform: rotate(45deg); }
+.badge::before { content: ""; flex: none; width: 6px; height: 6px; background: currentColor; transform: rotate(45deg); }
 .lane-warmups { color: #ffd479; }
 .lane-metadata { color: #7fd8ff; }
 .lane-mobile { color: #9ef0a0; }
@@ -208,19 +209,24 @@ section + section { margin-top: var(--s-7); }
 
 /* ---------- challenge cards / lists ---------- */
 .cards { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); }
+.cards > li { min-width: 0; }
 .card {
-  position: relative; display: block; height: 100%; text-decoration: none; color: var(--text);
-  padding: 14px 16px 14px 18px; border: 1px solid var(--hair); border-radius: var(--r-sm);
+  position: relative; display: block; height: 100%; min-width: 0; text-decoration: none; color: var(--text);
+  padding: 14px 36px 14px 18px; border: 1px solid var(--hair); border-radius: var(--r-sm);
   background: linear-gradient(180deg, var(--surface-2), var(--surface));
   transition: border-color .15s ease, transform .15s ease;
+  overflow: hidden;
 }
+.card > * { min-width: 0; max-width: 100%; }
 .card::before { content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 2px; background: currentColor; opacity: .0; }
 .card:hover { border-color: var(--hair-2); transform: translateY(-1px); color: var(--text); }
 .card:hover .card-title { color: var(--amber); }
-.card .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-bottom: 6px; }
+.card .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-bottom: 6px; min-width: 0; max-width: 100%; }
+.card .meta > * { max-width: 100%; min-width: 0; }
 .card .day { font-family: var(--f-mono); font-size: 11.5px; color: var(--muted); letter-spacing: .12em; }
-.card-title { font-family: var(--f-head); font-weight: 700; font-size: 21px; line-height: 1.2; margin: 2px 0 6px; transition: color .15s; }
-.card .sum { font-size: 15px; color: var(--text-2); margin: 0; line-height: 1.5; }
+.card-title { font-family: var(--f-head); font-weight: 700; font-size: 21px; line-height: 1.2; margin: 2px 0 6px; transition: color .15s;
+  overflow-wrap: anywhere; word-break: break-word; hyphens: auto; }
+.card .sum { font-size: 15px; color: var(--text-2); margin: 0; line-height: 1.5; overflow-wrap: anywhere; word-break: break-word; }
 .card .chev { position: absolute; right: 12px; top: 12px; color: var(--muted); font-family: var(--f-mono); }
 
 /* ---------- search ---------- */
