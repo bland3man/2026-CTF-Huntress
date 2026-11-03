@@ -184,6 +184,15 @@ section + section { margin-top: var(--s-7); }
   background: var(--amber); box-shadow: 0 0 0 2px rgba(244, 176, 70, .22), 0 0 10px rgba(244, 176, 70, .45);
   cursor: help;
 }
+.cell .webrow { display: flex; flex-wrap: wrap; gap: 2px; margin-top: 4px; }
+.cell .webchip {
+  font-family: var(--f-mono); font-size: 9.5px; line-height: 1; letter-spacing: .04em;
+  padding: 2px 4px; border: 1px solid currentColor; border-radius: 2px; color: var(--muted);
+  background: transparent; cursor: help; min-width: 14px; text-align: center; font-weight: 500;
+}
+.cell .webchip.present { color: var(--teal); background: rgba(69, 220, 203, .18); border-color: rgba(69, 220, 203, .55); }
+.cell .webchip.missing { color: var(--amber); border-color: rgba(244, 176, 70, .55); border-style: dashed; }
+.legend .l-webgap::before { border: 1px dashed var(--amber); background: transparent; border-radius: 2px; vertical-align: -1px; }
 .legend { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: var(--s-4); font-family: var(--f-mono); font-size: 12px; letter-spacing: .08em; color: var(--text-2); text-transform: uppercase; }
 .legend span::before { content: ""; display: inline-block; width: 12px; height: 12px; margin-right: 8px; vertical-align: -2px; border: 1px solid; border-radius: 2px; }
 .legend .l-full::before { border-color: var(--teal); background: rgba(69, 220, 203, .3); }
