@@ -66,7 +66,7 @@ rules (applied in order):
 <h2 id="mastery-localization-method">Mastery localization method</h2>
 <p>Mastery returns zero per-field feedback on an <code>incorrect</code> whole submit. But a partial submit that is <strong>100% correct for every included field</strong> returns <code>accepted</code> with <code>accepted_ids</code> and <code>remaining</code>. So the oracle is: submit a small, high-confidence subset first (we used <code>d08/d09/d11/d13 = base64</code> as the trusted 240-field baseline), then add one <code>dNN</code> group at a time. Each successful partial narrows the search; each <code>incorrect</code> localizes to that group. We went from 1020 unknowns to 8 unknowns in 15 submits with no attempts spent.</p>
 <h2 id="live-results-2026-10-17">Live results (2026-10-17)</h2>
-<ul><li><strong>Single Solve (CORRECT):</strong> <code>2026-10-17T16:16:43Z</code></li><li><strong>Time Trial (CORRECT, RANKED):</strong> 36.9 s by <code>sudo_who_farted</code></li><li><strong>Mastery (CORRECT):</strong> <code>2026-10-17T17:20:12Z</code> by <code>sudo_who_farted</code>
+<ul><li><strong>Single Solve (CORRECT):</strong> <code>2026-10-17T16:16:43Z</code></li><li><strong>Time Trial (CORRECT, RANKED):</strong> 36.9 s by <code>teammate</code></li><li><strong>Mastery (CORRECT):</strong> <code>2026-10-17T17:20:12Z</code> by <code>teammate</code>
 <ul><li><strong>Flag:</strong> <span class="flag" data-flag><span class="fl">Token</span><span class="fv">baf352c3dcb43a86667b296ddde0e055</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li></ul></li></ul>
 <h2 id="solver-changes">Solver changes</h2>
 <ul><li><code>challenges/_lib/autosolve_binary.py</code>:

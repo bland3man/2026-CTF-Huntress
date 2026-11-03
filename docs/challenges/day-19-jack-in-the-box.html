@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Jack in the Box - Day 19 write-up</title>
-<meta name="description" content="Day 19 Binary RE write-up: Solved by sudowhofarted. Mastery ran as a RANKED attempt inside a 324 s server window (deadline 2026-10-19T13:27:34.585Z) and answered 1140 ">
+<meta name="description" content="Day 19 Binary RE write-up: Solved by teammate. Mastery ran as a RANKED attempt inside a 324 s server window (deadline 2026-10-19T13:27:34.585Z) and answered 1140 field">
 <meta name="color-scheme" content="dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -38,7 +38,7 @@
 <ul><li>GM id: <code>binary-reverse-engineering-day-19-static-unpacking</code></li><li>Lane: binary-reverse-engineering | Agent: agent-2 | Date: 2026-10-19</li><li>Prompt: "There's a payload hiding inside this binary, and a little decoder stub wound up to pop it out. Find the stub, watch it work, and catch what's inside - statically."</li></ul>
 <h2 id="result-all-three-modes-correct">Result - all three modes CORRECT</h2>
 <div class="table-wrap"><table><thead><tr><th>Mode</th><th>Fields</th><th>Result</th><th>Time</th><th>Flag</th></tr></thead><tbody><tr><td>Single Solve</td><td>228</td><td>CORRECT</td><td>137.2 s</td><td><span class="flag" data-flag><span class="fl">Token</span><span class="fv">508c337ce227bc34d36ce6931acb377f</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td></tr><tr><td>Time Trial</td><td>228</td><td>CORRECT</td><td>7.1 s</td><td><span class="flag" data-flag><span class="fl">Token</span><span class="fv">6bf12b4873775f60d3422c9f6d577d86</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td></tr><tr><td>Mastery</td><td>1140 (5 sets)</td><td>CORRECT, hall_of_fame_eligible</td><td>28.4 s</td><td><span class="flag" data-flag><span class="fl">Token</span><span class="fv">df7f927e86882b37dd1948db6b9723cf</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td></tr></tbody></table></div>
-<p>Solved by <code>sudo_who_farted</code>. Mastery ran as a RANKED attempt inside a 324 s server window (deadline <code>2026-10-19T13:27:34.585Z</code>) and answered 1140 fields in 15.3 s with 0 probes and 0 unknowns.</p>
+<p>Solved by <code>teammate</code>. Mastery ran as a RANKED attempt inside a 324 s server window (deadline <code>2026-10-19T13:27:34.585Z</code>) and answered 1140 fields in 15.3 s with 0 probes and 0 unknowns.</p>
 <h2 id="artifact">Artifact</h2>
 <p><code>artifact_0.bin</code> - a 32,838,781-byte AES ZIP (password <code>infected</code>), the lane's cumulative evidence bundle: 22 members, <code>d01--variant-000.elf</code> through <code>d19--variant-000.elf</code> (16 ELF, 2 JAR, 2 WASM, 1 .NET DLL, 1 runtimeconfig.json). 216 of the 228 answer ids are the inventory questions Days 1-18 already established; the 12 new ones are the <code>d19_*</code> slots.</p>
 <p>Today's deliverable: <code>d19--variant-000.elf</code>, 11,232 bytes, ET_EXEC x86-64 ELF64, SHA-256 <code>cf82c07ef9325c0a7012dd43e49182664513d57fa46eac312d26e98dc2231fbe</code>.</p>

@@ -37,7 +37,7 @@
 <h1 id="query-me-this">Query Me This</h1>
 <p>Day 3 - Web Exploitation - boolean-blind SQL injection in a search box - all three modes CORRECT on 2026-10-19 via the homestation Commander (same backlog pickup as Permission to Slip; agent-6 did not claim it on the daily release).</p>
 <div class="table-wrap"><table><thead><tr><th>Mode</th><th>GM result</th><th>Flag</th><th>Author of the solving method</th></tr></thead><tbody><tr><td>Single Solve</td><td>CORRECT</td><td>a2a8205565ab4d70a2ff470f81544c84</td><td>team shared pool (earned pre-this-run via a peer session; our own extraction confirmed the same proof_cb727cb1... value from the same target bytes)</td></tr><tr><td>Time Trial</td><td>CORRECT</td><td>9331abb4b47fa1f59a38f73dc17617d4</td><td>Commander (homestation) - parallel extractor, 5.6s end-to-end</td></tr><tr><td>Mastery</td><td>CORRECT</td><td>0ade81cc896e517a8c259612a1b54d01</td><td>Commander (homestation) - mixed SQLi + deploy-backup</td></tr></tbody></table></div>
-<p>GM evidence for every mode: the real <code>op=submit</code> response had <code>"result":"CORRECT"</code> and <code>solved_by.name:"sudo_who_farted"</code>. Nothing was guessed; every proof came from the live target's own data via a boolean-blind oracle.</p>
+<p>GM evidence for every mode: the real <code>op=submit</code> response had <code>"result":"CORRECT"</code> and <code>solved_by.name:"teammate"</code>. Nothing was guessed; every proof came from the live target's own data via a boolean-blind oracle.</p>
 <h2 id="prompt-and-lane">Prompt and lane</h2>
 <p>Prompt (verbatim from the GM start response):</p>
 <blockquote><p>The search box trusts you a little too much. Ask the database one pointed question and read the row it was never supposed to show you.</p></blockquote>
