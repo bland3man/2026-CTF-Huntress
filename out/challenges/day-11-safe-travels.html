@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Safe Travels - Day 11 write-up</title>
+<meta name="description" content="Day 11 Warmups write-up: Prompt: &quot;Our usual base went on a URL-friendly vacation.&quot;">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-11.html">Day 11</a> / Safe Travels</p><p class="telemetry"><span>DAY 11</span><span class="sep">//</span><span>LANE: WARMUPS</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Safe Travels</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-warmups" href="../lanes/warmups.html">Warmups</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout"><article class="prose">
+<h1 id="safe-travels-day-11-warmups">Safe Travels (Day 11, warmups)</h1>
+<p>Prompt: "Our usual base went on a URL-friendly vacation."</p>
+<p>Hint: the pun points to base64 (the usual base) in its URL-safe variant (base64url, - and _ in place of + and /).</p>
+<p>Artifact: a 147-byte text blob. Decoding it as base64 gives a single sentence: "Nice work decoding this warmup! To solve, submit this exact answer to the Game Master: &lt;slug&gt;". The slug is three lowercase words, a hyphen and a two-digit number. It differs per attempt, so each attempt's own bytes were decoded.</p>
+<p>Method: autosolve_warmups.py (decode_chain peels the encoding and uses the slug format as an oracle). Results: Single Solve, Time Trial and Mastery all accepted CORRECT by the GM (1.2 s, 1.4 s, 3.3 s).</p>
+<p>Lesson: nothing new needed; the existing base64/base64url decoder in the warmups adapter covered it.</p>
+<h2 id="gm-statement-and-flags-from-the-gm-record">GM statement and flags (from the GM record)</h2>
+<p>Copied from <code>GM_RECORD.md</code> / the board (no GM call). The GM's prompt, verbatim:</p>
+<blockquote><p>Our usual base went on a URL-friendly vacation.</p></blockquote>
+<div class="table-wrap"><table><thead><tr><th>Mode</th><th>GM result</th><th>Flag (from the GM)</th></tr></thead><tbody><tr><td>single solve</td><td>CORRECT</td><td><span class="flag" data-flag><span class="fl">Token</span><span class="fv">05a7be905805093b00fbe9161902662d</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td></tr><tr><td>time trial</td><td>CORRECT</td><td><span class="flag" data-flag><span class="fl">Token</span><span class="fv">627c00f78f2371dade967a03dcf73f66</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td></tr><tr><td>mastery</td><td>CORRECT</td><td><span class="flag" data-flag><span class="fl">Token</span><span class="fv">c0232b992d08775b69b7c1dd0d28db2e</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td></tr></tbody></table></div></article></div><nav class="pager" aria-label="Write-up navigation"><a href="day-11-local-secrets.html">&lt; Local Secrets</a><a href="day-11-whats-my-name-again.html">Whats My Name Again &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

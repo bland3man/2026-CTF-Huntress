@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Routine Check - Day 07 write-up</title>
+<meta name="description" content="Day 07 Binary RE write-up: Extracted the zip, hashed every file. Confirmed types via file/readelf. d01 ELF: readelf -h/-S/-s, objdump -d -M intel. recovercode (FUNC, 6">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-07.html">Day 07</a> / Routine Check</p><p class="telemetry"><span>DAY 07</span><span class="sep">//</span><span>LANE: BINARY RE</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Routine Check</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-binary" href="../lanes/binary.html">Binary RE</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
+<h1 id="routine-check">Routine Check</h1>
+<h2 id="challenge">Challenge</h2>
+<p>Binary reverse engineering, Huntress CTF 2026 Day 07 (lane: binary-reverse-engineering, 56 fields). Prompt: "Kotlin coroutines don't run - they suspend, resume, and hop between states. Reconstruct the state machine from the metadata and figure out what this one was staging." Modes: Single Solve (static), Time Trial (timed), Mastery (2 evidence sets under one timer). Scored per field by the Game Master (partial credit, accepted fields accumulate).</p>
+<h2 id="artifacts">Artifacts</h2>
+<p><code>artifact_0.bin</code> = AES zip (password <code>infected</code>, inert fixtures) holding an evidence set of 8 items per set:</p>
+<ul><li>d01 = dynamically linked x86-64 ELF (EXEC, not stripped): header facts, section names, symbols, <code>recover_code</code> disassembly.</li><li>d02 = x86-64 ELF with an embedded <code>HCFG</code> config blob.</li><li>d03 = .NET PE32 (i386) DLL + runtimeconfig.json, XOR'd config in metadata.</li><li>d04, d05 = large x86-64 ELF with <code>HCFG</code> config blob.</li><li>d06, d07 = Java jar with a base64 <code>HCFG</code> blob stored in a <code>.class</code> constant pool.</li></ul>
+<p>Despite the Kotlin-coroutine flavor text, this is the recurring <code>dual_format_re</code> forensic-inventory family (Day 02 Mangled / Day 03 Table Manners / Day 04 Go Fish / Day 05 Rust Belt / Day 06 Pool Party) extended to 7 slots.</p>
+<h2 id="investigation">Investigation</h2>
+<ol><li>Extracted the zip, hashed every file. Confirmed types via <code>file</code>/<code>readelf</code>.</li><li>d01 ELF: <code>readelf -h/-S/-s</code>, <code>objdump -d -M intel</code>. <code>recover_code</code> (FUNC, 6 bytes @ 0x401126) = <code>mov eax,0x1fa4</code> (8100) + <code>ret</code> -&gt; disassembly <code>["mov eax, 8100","ret"]</code>. Section-name and non-empty-symbol lists emitted as compact JSON arrays.</li><li>HCFG layout (same across d02/d04/d05/d06/d07): magic <code>HCFG</code>(4) + version(1) + 1-byte XOR key(1) + len(2 LE) + crc32(4 LE) + single-byte-XOR JSON payload. Brute is unnecessary - key byte is in the header; XOR the payload and CRC32-validate. Large ELFs can contain decoy <code>HCFG</code> hits, so scan every occurrence and keep the one that both CRC-validates and JSON-parses.</li><li>d03 managed PE: machine <code>i386</code>, metadata version <code>v4.0.30319</code> (BSJB header), format compound token <code>pe_cli</code>, config via XOR-scan for <code>{"campaign"</code>.</li><li>d06/d07 jars: find the base64 run in a <code>.class</code>, decode, parse HCFG; <code>hcfg_version = raw[4]</code>, <code>format = jar</code>.</li><li>Single Solve: all 56 fields derived offline reproduced on the live attempt -&gt; CORRECT first shot. Time Trial: same automated solver, one shot -&gt; CORRECT.</li><li>Mastery = 2 sets x 56 fields (<code>setN.</code> prefix). Mutation space includes <strong>native PE32+</strong> deliveries in d02/d04 (observed: mingw-GCC exe and Go exe, both amd64, with a <code>.hcfg</code> section). The HCFG scan is format-agnostic, so config/sha256/architecture (<code>x86-64</code>) stay correct on PE; only the native-PE <code>analysis_format</code> label is unknown. Built a runner that submits the sure batch then iterates PE format candidates (<code>pe</code>, <code>pe32+</code>, ...) resubmitting the full set (partial-credit accumulation flips result to CORRECT on the right label). The drawn mastery attempt happened to be all-ELF, so it solved immediately with <code>format=elf</code>.</li></ol>
+<h2 id="answer-shape-labels-grader-faithful">Answer-shape labels (grader-faithful)</h2>
+<ul><li>elf_class <code>ELF64</code>, machine <code>x86-64</code>, elf_type <code>ET_EXEC</code>, endianness <code>little</code></li><li>format: ELF <code>elf</code>, jar <code>jar</code>, managed PE <code>pe_cli</code>; native PE candidate <code>pe</code> (not needed this attempt)</li><li>architecture <code>x86-64</code>; crc32 lowercase <code>0x%08x</code>; xor key <code>0x%02x</code>; hcfg_version integer (= raw[4])</li><li>section_names / symbols / disassembly = compact JSON arrays (<code>separators=(",",":")</code>)</li></ul>
+<h2 id="flags">Flags</h2>
+<ul class="flag-list"><li><span class="count">Single Solve</span> <span class="flag" data-flag><span class="fl">Token</span><span class="fv">0ec9c3469c99a2c1c8cecaa80872a056</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li><li><span class="count">Time Trial</span> <span class="flag" data-flag><span class="fl">Token</span><span class="fv">b5a29c1b96c633af996932371f7cfbea</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li><li><span class="count">Mastery</span> <span class="flag" data-flag><span class="fl">Token</span><span class="fv">203a12293ef0e1d834860301fe9d3e92</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li></ul>
+<h2 id="minimal-reproduction">Minimal Reproduction</h2>
+<ul><li>Offline: <code>python3 "challenges/Day 07/Routine Check/scripts/solve_routine.py" offline "challenges/Day 07/Routine Check/work"</code></li><li>Live: <code>python3 .../solve_routine.py &lt;mode_cid&gt; &lt;reps&gt;</code> (single_solve/time_trial); <code>python3 .../run_mastery_v2.py &lt;id&gt;/mastery 1</code> for mastery (handles PE probing).</li></ul>
+<h2 id="lessons-learned">Lessons Learned</h2>
+<ul><li>Reused Rust Belt (d01-d05) + Pool Party jar logic (d06/d07) verbatim; only new work was handling native-PE mutations in d02/d04 for Mastery.</li><li>HCFG scan is container-agnostic: config/crc/xor key/sha/architecture are all recoverable from a native PE the same way as from an ELF; only the <code>analysis_format</code> string differs.</li><li>Mastery mutation is random per attempt; an all-ELF draw passes with the straight solver, matching the Day 06 experience.</li></ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#challenge">Challenge</a></li><li class="l2"><a href="#artifacts">Artifacts</a></li><li class="l2"><a href="#investigation">Investigation</a></li><li class="l2"><a href="#answer-shape-labels-grader-faithful">Answer-shape labels (grader-faithful)</a></li><li class="l2"><a href="#flags">Flags</a></li><li class="l2"><a href="#minimal-reproduction">Minimal Reproduction</a></li><li class="l2"><a href="#lessons-learned">Lessons Learned</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-07-percent-chance.html">&lt; Percent Chance</a><a href="day-07-seven-zip-no-relation.html">Seven-Zip, No Relation &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

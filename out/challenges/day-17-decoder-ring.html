@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Decoder Ring - Day 17 write-up</title>
+<meta name="description" content="Day 17 Binary RE write-up: Mastery returns zero per-field feedback on an incorrect whole submit. But a partial submit that is 100% correct for every included field ret">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-17.html">Day 17</a> / Decoder Ring</p><p class="telemetry"><span>DAY 17</span><span class="sep">//</span><span>LANE: BINARY RE</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Decoder Ring</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-binary" href="../lanes/binary.html">Binary RE</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
+<h1 id="decoder-ring-day-17">Decoder Ring (Day 17)</h1>
+<h2 id="challenge">Challenge</h2>
+<ul><li><strong>Event:</strong> Huntress CTF 2026, Day 17 (2026-10-17)</li><li><strong>GM id:</strong> <code>binary-reverse-engineering-day-17-encoded-configuration-recovery</code></li><li><strong>Category:</strong> Binary Reverse Engineering - multi-day retrospective + XOR config recovery across 17 encoded binaries in one archive</li><li><strong>Prompt:</strong> "The configuration is encoded, but the decoder ships with the binary - a ring waiting for its secret. Recover the reversible decoder and read what it was hiding."</li></ul>
+<h2 id="artifact">Artifact</h2>
+<ul><li><code>evidence.zip</code> (32,831,470 bytes), AES-256 encrypted, password <code>infected</code></li><li>20 members: <code>d01</code> through <code>d17</code>, representing one specimen per prior day's binary challenge:
+<ul><li>Day 01-02: C / C++ ELF (orientation)</li><li>Day 03: .NET DLL + runtimeconfig.json</li><li>Day 04-07: Go, Rust, Java JARs, Kotlin coroutines</li><li>Day 08-14: Swift (ELF), Nim, Zig, D, Free Pascal, Crystal, Objective-C</li><li>Day 15: Stripped vs symbolized ELF pair</li><li>Day 16: WebAssembly (compact + direct)</li><li>Day 17: Ada ELF (new)</li></ul></li></ul>
+<p>Every binary carries exactly one CRC-valid HCFG record. Six variations:</p>
+<ul><li><code>base64</code> wrapper in <code>.rodata</code>: d08, d09, d11, d13</li><li><code>base64</code> inside <code>.class</code> JAR constant pools: d06, d07</li><li><code>raw</code> HCFG in <code>.hcfg</code> dedicated section: d02, d10, d14, d15</li><li><code>raw</code> HCFG in <code>.data</code> (writable): d12</li><li><code>raw</code> HCFG in <code>.rodata</code> (other): d04, d05, d17</li><li><code>raw</code> HCFG in WASM data segment: d16</li></ul>
+<h2 id="investigation">Investigation</h2>
+<p>Day 17 effectively asks every analysis field from Days 01-17 across one bundle. The adapter already handled ~190 fields deterministically. The TWO new fields that required dedicated work:</p>
+<h3 id="analysis-hcfg-storage-day-17-new-field"><code>analysis_hcfg_storage</code> (Day 17 new field)</h3>
+<p>At 09:00 the question text was ambiguous <code>exact_text</code>, with no accepted-values enum. After the organizer-fix at ~T+3h, the live question added the explicit rule set:</p>
+<pre class="code"><code>accepted_values: ["raw", "base64", "raw_const_array", "raw_hcfg_section", "wasm_data_segment"]
+rules (applied in order):
+  base64            = winning HCFG only after decoding a printable Base64 carrier
+  raw_hcfg_section  = literal HCFG in a native section named exactly .hcfg
+  wasm_data_segment = literal HCFG inside a WebAssembly data segment
+  raw_const_array   = literal HCFG in a native data section OTHER THAN .hcfg (e.g. writable .data)
+  raw               = otherwise</code></pre>
+<p>Final mapping for the asked members:</p>
+<div class="table-wrap"><table><thead><tr><th>Member</th><th>Container</th><th>Section</th><th>Answer</th></tr></thead><tbody><tr><td>d08, d09, d11, d13</td><td>base64 text</td><td>.rodata</td><td><code>base64</code></td></tr><tr><td>d12</td><td>raw</td><td>.data</td><td><code>raw_const_array</code></td></tr><tr><td>d14</td><td>raw</td><td>.hcfg</td><td><code>raw_hcfg_section</code></td></tr></tbody></table></div>
+<h3 id="mastery-mangler-reprise-with-coff-twist">Mastery: Mangler reprise with COFF twist</h3>
+<p>Mastery = 5 deliveries, 1020 answer_ids. 1012 banked immediately. 8 fields held:</p>
+<ul><li><strong>5x</strong> <code>d02_analysis_mangled_score_symbol</code></li><li><strong>3x</strong> <code>d02_analysis_typeinfo_symbol</code> (PE sets 1/3/5 only)</li></ul>
+<p>Mastery d02 alternates ELF (sets 2/4) and MinGW PE64 (sets 1/3/5). The adapter extracted the plain Itanium symbols <code>_ZNK15DiscoveryEngine5scoreEPKc</code> / <code>_ZTI15DiscoveryEngine</code> for both. The GM accepted those for the ELF variants but rejected them for PE.</p>
+<p>Hint from the user: "take it ezz" - the <code>_Z</code> of Itanium ABI mangling has a COFF counterpart.</p>
+<p><strong>Resolution:</strong> MinGW emits each C++ symbol in a COFF COMDAT section group named by its section ($) prefix. The PE grader expects the full COFF-decorated form:</p>
+<div class="table-wrap"><table><thead><tr><th>Set</th><th>File</th><th>mangled_score_symbol</th><th>typeinfo_symbol</th></tr></thead><tbody><tr><td>set1 (PE)</td><td>d02--variant-000.exe</td><td><code>.text$_ZNK15DiscoveryEngine5scoreEPKc</code></td><td><code>.rdata$_ZTI15DiscoveryEngine</code></td></tr><tr><td>set2 (ELF)</td><td>d02--variant-001.elf</td><td><code>_ZNK15DiscoveryEngine5scoreEPKc</code></td><td><code>_ZTI15DiscoveryEngine</code></td></tr><tr><td>set3 (PE)</td><td>d02--variant-001.exe</td><td><code>.text$_ZNK15DiscoveryEngine5scoreEPKc</code></td><td><code>.rdata$_ZTI15DiscoveryEngine</code></td></tr><tr><td>set4 (ELF)</td><td>d02--variant-002.elf</td><td><code>_ZNK15DiscoveryEngine5scoreEPKc</code></td><td><code>_ZTI15DiscoveryEngine</code></td></tr><tr><td>set5 (PE)</td><td>d02--variant-002.exe</td><td><code>.text$_ZNK15DiscoveryEngine5scoreEPKc</code></td><td><code>.rdata$_ZTI15DiscoveryEngine</code></td></tr></tbody></table></div>
+<p>Note: <code>recover_code</code> is <code>none</code> for the stripped Day 17 d01 variant (no symtab, no recoverable function name). The literal <code>none</code> is the correct answer per the format's own rule ("use the literal <code>none</code> only when the requested field is absent"), confirmed by submit.</p>
+<h2 id="mastery-localization-method">Mastery localization method</h2>
+<p>Mastery returns zero per-field feedback on an <code>incorrect</code> whole submit. But a partial submit that is <strong>100% correct for every included field</strong> returns <code>accepted</code> with <code>accepted_ids</code> and <code>remaining</code>. So the oracle is: submit a small, high-confidence subset first (we used <code>d08/d09/d11/d13 = base64</code> as the trusted 240-field baseline), then add one <code>dNN</code> group at a time. Each successful partial narrows the search; each <code>incorrect</code> localizes to that group. We went from 1020 unknowns to 8 unknowns in 15 submits with no attempts spent.</p>
+<h2 id="live-results-2026-10-17">Live results (2026-10-17)</h2>
+<ul><li><strong>Single Solve (CORRECT):</strong> <code>2026-10-17T16:16:43Z</code></li><li><strong>Time Trial (CORRECT, RANKED):</strong> 36.9 s by <code>sudo_who_farted</code></li><li><strong>Mastery (CORRECT):</strong> <code>2026-10-17T17:20:12Z</code> by <code>sudo_who_farted</code>
+<ul><li><strong>Flag:</strong> <span class="flag" data-flag><span class="fl">Token</span><span class="fv">baf352c3dcb43a86667b296ddde0e055</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li></ul></li></ul>
+<h2 id="solver-changes">Solver changes</h2>
+<ul><li><code>challenges/_lib/autosolve_binary.py</code>:
+<ul><li><code>analysis_hcfg_storage</code> handler now implements the full enum rule set (ELF-section-aware, WASM-aware).</li><li><code>analysis_has_go_runtime</code> and <code>analysis_section_names</code> extended to accept kind in <code>{elf, pe, pe_native, pe_managed}</code> (Mastery d04 alternates Go-PE and Go-ELF per set).</li></ul></li></ul>
+<h2 id="lessons">Lessons</h2>
+<ol><li>When <code>exact_text</code> fields with no <code>accepted_values</code> appear in a brand-new field name, the live <code>op=status</code> contract is the authoritative source. Always refetch and compare after a <code>HELD</code> on a new field; the organizer may have added an enum.</li><li>Prior-day writeups contain hints for the current day. Day 02 "Mangled" MASTERY_SCHEMA.md explicitly flagged "PE MinGW with Itanium mangling, UNPROVEN" - the exact issue we hit today.</li><li>PE MinGW symbols differ from ELF: COFF COMDAT groups prefix the Itanium name with <code>.text$</code>, <code>.rdata$</code>, etc. The grader uses that full COFF name for PE binaries.</li><li>Mastery partial submits are an O(log n) oracle. Submit a known-good baseline first, then one <code>dNN</code> group at a time, each adding to the banked set.</li></ol></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#challenge">Challenge</a></li><li class="l2"><a href="#artifact">Artifact</a></li><li class="l2"><a href="#investigation">Investigation</a></li><li class="l3"><a href="#analysis-hcfg-storage-day-17-new-field">analysis_hcfg_storage (Day 17 new field)</a></li><li class="l3"><a href="#mastery-mangler-reprise-with-coff-twist">Mastery: Mangler reprise with COFF twist</a></li><li class="l2"><a href="#mastery-localization-method">Mastery localization method</a></li><li class="l2"><a href="#live-results-2026-10-17">Live results (2026-10-17)</a></li><li class="l2"><a href="#solver-changes">Solver changes</a></li><li class="l2"><a href="#lessons">Lessons</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-17-bacon-bits.html">&lt; Bacon Bits</a><a href="day-17-fetch-quest.html">Fetch Quest &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

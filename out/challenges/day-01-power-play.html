@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Power Play - Day 01 write-up</title>
+<meta name="description" content="Day 01 Script Analysis write-up: Classification: static PowerShell triage (malwarere / scriptingdata). No execution is needed. The challenge text itself says the scripts &quot;wi">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-01.html">Day 01</a> / Power Play</p><p class="telemetry"><span>DAY 01</span><span class="sep">//</span><span>LANE: SCRIPT ANALYSIS</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Power Play</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-script" href="../lanes/script.html">Script Analysis</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
+<h1 id="power-play">Power Play</h1>
+<h2 id="challenge">Challenge</h2>
+<ul><li>Event: Huntress CTF 2026 (AI Arena)</li><li>Challenge ID: <code>script-analysis-day-01-native-signals</code></li><li>Modes and points: Single Solve 2, Time Trial 3 (1 task in under 8 s), Mastery (2 tasks in under 7 s)</li><li>Challenge text:
+<blockquote><p>Three PowerShell specimens are on the table, and none of them will ever run. That's fine, because you only need to read them. Classify each script's intent, map its primary ATT&amp;CK technique, and pull out the exact indicators sitting in plain sight.</p></blockquote></li><li>Artifact: <code>power_play.zip</code> (zip password <code>infected</code>).</li><li>How flags are issued: the Game Master in the AI Homebase VM. You submit answers under fixed answer IDs and it returns a completion code for each mode.</li></ul>
+<h2 id="artifacts">Artifacts</h2>
+<div class="table-wrap"><table><thead><tr><th>File</th><th>Notes</th></tr></thead><tbody><tr><td><code>power_play.zip</code></td><td>Downloaded copy of the challenge zip. It is WinZip-AES encrypted (ZIP 5.1), so stock <code>unzip</code> fails; use <code>7z x -pinfected</code>.</td></tr><tr><td><code>extracted/resource-sample.ps1</code></td><td>Cryptominer fixture</td></tr><tr><td><code>extracted/collection-sample.ps1</code></td><td>Browser-credential collection fixture</td></tr><tr><td><code>extracted/impact-sample.ps1</code></td><td>Ransomware fixture</td></tr></tbody></table></div>
+<p>Game Master assignments (SHA-256):</p>
+<ul><li>Single Solve <code>evidence.zip</code>: <code>07e61f33b72ae646d925087de9b9e94068812fdf12f7e43613d0b2bef6f6d3e5</code></li><li>Time Trial <code>evidence.zip</code>: <code>76980d6a5ad47ff42da017569278ceaf77bc9f226090bd5fa5d947c3caf5480e</code></li><li>Mastery bundle (<code>evidence-01.zip</code> and <code>evidence-02.zip</code>): <code>f96ad10b598a63dc897fd8890dd7de8cbbd9cbc1717d3f72627484d057b1b2cd</code></li></ul>
+<h2 id="triage">Triage</h2>
+<ul><li>Classification: static PowerShell triage (malware_re / scripting_data). No execution is needed. The challenge text itself says the scripts "will never run".</li><li>Every specimen uses the same template:
+<ol><li>a Base64 blob is passed to <code>[Convert]::FromBase64String</code>;</li><li>a <code>$reconstruct</code> scriptblock returns the bytes unchanged;</li><li>the bytes are decoded as UTF-8 and passed to <code>ConvertFrom-Json</code>;</li><li>the script returns an object built from single-letter keys (<code>a</code>, <code>b</code>, <code>c</code>, ...).</li></ol></li><li>The intent comes from two places:
+<ul><li>the <code>$nativeTypes</code> triad of .NET classes;</li><li>which keys appear in the decoded JSON.</li></ul></li></ul>
+<h2 id="investigation">Investigation</h2>
+<h3 id="1-extract-and-decode-without-executing">1. Extract and decode without executing</h3>
+<pre class="code"><code class="lang-bash">7z x -pinfected -oextracted power_play.zip
+for f in extracted/*.ps1; do
+  echo "== $f"
+  grep -o "FromBase64String('[^']*')" "$f" | sed "s/.*('//;s/')//" | base64 -d; echo
+done</code></pre>
+<p>Output:</p>
+<pre class="code"><code class="lang-text">== extracted/collection-sample.ps1
+{"a":"e536c782dd01","b":"https://497b6b9b43.example.invalid/3f890532dd42.dat","c":["update-497b6b9b43.dat","Login Data","Cookies"],"d":"stage-e536c782dd01.zip","e":"Global\\HuntressLab_03b15c606290","f":"Mozilla/5.0 HuntressLab/3.3"}
+== extracted/impact-sample.ps1
+{"a":"785244c7fdf5","b":".locked-1d685","c":"RECOVERY-1d6858b777.txt","d":"https://1d6858b777.example.invalid/a0e20204ed17.dat","e":["update-1d6858b777.dat","Login Data","Cookies"],"f":"Global\\HuntressLab_b2e257a4ea0f"}
+== extracted/resource-sample.ps1
+{"a":"a88bfda72dbe","b":"https://cdn-03ce326948.example.invalid/3e59094b24e2.bin","c":"wallet_d327bc1114a907589af81bba71226b77","d":"update-03ce326948.dat","e":"HKCU\\Software\\HuntressLab\\Run\\03ce326948","f":"Mozilla/5.0 HuntressLab/3.6","g":64,"h":"Global\\HuntressLab_6460b4f6aa72"}</code></pre>
+<h3 id="2-classify">2. Classify</h3>
+<div class="table-wrap"><table><thead><tr><th>Sample</th><th><code>$nativeTypes</code></th><th>Discriminating indicators</th><th>Scenario</th><th>Accepted ATT&amp;CK</th></tr></thead><tbody><tr><td>resource</td><td><code>Diagnostics.Process</code>, <code>Microsoft.Win32.Registry</code>, <code>Net.WebClient</code></td><td><code>wallet_*</code>, thread count <code>64</code>, HKCU Run key</td><td><code>resource_hijacking</code></td><td><strong>T1496</strong></td></tr><tr><td>collection</td><td><code>IO.File</code>, <code>IO.Compression.ZipFile</code>, <code>Net.HttpWebRequest</code></td><td><code>Login Data</code>, <code>Cookies</code>, <code>stage-*.zip</code>, user-agent</td><td><code>synthetic_collection</code></td><td><strong>T1555.003</strong></td></tr><tr><td>impact</td><td><code>IO.File</code>, <code>Security.Cryptography.Aes</code>, <code>IO.DirectoryInfo</code></td><td><code>.locked-*</code>, <code>RECOVERY-*.txt</code></td><td><code>synthetic_impact</code></td><td><strong>T1486</strong></td></tr></tbody></table></div>
+<p>Failed path: before checking with the Game Master, I mapped the collection sample to T1560 (Archive Collected Data) because of <code>ZipFile</code> and the staging zip. The accepted answer is <strong>T1555.003</strong> (Credentials from Web Browsers): the browser credential stores are the primary objective, and the archive only stages them.</p>
+<h3 id="3-game-master-questions-single-solve-and-time-trial">3. Game Master questions (Single Solve and Time Trial)</h3>
+<p>Mastery asks the same questions twice, with IDs prefixed <code>set1.</code> and <code>set2.</code>.</p>
+<div class="table-wrap"><table><thead><tr><th>Answer ID</th><th>Question</th><th>Single Solve answer</th></tr></thead><tbody><tr><td>resource-scenario</td><td>Scenario for resource-sample.ps1</td><td><code>resource_hijacking</code></td></tr><tr><td>resource-attack</td><td>Primary ATT&amp;CK ID</td><td><code>T1496</code></td></tr><tr><td>resource-url</td><td>Exact URL</td><td><code>https://cdn-03ce326948.example.invalid/3e59094b24e2.bin</code></td></tr><tr><td>resource-wallet</td><td>Exact wallet</td><td><code>wallet_d327bc1114a907589af81bba71226b77</code></td></tr><tr><td>resource-mutex</td><td>Exact mutex</td><td><code>Global\HuntressLab_6460b4f6aa72</code></td></tr><tr><td>collection-scenario</td><td>Scenario for collection-sample.ps1</td><td><code>synthetic_collection</code></td></tr><tr><td>collection-attack</td><td>Primary ATT&amp;CK ID</td><td><code>T1555.003</code></td></tr><tr><td>collection-url</td><td>Exact URL</td><td><code>https://497b6b9b43.example.invalid/3f890532dd42.dat</code></td></tr><tr><td>collection-file</td><td>First filename indicator</td><td><code>update-497b6b9b43.dat</code></td></tr><tr><td>collection-user-agent</td><td>Exact user-agent</td><td><code>Mozilla/5.0 HuntressLab/3.3</code></td></tr><tr><td>impact-scenario</td><td>Scenario for impact-sample.ps1</td><td><code>synthetic_impact</code></td></tr><tr><td>impact-attack</td><td>Primary ATT&amp;CK ID</td><td><code>T1486</code></td></tr><tr><td>impact-extension</td><td>Exact extension</td><td><code>.locked-1d685</code></td></tr><tr><td>impact-note</td><td>Recovery-note filename</td><td><code>RECOVERY-1d6858b777.txt</code></td></tr><tr><td>impact-url</td><td>Exact URL</td><td><code>https://1d6858b777.example.invalid/a0e20204ed17.dat</code></td></tr></tbody></table></div>
+<p>Key mapping (Single Solve samples):</p>
+<div class="table-wrap"><table><thead><tr><th>Sample</th><th>URL</th><th>Wallet / file</th><th>Mutex</th><th>Other</th></tr></thead><tbody><tr><td>resource</td><td><code>b</code></td><td>wallet <code>c</code></td><td><code>h</code></td><td>&#8212;</td></tr><tr><td>collection</td><td><code>b</code></td><td>first file <code>c[0]</code></td><td>&#8212;</td><td>user-agent <code>f</code></td></tr><tr><td>impact</td><td><code>d</code></td><td>&#8212;</td><td>&#8212;</td><td>extension <code>b</code>, note <code>c</code></td></tr></tbody></table></div>
+<p>The Time Trial and Mastery artifacts are regenerated for each attempt, so pick answers by the shape of each value (URL, <code>wallet_</code>, <code>Global\</code>, <code>.locked-</code>, <code>RECOVERY-</code>, <code>Mozilla/</code>) rather than by key letter.</p>
+<h3 id="4-timed-modes">4. Timed modes</h3>
+<ul><li>Timed modes were run by an agent inside the AI Homebase VM, using a one-shot solver against the Game Master proxy. The steps were:
+<ol><li><code>op=start</code>;</li><li>download the artifact;</li><li>AES-unzip it in memory;</li><li>regex out the Base64 and decode the JSON;</li><li>map the values to answers;</li><li>submit.</li></ol></li><li>Time Trial: the solver finished in 1.847 s (limit 8 s).</li><li>Mastery:
+<ul><li>Two artifact sets were delivered one after the other (<code>evidence-01.zip</code>, then <code>evidence-02.zip</code>). Measured processing was about 2.4 s.</li><li>The first Mastery <code>op=start</code> timed out on the client side even though the server had created the attempt. The solver recovered the attempt through the status call, renewed the expired timer, and completed it.</li></ul></li><li>Local helper for the same job: <code>scripts/triage.py</code> decodes the blobs and classifies by the type triad.</li></ul>
+<h2 id="flag-recovery">Flag Recovery</h2>
+<p>The Game Master returned CORRECT for all three modes. The completion codes are per-team dynamic flags:</p>
+<h2 id="flag">Flag</h2>
+<ul class="flag-list"><li><span class="count">Single Solve</span> <span class="flag" data-flag><span class="fl">Token</span><span class="fv">d24691da4c32b65c01a8b287fb73056f</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li><li><span class="count">Time Trial</span> <span class="flag" data-flag><span class="fl">Token</span><span class="fv">606353c05c5d49836264ff51bd99bc15</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li><li><span class="count">Mastery</span> <span class="flag" data-flag><span class="fl">Token</span><span class="fv">31cc0878e750233652db9bd7198c2ec0</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li></ul>
+<h2 id="minimal-reproduction">Minimal Reproduction</h2>
+<pre class="code"><code class="lang-bash">7z x -pinfected -oextracted power_play.zip
+python scripts/triage.py extracted/*.ps1</code></pre>
+<p>Then submit the scenario, the ATT&amp;CK ID and the value-shape-selected indicators under the Game Master's exact answer IDs.</p>
+<h2 id="lessons-learned">Lessons Learned</h2>
+<ul><li>Two indicators appear in both the collection and impact samples: the <code>Login Data</code> and <code>Cookies</code> browser targets, and the <code>update-*.dat</code> file. Tell the samples apart with the .NET type triad and their unique keys: <code>Aes</code> + <code>.locked</code>, <code>ZipFile</code>, or <code>Process</code> + wallet.</li><li>ATT&amp;CK mapping follows the objective, not the mechanism. Browser credential theft is T1555.003 even when the data is zipped (not T1560).</li><li>The scenario answers come from a fixed list: <code>resource_hijacking</code>, <code>synthetic_collection</code>, <code>synthetic_impact</code>.</li><li>The zips use WinZip AES. Use <code>7z</code> or <code>pyzipper</code>, not <code>unzip</code> or Python's stdlib <code>zipfile</code>.</li><li>For timed modes, one script should handle start, fetch, decode and submit in a single run. Answers typed by hand cannot meet an 8 s or 7 s limit.</li><li>On a client timeout, recover the attempt through the status call; don't start a new one blindly.</li></ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#challenge">Challenge</a></li><li class="l2"><a href="#artifacts">Artifacts</a></li><li class="l2"><a href="#triage">Triage</a></li><li class="l2"><a href="#investigation">Investigation</a></li><li class="l3"><a href="#1-extract-and-decode-without-executing">1. Extract and decode without executing</a></li><li class="l3"><a href="#2-classify">2. Classify</a></li><li class="l3"><a href="#3-game-master-questions-single-solve-and-time-trial">3. Game Master questions (Single Solve and Time Trial)</a></li><li class="l3"><a href="#4-timed-modes">4. Timed modes</a></li><li class="l2"><a href="#flag-recovery">Flag Recovery</a></li><li class="l2"><a href="#flag">Flag</a></li><li class="l2"><a href="#minimal-reproduction">Minimal Reproduction</a></li><li class="l2"><a href="#lessons-learned">Lessons Learned</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-01-exported-trust.html">&lt; Exported Trust</a><a href="day-01-read-the-rules.html">Read the Rules &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

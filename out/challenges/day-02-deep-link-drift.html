@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deep Link Drift - Day 02 write-up</title>
+<meta name="description" content="Day 02 Mobile Android write-up: file -&gt; Android package (APK). File type is the strongest signal -&gt; Android RE. Name/theme &quot;Deep Link Drift&quot; + manifest meta-data huntress.m">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-02.html">Day 02</a> / Deep Link Drift</p><p class="telemetry"><span>DAY 02</span><span class="sep">//</span><span>LANE: MOBILE ANDROID</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Deep Link Drift</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-mobile" href="../lanes/mobile.html">Mobile Android</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
+<h1 id="deep-link-drift">Deep Link Drift</h1>
+<h2 id="challenge">Challenge</h2>
+<ul><li>Event: Huntress CTF 2026 &#8212; Day 02 (AI Arena)</li><li>Category: Mobile / Android reverse engineering (deep link / intent-filter)</li><li>Case reference: <code>MOB-02-15B6E1B835</code></li><li>Mechanic (from the app + manifest meta-data): <em>permissive scheme, host, and path validation</em></li><li>In-app brief: "Huntress Mobile Arena &#8212; Day 02 / Deep Link Drift / Case reference: MOB-02-15B6E1B835 / Analyze the public APK and cross the permissive scheme, host, and path validation boundary."</li><li>Answer format: the arena hands you the exact answer inside the artifact; you submit that string to the Game Master (same model as the sibling warmup "Half a Turn").</li></ul>
+<h2 id="artifacts">Artifacts</h2>
+<div class="table-wrap"><table><thead><tr><th>File</th><th>Size</th><th>SHA-256</th></tr></thead><tbody><tr><td><code>deep_link_drift.apk</code></td><td>12,704 B</td><td><code>d43d443e70b97b3cd2880ad853d54335cfe97a9163c9d09a99104fe264947580</code></td></tr></tbody></table></div>
+<p>Key members inside the APK:</p>
+<ul><li><code>AndroidManifest.xml</code> (binary AXML)</li><li><code>classes.dex</code></li><li><code>assets/huntress_puzzle.json</code></li></ul>
+<h2 id="triage">Triage</h2>
+<ul><li><code>file</code> -&gt; Android package (APK). File type is the strongest signal -&gt; Android RE.</li><li>Name/theme "Deep Link Drift" + manifest meta-data <code>huntress.mechanic = permissive scheme, host, and path validation</code> -&gt; the puzzle is about an exported Activity reached through a deep link whose scheme/host/path checks are loose.</li><li>Primary specialist lane: <code>malware_re</code> (mobile RE). Work was small enough to run inline.</li><li>Hypothesis: an exported Activity consumes deep-link query params and builds/sends a "proof"; the correct proof is derivable statically from a bundled asset.</li></ul>
+<h2 id="investigation">Investigation</h2>
+<p>Tooling: <code>androguard</code> (WSL Ubuntu). The project path contains spaces, which breaks <code>wsl</code> interop, so the APK was copied to a space-free WSL home path first.</p>
+<pre class="code"><code class="lang-bash">wsl bash -lc 'mkdir -p [home path] &amp;&amp; cp ".../deep_link_drift.apk" [home path] &amp;&amp; cd [home path] &amp;&amp; \
+  androguard axml dld.apk'</code></pre>
+<h3 id="1-manifest-the-exported-deep-link-target">1. Manifest &#8212; the exported deep-link target</h3>
+<pre class="code"><code class="lang-xml">&lt;activity android:name=".ChallengeActivity" android:exported="true"&gt;
+  &lt;intent-filter&gt;
+    &lt;action android:name="android.intent.action.VIEW"/&gt;
+    &lt;category android:name="android.intent.category.DEFAULT"/&gt;
+    &lt;category android:name="android.intent.category.BROWSABLE"/&gt;
+    &lt;data android:scheme="huntress02" android:host="deep-link-drift" android:pathPrefix="/unlock"/&gt;
+  &lt;/intent-filter&gt;
+&lt;/activity&gt;</code></pre>
+<p>So the deep link is <code>huntress02://deep-link-drift/unlock...</code> and <code>ChallengeActivity</code> is <code>exported="true"</code> + <code>BROWSABLE</code> &#8212; reachable by any app/browser. That is the "permissive validation boundary": no signature/permission gate, only scheme/host/path.</p>
+<h3 id="2-dex-what-challengeactivity-does-with-the-deep-link">2. DEX &#8212; what ChallengeActivity does with the deep link</h3>
+<pre class="code"><code class="lang-bash">wsl bash -lc 'cd [home path] &amp;&amp; androguard decompile dld.apk -o src'</code></pre>
+<p><code>ChallengeActivity.onCreate</code> (decompiled, trimmed):</p>
+<pre class="code"><code class="lang-java">Intent v0 = getIntent();
+String answer  = v0.getStringExtra("answer");
+String case_id = v0.getStringExtra("case_id");
+Uri v4 = v0.getData();
+if (v4 != null) {                       // deep-link path
+    answer  = v4.getQueryParameter("answer");
+    case_id = v4.getQueryParameter("case_id");
+}
+if (answer == null || case_id == null) { /* "Missing challenge answer or case_id" */ }
+else {
+    String url = "http://127.0.0.1:19090/mobile/attempt/d02-522ef6efdbc1d702/evidence?case_id="
+        + Uri.encode(case_id)
+        + "&amp;client_secret: [redacted]&amp;proof="
+        + Uri.encode(answer);
+    WebView w = new WebView(this);
+    setContentView(w);
+    w.loadUrl(url);                      // submits proof to the local validator
+}</code></pre>
+<p>So a crafted deep link supplies <code>answer</code> (the "proof") and <code>case_id</code>; the app appends the hardcoded <code>client_secret</code> and loads the evidence URL in a WebView. The validator lives at <code>127.0.0.1:19090</code> (inside the arena env).</p>
+<p><code>DeepLinkDrift.java</code> tells us the codec:</p>
+<pre class="code"><code class="lang-java">public static final String CODEC   = "reverse";
+public static final String CONTROL = "deep_link_validator";
+public static final int    DAY     = 2;
+// describe() -&gt; "DAY-02:deep_link_validator:permissive scheme, host, and path validation"</code></pre>
+<p><code>MainActivity.java</code> only renders the case-reference brief (<code>MOB-02-15B6E1B835</code>).</p>
+<h3 id="3-asset-the-packaged-answer">3. Asset &#8212; the packaged answer</h3>
+<pre class="code"><code class="lang-json">{"schema":"huntress.mobile.puzzle.v1","day":2,"codec":"reverse","data":"94AEE0A765B0097A-SNA"}</code></pre>
+<p><code>codec = reverse</code>, so reverse <code>data</code>:</p>
+<pre class="code"><code>94AEE0A765B0097A-SNA   (reversed)  -&gt;  <span class="flag" data-flag><span class="fv">ANS-A7900B567A0EEA49</span></span></code></pre>
+<p>The decoded string begins <code>ANS-</code> ("ANSwer"), confirming both the codec and that this is the value to supply as <code>proof</code>/<code>answer</code>. This is identical in spirit to the sibling Day-02 warmup "Half a Turn," where the decoded artifact string is the exact Game Master answer.</p>
+<h2 id="flag-recovery">Flag Recovery</h2>
+<ul><li>Source: <code>assets/huntress_puzzle.json</code> inside <code>deep_link_drift.apk</code>.</li><li>Transformation: string reversal (codec declared both in the asset and in <code>DeepLinkDrift.CODEC</code>).</li><li>Independent verification (round-trip on the real asset bytes):</li></ul>
+<pre class="code"><code class="lang-python">import zipfile, json
+raw = zipfile.ZipFile('dld.apk').read('assets/huntress_puzzle.json').decode()
+j = json.loads(raw)                 # codec == "reverse"
+ans = j["data"][::-1]               # -&gt; "<span class="flag" data-flag><span class="fv">ANS-A7900B567A0EEA49</span></span>"
+assert ans[::-1] == j["data"]       # re-reverse equals original -&gt; consistent</code></pre>
+<p>The crafted deep link that drives the app across the boundary:</p>
+<pre class="code"><code>huntress02://deep-link-drift/unlock?case_id=MOB-02-15B6E1B835&amp;answer=<span class="flag" data-flag><span class="fv">ANS-A7900B567A0EEA49</span></span></code></pre>
+<p>which makes the app issue:</p>
+<pre class="code"><code>http://127.0.0.1:19090/mobile/attempt/d02-522ef6efdbc1d702/evidence?case_id=MOB-02-15B6E1B835&amp;client_secret: [redacted]&amp;proof=<span class="flag" data-flag><span class="fv">ANS-A7900B567A0EEA49</span></span></code></pre>
+<h2 id="flag">Flag</h2>
+<ul class="flag-list"><li><span class="flag" data-flag><span class="fl">Answer</span><span class="fv">ANS-A7900B567A0EEA49</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li></ul>
+<p>(Submit to the Game Master with <code>case_id = MOB-02-15B6E1B835</code>. The decoded <code>proof</code> is the arena answer; the local validator at <code>127.0.0.1:19090</code> is only reachable inside the Homebase VM.)</p>
+<h2 id="completing-it-end-to-end-live-game-master-all-modes">Completing it end to end (live Game Master, all modes)</h2>
+<p>The decoded value is the <strong>Game Master input</strong>, not the final completion flag &#8212; exactly like the sibling warmup "Half a Turn," whose decoded string was rejected by the CourseStack box directly and only the Game Master returned completion. The Game Master (<code>[ip]/huntress-ctf-proxy</code>) lives on the <strong>Homebase VM's internal network</strong>, so submission must happen from inside the VM (the in-VM workbench / GPT-6 Luna, or SSH), not from the workstation/CLI.</p>
+<p>Because the arena is <strong>dynamic per attempt</strong>, Time Trial / Mastery hand a <em>different</em> artifact whose <code>data</code> differs &#8212; so the answer must be recomputed from each attempt's own bytes, never hardcoded. <code>scripts/solve_deep_link_drift.py</code> does this deterministically:</p>
+<pre class="code"><code>start attempt -&gt; download the attempt's artifact -&gt; extract assets/huntress_puzzle.json
+-&gt; apply declared codec (reverse) -&gt; submit under the GM answer_ids</code></pre>
+<p>Its offline extract+decode path is self-tested against the public APK and reproduces <span class="flag" data-flag><span class="fl">Answer</span><span class="fv">ANS-A7900B567A0EEA49</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span>. Run inside the VM:</p>
+<pre class="code"><code class="lang-bash">python3 scripts/solve_deep_link_drift.py            # Single Solve (auto-discovers the id)
+python3 scripts/solve_deep_link_drift.py            # re-run for Time Trial (new attempt bytes)
+</code></pre>
+<h1 id="mastery-submit-each-returned-answer-id-until-remaining-0-before-the-shared-deadline">Mastery: submit each returned answer_id until remaining == 0, before the shared deadline</h1>
+<pre class="code"><code>
+Status: SOLVED - all 3 modes (Single / Time Trial / Mastery) CORRECT on 2026-10-02, part of the
+day's 15/15. The deterministic reverse-codec solver (scripts/solve_deep_link_drift.py) ran
+start -&gt; download -&gt; decode -&gt; submit per attempt. Individual completion tokens were not separately
+captured, but the modes are accepted on CourseStack. (The earlier "blocked on in-VM execution" note
+is SUPERSEDED: we proved SSH-direct Game-Master access works and landed the whole day token-free.)
+
+</code></pre>
+<h2 id="minimal-reproduction">Minimal Reproduction</h2>
+<pre class="code"><code class="lang-bash"></code></pre>
+<h1 id="1-unzip-the-asset-and-reverse-it-that-is-the-answer">1. unzip the asset and reverse it &#8212; that is the answer</h1>
+<p>python3 - &lt;&lt;'PY' import zipfile, json j = json.loads(zipfile.ZipFile('deep_link_drift.apk').read('assets/huntress_puzzle.json')) assert j['codec'] == 'reverse' print(j['data'][::-1])          # <span class="flag" data-flag><span class="fl">Answer</span><span class="fv">ANS-A7900B567A0EEA49</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span> PY</p>
+<h1 id="2-confirm-context-decode-manifest-dex">2. (confirm context) decode manifest + dex</h1>
+<p>androguard axml deep_link_drift.apk        # shows huntress02://deep-link-drift/unlock, exported ChallengeActivity androguard decompile deep_link_drift.apk -o src   # shows answer/case_id -&gt; evidence URL</p>
+<pre class="code"><code>
+Case reference `MOB-02-15B6E1B835` supplies `case_id`. Submit `<span class="flag" data-flag><span class="fv">ANS-A7900B567A0EEA49</span></span>`
+to the Game Master (Single Solve; repeat for Time Trial / Mastery if those modes exist
+for this challenge).
+
+</code></pre>
+<h2 id="lessons-learned">Lessons Learned</h2>
+<ul><li>File-type-first triage nailed the lane immediately (APK -&gt; Android RE), and the manifest <code>huntress.mechanic</code> meta-data literally named the vulnerability class.</li><li>The arena's Day-02 pattern is consistent: the downloadable artifact <em>contains</em> the answer behind a trivial codec (ROT13 for "Half a Turn", string-reverse here). Decode the bundled puzzle before building any exploit tooling &#8212; the WebView/validator plumbing is flavor, not the gate.</li><li>The <code>ANS-</code> prefix after decoding is a built-in correctness check for the reverse codec.</li><li>WSL interop note (recorded in docs/tool-routing.md): paths with spaces break <code>wsl</code>/<code>wsl.exe</code> argument passing; copy the artifact to a space-free WSL path (<code>[home path]</code>) before running <code>androguard</code>.</li><li>Hardcoded <code>client_secret: [redacted]</code> is baked into the app and auto-appended by <code>ChallengeActivity</code>; the attacker only needs <code>answer</code> + <code>case_id</code> on the deep link &#8212; the essence of the "permissive validation boundary."</li></ul>
+<pre class="code"><code></code></pre></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#challenge">Challenge</a></li><li class="l2"><a href="#artifacts">Artifacts</a></li><li class="l2"><a href="#triage">Triage</a></li><li class="l2"><a href="#investigation">Investigation</a></li><li class="l3"><a href="#1-manifest-the-exported-deep-link-target">1. Manifest &#8212; the exported deep-link target</a></li><li class="l3"><a href="#2-dex-what-challengeactivity-does-with-the-deep-link">2. DEX &#8212; what ChallengeActivity does with the deep link</a></li><li class="l3"><a href="#3-asset-the-packaged-answer">3. Asset &#8212; the packaged answer</a></li><li class="l2"><a href="#flag-recovery">Flag Recovery</a></li><li class="l2"><a href="#flag">Flag</a></li><li class="l2"><a href="#completing-it-end-to-end-live-game-master-all-modes">Completing it end to end (live Game Master, all modes)</a></li><li class="l2"><a href="#minimal-reproduction">Minimal Reproduction</a></li><li class="l2"><a href="#lessons-learned">Lessons Learned</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-01-you-must-be-this-hash-to-ride.html">&lt; You Must Be This Hash to Ride</a><a href="day-02-half-a-turn.html">Half a Turn &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

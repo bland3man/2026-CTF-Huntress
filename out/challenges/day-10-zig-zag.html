@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zig Zag - Day 10 write-up</title>
+<meta name="description" content="Day 10 Binary RE write-up: claimnext.py autosolved the single solve to 99/100 at claim. Identified the lone unresolved field (d10analysishashcfgsection) via analyse();">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-10.html">Day 10</a> / Zig Zag</p><p class="telemetry"><span>DAY 10</span><span class="sep">//</span><span>LANE: BINARY RE</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Zig Zag</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-binary" href="../lanes/binary.html">Binary RE</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
+<h1 id="zig-zag-day-10-binary-reverse-engineering">Zig Zag - Day 10 (binary-reverse-engineering)</h1>
+<p>GM id: <code>binary-reverse-engineering-day-10-zig-cross-platform-services</code></p>
+<h2 id="prompt">Prompt</h2>
+<blockquote><p>Zig promises one binary for every platform. Compare the ELF and PE service descriptors side by side and prove they're the same program wearing different uniforms.</p></blockquote>
+<h2 id="result-all-three-modes-correct-solver-blandman3">Result - all three modes CORRECT (solver: Blandman3)</h2>
+<ul><li>single_solve: <span class="flag" data-flag><span class="fl">Token</span><span class="fv">fb10f5c652dd44838d1b3d36a32abca7</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li><li>time_trial:   <span class="flag" data-flag><span class="fl">Token</span><span class="fv">af42050939cf70f2d541a216d3a03bbd</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li><li>mastery:      <span class="flag" data-flag><span class="fl">Token</span><span class="fv">ff8b4e412f027b787ef449b646aafdaa</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li></ul>
+<h2 id="family">Family</h2>
+<p><code>dual_format_re</code> - the recurring multi-field forensic inventory of a per-day zip of mixed binaries (ELF / native PE / managed .NET PE / JAR), each asked for header facts, section + symbol tables, a <code>recover_code</code> constant, demangled C++ names, vtable/typeinfo, and an embedded single-byte-XOR <code>HCFG</code> config record. Solved by the banked spine <code>challenges/_lib/autosolve_binary.py</code>; the single solve autosolved 99/100 at claim.</p>
+<p>The evidence zip (AES pw <code>infected</code>) carried d01..d10 members: 7 <code>.elf</code>, 1 managed <code>.dll</code> (+<code>.runtimeconfig.json</code>), 2 <code>.jar</code>, and the Day 10 <code>d10</code> Zig binary.</p>
+<h2 id="today-s-new-layer-zig-and-the-two-fields-the-spine-did-not-yet-handle">Today's new layer (Zig) and the two fields the spine did not yet handle</h2>
+<h3 id="1-d10-analysis-has-hcfg-section-enum-true-false-new-field">1. <code>d10_analysis_has_hcfg_section</code> (enum true/false) - NEW field</h3>
+<p>The Zig d10 ELF carries a named <code>.hcfg</code> PROGBITS section (section [23]) in its section header table holding the single-byte-XOR config record. The spine had no handler for the <code>analysis_has_hcfg_section</code> suffix. Added one: **true iff a named <code>.hcfg</code> section exists in the ELF section header table** (fallback: a successful HCFG header parse for any kind). d10 ELF =&gt; <code>true</code>.</p>
+<h3 id="2-d10-analysis-machine-integer-kind-and-d10-rotates-elf-lt-gt-native-pe-per-attempt">2. <code>d10_analysis_machine</code> - INTEGER-kind, and d10 rotates ELF &lt;-&gt; native PE per attempt</h3>
+<p>The crux of the "cross-platform" theme. d10's delivered binary is <strong>mutated per attempt</strong>: sometimes an ELF (<code>d10--variant-NNN.elf</code>, e_machine 0x3e), sometimes a <strong>native Windows PE</strong> (<code>d10--variant-NNN.exe</code>, COFF machine 0x8664). The question's own <code>answer_format</code> is <code>kind: integer</code> (base-10), so the grader wants the <strong>raw numeric machine id</strong>, not a text token:</p>
+<ul><li>ELF x86-64 =&gt; e_machine <code>0x3e</code> = <strong>62</strong></li><li>native PE amd64 =&gt; COFF machine <code>0x8664</code> = <strong>34404</strong></li></ul>
+<p>The spine's integer-kind machine handler only covered ELF (the Day 8/9 lesson). For the PE variant it was falling through to the string machine path and emitting <code>x86-64</code> (and later probe tokens <code>amd64</code>/<code>x86_64</code>/<code>AMD64</code>), all of which the integer grader rejected. Fix: when <code>ikind == "integer"</code> and the file is a PE, return <code>str(pe_machine(main))</code> (the decimal COFF machine) - the same integer contract the ELF branch already honored.</p>
+<h2 id="gm-timed-route-gotchas-resolved-banked-for-the-team">GM / timed-route gotchas resolved (banked for the team)</h2>
+<ul><li>A timed route can return <code>409 timed_intent_not_available</code> for the <strong>ranked</strong> (<code>run_for_time:true</code>) pool while a **plain <code>op=start</code>** on the same route succeeds. Do NOT auto-escalate a plain-start failure to <code>run_for_time</code>.</li><li>An <strong>expired-but-not-yet-retired</strong> timed attempt occupies the single timed-intent slot and makes a fresh <code>op=start</code> 409. <code>op=retry</code> both retires it AND provisions a fresh attempt, returning the full start-shaped payload (attempt_id, questions, download, deadline) - use that return directly; calling <code>op=start</code> again would 409 anew. Patched into <code>ctf_gm.GM.start</code>.</li></ul>
+<h2 id="method-fully-automated-one-shot-per-timed-window">Method (fully automated, one shot per timed window)</h2>
+<ol><li><code>claim_next.py</code> autosolved the single solve to 99/100 at claim.</li><li>Identified the lone unresolved field (<code>d10_analysis_has_hcfg_section</code>) via <code>analyse()</code>; added the <code>.hcfg</code>-section handler =&gt; single_solve 100/100 CORRECT.</li><li>First timed attempt banked 99 and flagged <code>d10_analysis_machine</code> wrong; inspected the saved attempt bytes, found d10 was a native PE and the field is integer-kind, and fixed the PE integer-machine handler.</li><li>Drove <code>autosolve_binary.run()</code> directly for time_trial and mastery (start-&gt;download-&gt; analyse-&gt;submit in one tight process, well inside the window): both CORRECT.</li></ol>
+<h2 id="files">Files</h2>
+<ul><li>Extended spine: <code>challenges/_lib/autosolve_binary.py</code> (<code>.hcfg</code>-section handler + PE integer-kind machine).</li><li>GM self-heal: <code>challenges/_lib/ctf_gm.py</code> (<code>timed_intent_not_available</code> -&gt; retry-as-start).</li><li>Solver copy: <code>challenges/Day 10/Zig Zag/scripts/solve_zig.py</code>.</li></ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#prompt">Prompt</a></li><li class="l2"><a href="#result-all-three-modes-correct-solver-blandman3">Result - all three modes CORRECT (solver: Blandman3)</a></li><li class="l2"><a href="#family">Family</a></li><li class="l2"><a href="#today-s-new-layer-zig-and-the-two-fields-the-spine-did-not-yet-handle">Today&#x27;s new layer (Zig) and the two fields the spine did not yet handle</a></li><li class="l3"><a href="#1-d10-analysis-has-hcfg-section-enum-true-false-new-field">1. d10_analysis_has_hcfg_section (enum true/false) - NEW field</a></li><li class="l3"><a href="#2-d10-analysis-machine-integer-kind-and-d10-rotates-elf-lt-gt-native-pe-per-attempt">2. d10_analysis_machine - INTEGER-kind, and d10 rotates ELF &amp;lt;-&amp;gt; native PE per attempt</a></li><li class="l2"><a href="#gm-timed-route-gotchas-resolved-banked-for-the-team">GM / timed-route gotchas resolved (banked for the team)</a></li><li class="l2"><a href="#method-fully-automated-one-shot-per-timed-window">Method (fully automated, one shot per timed window)</a></li><li class="l2"><a href="#files">Files</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-10-where-do-we-begin.html">&lt; Where Do We Begin</a><a href="day-11-by-any-other-name.html">By Any Other Name &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

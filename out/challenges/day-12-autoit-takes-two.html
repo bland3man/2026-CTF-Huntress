@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AutoIt Takes Two - Day 12 write-up</title>
+<meta name="description" content="Day 12 Script Analysis write-up: autosolvescript.py line 44 already mapped the AutoIt layer before the release:">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-12.html">Day 12</a> / AutoIt Takes Two</p><p class="telemetry"><span>DAY 12</span><span class="sep">//</span><span>LANE: SCRIPT ANALYSIS</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>AutoIt Takes Two</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-script" href="../lanes/script.html">Script Analysis</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
+<h1 id="day-12-autoit-takes-two-script-analysis">Day 12 - AutoIt Takes Two (script-analysis)</h1>
+<p>GM id: <code>script-analysis-day-12-autoit-workflow-pair</code> | lane: script-analysis | fields: 855 | agent: agent-1</p>
+<h2 id="result">Result</h2>
+<div class="table-wrap"><table><thead><tr><th>Mode</th><th>Result</th><th>Flag</th><th>Time</th></tr></thead><tbody><tr><td>Single Solve</td><td>CORRECT</td><td><span class="flag" data-flag><span class="fl">Token</span><span class="fv">27a4adffe0955f8bad048a4a55d9a8d9</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td><td>3.1 s</td></tr><tr><td>Time Trial</td><td>CORRECT</td><td><span class="flag" data-flag><span class="fl">Token</span><span class="fv">d0af1c5dccee188ddd7f93618210726d</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td><td>3.2 s</td></tr><tr><td>Mastery</td><td>CORRECT</td><td><span class="flag" data-flag><span class="fl">Token</span><span class="fv">a395adc89913d7ee97e33d29f7a636be</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td><td>4.1 s</td></tr></tbody></table></div>
+<p>All three modes were solved by the banked lane autosolver (<code>challenges/_lib/autosolve_script.py</code>, run through <code>autosolve.py</code>) at claim time, before any manual work. Nothing was executed from the archive; every answer was derived statically from the fixtures' own bytes.</p>
+<h2 id="challenge">Challenge</h2>
+<p>GM prompt: <em>"Two inert AutoIt workflows arrived as a matched set, and each one carries half the story. Correlate them with everything you've proven so far, and decide which pairing is genuine and which is just going through the motions."</em></p>
+<p>Artifact: <code>artifact_0.bin</code> - 93,075 byte WinZip-AES zip, 99 members, password <code>infected</code> (stock <code>unzip</code> fails; <code>pyzipper.AESZipFile</code> or <code>7z x -pinfected</code>).</p>
+<p>Member mix: 16 <code>.sh</code>, 14 <code>.py</code>, 12 <code>.js</code>, 10 <code>.vbs</code>, 9 <code>.php</code>, 8 <code>.mjs</code>, 5 <code>.cmd</code>, 5 <code>.lua</code>, 4 <code>.ps1</code>, 4 <code>.bat</code>, 4 <code>.mof</code>, 4 <code>.ts</code>, **4 <code>.au3</code>**. Every language layer from Days 1-11 (PowerShell, JScript, Batch, VBScript, Python, Bash, Node <code>.mjs</code>, PHP polyglots, WMI <code>.mof</code>) is still present and still asked about - the lane is cumulative.</p>
+<h2 id="today-s-new-layer-autoit-au3">Today's new layer: AutoIt <code>.au3</code></h2>
+<p>The title and the GM id gave it away, and the four new members confirmed it:</p>
+<pre class="code"><code>polyglot-autoit-benign-utility.au3
+polyglot-autoit-downloader.au3
+polyglot-autoit-launcher.au3
+polyglot-autoit-staged-chain.au3</code></pre>
+<p>44 new question keys appeared, all of the shape <code>polyglot-autoit-&lt;role&gt;-&lt;field&gt;</code> (<code>-role</code>, <code>-attack</code>, <code>-campaign</code>, <code>-url</code>, <code>-file-path</code>, <code>-steps</code>, <code>-stage-count</code>, <code>-adapter</code>, <code>-host-profile</code>, <code>-next-language</code>, <code>-obfuscation</code>, <code>-stage-profile</code>).</p>
+<h3 id="fixture-structure">Fixture structure</h3>
+<p>Each <code>.au3</code> file is the same three-part shape - a self-describing descriptor, exactly as every fixture has been since Day 6:</p>
+<ol><li>A header comment <code>; HUNTRESS_ANALYSIS_V1:&lt;TAG&gt;-&lt;blob&gt;</code></li><li><code>Global Const $descriptor_&lt;id&gt; = "&lt;same blob&gt;"</code></li><li><code>Func build_plan_&lt;id&gt;() / Return $descriptor_&lt;id&gt; / EndFunc</code></li></ol>
+<p>Decoding the blob yields a pipe-separated <code>k=v</code> descriptor (<code>v=3</code>), which answers every field directly. The only variation is the <code>&lt;TAG&gt;</code> encoding of the blob, one per fixture:</p>
+<div class="table-wrap"><table><thead><tr><th>Tag</th><th>Encoding</th><th><code>obfuscation_profile</code></th></tr></thead><tbody><tr><td><code>HEX</code></td><td>plain hex</td><td><code>plain_hex</code></td></tr><tr><td><code>B64</code></td><td>base64</td><td><code>base64</code></td></tr><tr><td><code>HB64</code></td><td>hex of base64 (decode hex, then base64)</td><td><code>hex_base64</code></td></tr><tr><td><code>FRAG</code></td><td>hex in dot-separated 12-byte fragments</td><td><code>fragmented_hex</code></td></tr></tbody></table></div>
+<p><code>FRAG</code> is just <code>unhexlify(blob.replace('.', ''))</code>; <code>HB64</code> is <code>b64decode(unhexlify(blob))</code>. All four were already in the adapter's carrier table.</p>
+<h3 id="recovered-descriptors-the-answers">Recovered descriptors (the answers)</h3>
+<div class="table-wrap"><table><thead><tr><th></th><th>benign-utility</th><th>downloader</th><th>launcher</th><th>staged-chain</th></tr></thead><tbody><tr><td>role</td><td><code>benign_utility</code></td><td><code>downloader</code></td><td><code>launcher</code></td><td><code>staged_chain</code></td></tr><tr><td>verdict</td><td>benign</td><td>suspicious</td><td>suspicious</td><td>suspicious</td></tr><tr><td><strong>attack</strong></td><td><code>none</code></td><td><code>T1105</code></td><td><code>T1059</code></td><td><code>T1059</code></td></tr><tr><td>adapter</td><td><code>local_parser</code></td><td><code>http_client</code></td><td><code>process_builder</code></td><td><code>operation_graph</code></td></tr><tr><td>host_profile</td><td>standalone</td><td>standalone</td><td>standalone</td><td>standalone</td></tr><tr><td>obfuscation</td><td><code>plain_hex</code></td><td><code>base64</code></td><td><code>hex_base64</code></td><td><code>fragmented_hex</code></td></tr><tr><td>stage_profile</td><td><code>single_descriptor</code></td><td><code>two_stage_download_execute</code></td><td><code>three_stage_decode_write_launch</code></td><td><code>cross_language_handoff</code></td></tr><tr><td>next_language</td><td><code>powershell</code></td><td><code>jscript</code></td><td><code>batch</code></td><td><code>vbscript</code></td></tr><tr><td>stage_count</td><td>2</td><td>2</td><td>3</td><td>3</td></tr><tr><td>steps</td><td><code>decode_configuration&gt;return_configuration</code></td><td><code>acquire_remote&gt;dispatch_process</code></td><td><code>decode_embedded&gt;write_file&gt;dispatch_process</code></td><td><code>profile_host&gt;decode_configuration&gt;dispatch_language</code></td></tr><tr><td>campaign_id</td><td><code>AUTOIT-6fa3e225</code></td><td><code>AUTOIT-908af952</code></td><td><code>AUTOIT-02a74447</code></td><td><code>AUTOIT-1dda6094</code></td></tr><tr><td>url</td><td><code>https://autoit-6fa3e2252a.example.invalid/stage</code></td><td><code>https://autoit-908af95255.example.invalid/stage</code></td><td><code>https://autoit-02a744470e.example.invalid/stage</code></td><td><code>https://autoit-1dda609468.example.invalid/stage</code></td></tr><tr><td>file_path</td><td><code>/tmp/huntress-autoit/.6fa3e2252a5414c5.stage</code></td><td><code>/tmp/huntress-autoit/.908af952550be9dd.stage</code></td><td><code>/tmp/huntress-autoit/.02a744470e2ca072.stage</code></td><td><code>/tmp/huntress-autoit/.1dda60946801d965.stage</code></td></tr></tbody></table></div>
+<p>Note the ATT&amp;CK answers: the descriptor's own <code>attack=</code> field wins over the language default. AutoIt/AutoHotKey as an <em>interpreter</em> is <strong>T1059.010</strong>, and that is what the adapter carries for <code>.au3</code>, but these fixtures are graded on their terminal intent - remote transfer gives <code>T1105</code>, decode-and-dispatch gives the generic <code>T1059</code>, and the benign parser gives the literal <code>none</code>. Follow the descriptor, not the file extension.</p>
+<h2 id="why-it-was-already-solved">Why it was already solved</h2>
+<p><code>autosolve_script.py</code> line 44 already mapped the AutoIt layer before the release:</p>
+<pre class="code"><code class="lang-python">(('.ahk', '.au3'), 'autoit', 'T1059.010', (), dict(_C, concat=r'\.|&amp;')),  # AutoHotKey &amp; AutoIT</code></pre>
+<p>AutoIt/AutoHotKey was on the lane's prepared next-layer candidate list, the descriptor spine (<code>Material_</code>/<code>Codec_</code>/<code>load</code>/<code>decode</code>/<code>recover</code>/<code>inspect</code>/<code>plan_</code> + <code>HUNTRESS_ANALYSIS_V1</code>) was unchanged, and all four carrier encodings were known. So the new language cost nothing: the adapter fingerprinted the extension, pulled the descriptor, and answered all 855 fields for Single, Time Trial and Mastery with no extension needed. This is the fifth consecutive day the "self-describing descriptor" hypothesis has held.</p>
+<h2 id="pairing-theme">Pairing theme</h2>
+<p>The "matched set / which pairing is genuine" framing is the Day 9 stage-relationship graph carried forward, now expressed across the AutoIt pair: <code>next_language</code> plus <code>stage_profile</code> decide whether a hand-off is real (<code>cross_language_handoff</code> -&gt; <code>same_language</code>/<code>cross_language</code> graph values) or merely "going through the motions". The three carried-over PowerShell scenario fields (<code>resource-scenario</code>, <code>collection-scenario</code>, <code>impact-scenario</code> -&gt; <code>resource_hijacking</code> / <code>synthetic_collection</code> / <code>synthetic_impact</code>) and the Day 11 browser credential-store question (<code>collection-attack</code> -&gt; the credential-store sub-technique, not the broader Data from Local System) were unchanged from yesterday.</p>
+<h2 id="takeaways">Takeaways</h2>
+<ul><li>Prepared candidate layers pay off: AutoIt was on the lane's candidate list and already in <code>LANGS</code>, so a brand-new language produced a 3-second three-mode sweep.</li><li><code>HB64</code> (hex-of-base64) and <code>FRAG</code> (dot-fragmented hex) are the two carrier spellings worth keeping: both appear only as the header tag, and both reduce to one line of Python.</li><li>The descriptor's <code>attack=</code> value always overrides the interpreter's own technique ID. T1059.010 is the right answer for "classify the AutoIt interpreter itself", never for "what does this specimen do".</li></ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#result">Result</a></li><li class="l2"><a href="#challenge">Challenge</a></li><li class="l2"><a href="#today-s-new-layer-autoit-au3">Today&#x27;s new layer: AutoIt .au3</a></li><li class="l3"><a href="#fixture-structure">Fixture structure</a></li><li class="l3"><a href="#recovered-descriptors-the-answers">Recovered descriptors (the answers)</a></li><li class="l2"><a href="#why-it-was-already-solved">Why it was already solved</a></li><li class="l2"><a href="#pairing-theme">Pairing theme</a></li><li class="l2"><a href="#takeaways">Takeaways</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-11-whats-my-name-again.html">&lt; Whats My Name Again</a><a href="day-12-back-at-you.html">Back at You &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

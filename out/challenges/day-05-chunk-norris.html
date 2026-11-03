@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chunk Norris - Day 05 write-up</title>
+<meta name="description" content="Day 05 Metadata Forensics write-up: Same family as Day 04&#x27;s &quot;Picture This&quot; (JPEG SOF dimensions), but for PNG: the prompt explicitly distrusts rendering/declared metadata and a">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-05.html">Day 05</a> / Chunk Norris</p><p class="telemetry"><span>DAY 05</span><span class="sep">//</span><span>LANE: METADATA FORENSICS</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Chunk Norris</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-metadata" href="../lanes/metadata.html">Metadata Forensics</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
+<h1 id="chunk-norris">Chunk Norris</h1>
+<h2 id="challenge">Challenge</h2>
+<ul><li>Category: Metadata Forensics (Day 05), GM id <code>metadata-forensics-day-05-chunk-norris</code></li><li>Prompt: "The PNGs render, but rendering is not proof. Walk their chunks, verify their declared geometry, and locate the image with an unexpected structural passenger."</li><li>Question shape (Single Solve): <code>Determine png.ihdr_dimensions_pixels for panel-001.png.</code> (<code>answer_format.kind = exact_text</code>, normalization <code>trim</code>)</li><li>Flag format: derived dimension string, e.g. <code>WxH</code></li></ul>
+<h2 id="artifacts">Artifacts</h2>
+<ul><li><code>metadata-day-05-evidence.zip</code> (AES, password <code>infected</code> - same standard password used across this project's artifact zips)</li><li>Contains <code>panel-001.png</code> (414 bytes)</li></ul>
+<h2 id="triage">Triage</h2>
+<p>Same family as Day 04's "Picture This" (JPEG SOF dimensions), but for PNG: the prompt explicitly distrusts rendering/declared metadata and asks to verify geometry from the file's own structure. For PNG the ground truth lives in the <code>IHDR</code> chunk, which is always the first chunk and always carries the authoritative pixel width/height - independent of anything a viewer or other chunk might claim.</p>
+<h2 id="investigation">Investigation</h2>
+<ol><li>Extract the zip with password <code>infected</code> -&gt; <code>panel-001.png</code>.</li><li>Parse the PNG structure directly: 8-byte PNG signature, followed by the first chunk. Bytes 8-11 are the IHDR chunk's 4-byte length, bytes 12-15 are the chunk type (<code>IHDR</code>), and bytes 16-23 are two big-endian 32-bit integers: width then height.</li><li>Verified directly from the raw bytes:
+<pre class="code"><code>magic  = 89 50 4e 47 0d 0a 1a 0a   (PNG signature)
+offset 12..16 = "IHDR"
+width  = struct.unpack('&gt;I', data[16:20])[0] = 269
+height = struct.unpack('&gt;I', data[20:24])[0] = 153</code></pre></li></ol>
+<h2 id="flag-recovery">Flag Recovery</h2>
+<p><code>png.ihdr_dimensions_pixels</code> for <code>panel-001.png</code> = <strong>269x153</strong>, read directly from the IHDR chunk's big-endian width/height fields at byte offsets 16-24. This is a direct structural read, not an inference - no alternate claim (EXIF, filename, or rendered size) was present to compare against in this Single Solve artifact; the full "unexpected structural passenger" outlier (the image whose IHDR disagrees with another declared source) would be found by running the same IHDR parse across the full Mastery-mode multi-panel set and comparing against each image's other metadata, which this single artifact does not include.</p>
+<h2 id="flag">Flag</h2>
+<pre class="code"><code>&lt;REDACTED_TOKEN&gt;</code></pre>
+<p>(Single Solve, Time Trial, and Mastery were all confirmed CORRECT by the Game Master on 2026-10-05; the raw completion tokens were not preserved locally at solve time, hence the redacted placeholder above - this writeup's technical derivation is independently re-verified from the actual artifact bytes, not reconstructed from memory.)</p>
+<h2 id="minimal-reproduction">Minimal Reproduction</h2>
+<pre class="code"><code class="lang-python">import struct, zipfile
+z = zipfile.ZipFile('metadata-day-05-evidence.zip')
+z.extractall(pwd=b'infected')
+data = open('panel-001.png', 'rb').read()
+assert data[12:16] == b'IHDR'
+w, h = struct.unpack('&gt;II', data[16:24])
+print(f'{w}x{h}')  # -&gt; 269x153</code></pre>
+<h2 id="lessons-learned">Lessons Learned</h2>
+<ul><li>PNG's IHDR chunk is always the first chunk right after the 8-byte signature - no need to walk the full chunk chain just to get dimensions; byte offsets 16-24 are fixed.</li><li>Same pattern as Day 04's JPEG SOF-dimensions challenge: trust the file's own structural header over any filename, EXIF, or rendering-implied size.</li><li>Process gap worth fixing: the solving agent did not persist its solver script or <code>state.json</code> for this challenge before closing out, unlike most other Day 05 challenges - this writeup was reconstructed after the fact from the staged artifact and a one-line KB note, and the real completion tokens could not be recovered. Future agents should always save a solver script and <code>state.json</code> immediately after each CORRECT, per the standing project rule, even for a single-field challenge that feels trivial.</li></ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#challenge">Challenge</a></li><li class="l2"><a href="#artifacts">Artifacts</a></li><li class="l2"><a href="#triage">Triage</a></li><li class="l2"><a href="#investigation">Investigation</a></li><li class="l2"><a href="#flag-recovery">Flag Recovery</a></li><li class="l2"><a href="#flag">Flag</a></li><li class="l2"><a href="#minimal-reproduction">Minimal Reproduction</a></li><li class="l2"><a href="#lessons-learned">Lessons Learned</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-05-by-the-numbers.html">&lt; By the Numbers</a><a href="day-05-hatch-careful.html">Hatch Careful &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

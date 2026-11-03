@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Percent Chance - Day 07 write-up</title>
+<meta name="description" content="Day 07 Warmups write-up: Reconstructed from the saved solver (scripts/solve.py) - the title is the pun: &quot;Percent&quot; = URL/percent-encoding (%xx escapes), which is the ">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-07.html">Day 07</a> / Percent Chance</p><p class="telemetry"><span>DAY 07</span><span class="sep">//</span><span>LANE: WARMUPS</span><span class="sep">//</span><span><span class="ok">STATUS: SEE LOG</span></span></p><h1>Percent Chance</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-warmups" href="../lanes/warmups.html">Warmups</a> <span class="pips" aria-label="Modes reported correct: none"><span class="pip" title="Single Solve: not reported CORRECT in the write-up">SS</span><span class="pip" title="Time Trial: not reported CORRECT in the write-up">TT</span><span class="pip" title="Mastery: not reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
+<h1 id="percent-chance">Percent Chance</h1>
+<h2 id="challenge">Challenge</h2>
+<p>Category: warmups (lane <code>warmups</code>, GM id <code>warmups-day-07</code>). Day 07.</p>
+<h2 id="artifacts">Artifacts</h2>
+<p>A single text blob delivered by the GM for the attempt (<code>mastery_blob.bin</code> saved locally for the Mastery delivery; Single Solve/Time Trial blobs are read directly from the GM response, not saved separately).</p>
+<h2 id="investigation">Investigation</h2>
+<p>Reconstructed from the saved solver (<code>scripts/solve.py</code>) - the title is the pun: "Percent" = URL/percent-encoding (<code>%xx</code> escapes), which is the actual transform being undone:</p>
+<ul><li>The blob is percent-encoded text (<code>urllib.parse.unquote</code>-decodable).</li><li>The solver applies <code>urllib.parse.unquote</code> in a loop (up to 5 times) until the text stops changing - i.e. it keeps un-escaping layers of percent-encoding until it reaches plain text, the same "peel until stable" pattern used for Day 06's octal-encoded "Eight Is Enough" and Day 07's own "Seven-Zip" sibling.</li><li>The final decoded text is split into non-empty lines; the last line is searched for a slug pattern <code>word-word-word-NN</code> (three lowercase hyphenated words followed by a two-digit number).</li><li>That matched slug is submitted verbatim as the answer for every <code>answer_id</code>.</li></ul>
+<h2 id="flag-recovery">Flag Recovery</h2>
+<p>The answer is the three-word-plus-number slug recovered by the regex above, after however many percent-decode passes were needed to reach it (the loop handles a variable number of nested encoding layers per attempt).</p>
+<h2 id="minimal-reproduction">Minimal Reproduction</h2>
+<pre class="code"><code>python3 scripts/solve.py</code></pre>
+<p>Uses <code>challenges/_lib/ctf_gm.py</code>'s <code>GM()</code>/<code>solve_mode()</code> to handle the GM round-trip and prints the result.</p>
+<h2 id="lessons-learned">Lessons Learned</h2>
+<ul><li>"Percent" in the title is a direct hint at percent-encoding - the same "decode this encoding until it stabilizes, then pull a slug from the last line" shape recurred across several Day 06/07 warmups with different base encodings (octal, percent-encoding) wrapping the same slug-extraction tail.</li></ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#challenge">Challenge</a></li><li class="l2"><a href="#artifacts">Artifacts</a></li><li class="l2"><a href="#investigation">Investigation</a></li><li class="l2"><a href="#flag-recovery">Flag Recovery</a></li><li class="l2"><a href="#minimal-reproduction">Minimal Reproduction</a></li><li class="l2"><a href="#lessons-learned">Lessons Learned</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-07-node-by-node.html">&lt; Node by Node</a><a href="day-07-routine-check.html">Routine Check &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

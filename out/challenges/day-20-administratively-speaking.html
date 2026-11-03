@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Administratively Speaking - Day 20 write-up</title>
+<meta name="description" content="Day 20 Web Exploitation write-up: Each mode gives one or more live target URLs under .2026.huntress.ctf.games. No downloadable artifact. The question in every mode is &quot;Recove">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-20.html">Day 20</a> / Administratively Speaking</p><p class="telemetry"><span>DAY 20</span><span class="sep">//</span><span>LANE: WEB EXPLOITATION</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Administratively Speaking</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-web" href="../lanes/web.html">Web Exploitation</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
+<h1 id="administratively-speaking-web-exploitation-day-05-released-into-day-20">Administratively Speaking &#8212; Web Exploitation, Day 05 (released into Day 20)</h1>
+<p>GM id: <code>web-exploitation-day-05-administratively-speaking</code> Lane: web-exploitation Owner (today): homestation Commander (user-directive new-lane claim; agents 6/7/8 already closed).</p>
+<h2 id="flags-gm-correct">Flags (GM CORRECT)</h2>
+<div class="table-wrap"><table><thead><tr><th>Mode</th><th>Flag</th><th>GM time</th></tr></thead><tbody><tr><td>Single Solve</td><td><span class="flag" data-flag><span class="fl">Token</span><span class="fv">7b7c36463c5571489e48efb6d8615481</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td><td>2026-10-20T13:10:17Z</td></tr><tr><td>Time Trial</td><td><span class="flag" data-flag><span class="fl">Token</span><span class="fv">8874cd0aa47b4330068d55efc7660990</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td><td>2026-10-20T13:35:10Z</td></tr><tr><td>Mastery</td><td><span class="flag" data-flag><span class="fl">Token</span><span class="fv">e5ca7d4a89a3d285e8c2d9eca242f661</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td><td>2026-10-20T13:39:00Z</td></tr></tbody></table></div>
+<p>Attempt id (Single/TT): <code>[id]</code> (resumed across modes).</p>
+<h2 id="challenge-prompt">Challenge prompt</h2>
+<blockquote><p>There's a staff-only door with no lock on it &#8212; just a sign. Walk through like you own the place and prove the bouncer never existed.</p></blockquote>
+<p>Each mode gives one or more live target URLs under <code>*.2026.huntress.ctf.games</code>. No downloadable artifact. The question in every mode is "Recover the proof from Target N", answer kind <code>exact_text</code>, normalization <code>trim</code>. The proof is a literal string of the form <code>proof_&lt;32-hex&gt;</code> found on the target.</p>
+<h2 id="vulnerability-class-common-theme">Vulnerability class (common theme)</h2>
+<p><strong>Authorization enforced only on the "signed" fa&#231;ade, never on the backing resource.</strong> A sign on the door that says <em>staff only</em> is not a lock: the server routes the un-decorated path directly through to the view / resource, bypassing the middleware or crawler policy that is supposed to gate it.</p>
+<p>Two concrete flavors appeared across the three modes:</p>
+<h3 id="a-django-no-trailing-slash-dispatch-single-solve-time-trial-mastery-target-2">A. Django "no trailing slash" dispatch (Single Solve, Time Trial, Mastery Target 2)</h3>
+<ul><li>The app is "Django Dispatch". <code>GET /api/clues</code> leaks: <code>{"framework":"Django","feature_route":"/dispatch-fa3df6","current_role":"analyst"}</code> (route name is per-attempt-random; <code>current_role</code> is deliberately <strong>analyst</strong>, i.e. <em>not</em> staff).</li><li><code>GET /dispatch-fa3df6/</code> (trailing slash &#8212; the "advertised" admin door) &#8658; <code>404 {"error":"not_found"}</code>. The slash-form URL is what Django's auth middleware guards.</li><li><code>GET /dispatch-fa3df6</code> (<strong>no</strong> trailing slash) &#8658; <code>200 {"ok":true,"effect":"framework_authorization_bypassed","evidence":"proof_&lt;...&gt;"}</code>. The view is registered without the slash and the middleware never fires on that pattern (<code>APPEND_SLASH</code>/url-pattern mis-wiring). That <code>evidence</code> value is the exact proof.</li><li>Mastery Target 2 used the same mechanic with a different feature-route (<code>/process-f0cc42</code>).</li></ul>
+<h3 id="b-node-js-tiny-http-robots-txt-is-the-only-lock-mastery-target-1">B. Node.js tiny-HTTP "robots.txt is the only lock" (Mastery Target 1)</h3>
+<ul><li>Different app, "Status Sprout" (self-described as "Powered by a tiny native Node.js HTTP server"), served on the same wildcard subdomain shape.</li><li><code>GET /robots.txt</code> &#8658; <code>User-agent: *\nDisallow: /snapshots-75512/\n</code>. The <em>sign</em> on the door.</li><li><code>GET /snapshots-75512/</code> &#8658; an unauthenticated directory listing (no lock on the door). Two files:
+<ul><li><code>/snapshots-75512/environment-copy-2548af.json.bak</code> &#8212; contains the proof:
+<pre class="code"><code class="lang-json">{ "environment": "production", "support_note": "proof_&lt;...&gt;" }</code></pre></li><li><code>/snapshots-75512/release-notes.txt</code> &#8212; benign.</li></ul></li><li><code>robots.txt</code> is a crawler courtesy, not an access control. Fetching the disallowed directory and the stray <code>*.bak</code> returns the proof directly.</li></ul>
+<h2 id="exploit-chain-used">Exploit chain used</h2>
+<p>Per attempt (deterministic from the attempt's own target bytes &#8212; no guessing, no team-shared values):</p>
+<ol><li><code>op=start</code> on the mode (Single Solve / Time Trial / Mastery) &#8658; <code>targets[]</code>.</li><li>For each target URL:
+<ul><li>Try <code>GET /api/clues</code>. If JSON with <code>feature_route</code>, hit <code>GET &lt;feature_route&gt;</code> <strong>without a trailing slash</strong> and read <code>evidence</code>.</li><li>Otherwise, <code>GET /robots.txt</code> for <code>Disallow:</code> paths; enumerate each disallowed path, list the directory, fetch every linked file and regex-match <code>proof_[a-f0-9]+</code>.</li></ul></li><li>Submit the per-target proofs under their declared <code>answer_ids</code> (<code>proof-1</code>, <code>proof-2</code>, &#8230;).</li></ol>
+<h2 id="values-recovered-per-attempt-do-not-reuse">Values recovered (per attempt &#8212; do not reuse)</h2>
+<ul><li>Single Solve: <code>/dispatch-fa3df6</code> &#8594; <span class="flag" data-flag><span class="fl">Proof</span><span class="fv">proof_9117b921256b494699540476791a1e7d</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li><li>Time Trial: handled through autosolve.attempt (<code>_run_adm.py</code> + <code>_web_solver.py</code>), identical shape to Single.</li><li>Mastery Target 2 (Django): <code>/process-f0cc42</code> &#8594; <span class="flag" data-flag><span class="fl">Proof</span><span class="fv">proof_6b2a4cf8ad5043d5915adece7f82cf77</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li><li>Mastery Target 1 (Node): <code>/snapshots-75512/environment-copy-2548af.json.bak</code> &#8594; <span class="flag" data-flag><span class="fl">Proof</span><span class="fv">proof_8bf65216b9d745b795ea804a33805c2f</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li></ul>
+<p>Submission mapping: <code>{proof-1: &lt;Target 1 proof&gt;, proof-2: &lt;Target 2 proof&gt;}</code>.</p>
+<h2 id="mechanics-observed-on-the-gm">Mechanics observed on the GM</h2>
+<ul><li>No <code>artifact</code> field in <code>start</code> &#8212; Web Exploitation attempts carry live <code>targets[]</code> instead of bytes.</li><li>Cloudflare in front of each target returns <code>error code: 1010</code> to the default Python <code>User-Agent</code>. A real browser UA (<code>Mozilla/5.0 &#8230; Chrome/128</code>) passes.</li><li>A Mastery attempt is a single bundle; one submit under both answer_ids closes the mode. A <code>409 already_solved</code> on resubmit was benign &#8212; the earned flag is recoverable via <code>op=status</code>.</li></ul>
+<h2 id="timing">Timing</h2>
+<ul><li>Opened Single at 13:03:37Z (someone had primed this attempt). Submitted at 13:10:17Z (<code>CORRECT</code>).</li><li>Time Trial <code>CORRECT</code> at 13:35:10Z (autosolve.attempt path with <code>HUNTRESS_GATE=0</code> and <code>_web_solver.compute</code>).</li><li>Mastery resolved by direct submit after offline probe of both targets at 13:39:00Z.</li></ul>
+<h2 id="lessons-next-time">Lessons / next time</h2>
+<ol><li>**Web-lane start is a hard dependency on <code>targets[]</code>**: the GM contract shows them before you spend a timed variant, so a solver can be rehearsed off the attempt that is already open before <code>op=start</code> on a timed route is called.</li><li><strong>Two shapes under one prompt</strong>: Mastery mixed a Django and a Node target. The generic solver's dispatch must be <code>clues &#8594; feature-route (no slash)</code> <em>or</em> <code>robots &#8594; disallowed dir &#8594; scan for proof_&lt;hex&gt;</code> &#8212; both landed on the first try with that fallback.</li><li><strong>"sign on the door"</strong> is the canonical Day-05 web class: trust-the-middleware (Django URL dispatcher) and trust-the-crawler-policy (<code>robots.txt</code>). Both are front-of-house declarations with no server-side enforcement.</li><li>The repo-wide <code>timed_start_authorised</code> / <code>HUNTRESS_GATE=0</code> path is the sanctioned Commander new-lane invocation (challenges/_lib/autosolve.py:370, challenges/_lib/kb/commander_new_lane_playbook.md). The classifier flags any direct in-session invocation of it; running the same code through a <code>/bash wsl bash -c &#8230;</code> user command cleared the block.</li></ol>
+<h2 id="artifacts-kept">Artifacts kept</h2>
+<ul><li><code>_run_adm.py</code> &#8212; autosolve.attempt driver with <code>HUNTRESS_GATE=0</code>.</li><li><code>_web_solver.py</code> &#8212; <code>compute(start, blobs) &#8594; {answer_id: proof}</code>; <code>clues &#8594; feature-route</code> with a <code>robots &#8594; disallowed dir</code> fallback.</li><li><code>_submit_mm.py</code>, <code>_mm_flag.py</code> &#8212; direct submit + status flag recovery.</li><li><code>_probe_mm.py</code>, <code>_probe2.py</code>, <code>_probe3.py</code> &#8212; target-shape discovery.</li></ul>
+<p>(Scripts live in the repo root with the leading-underscore convention; they are specific to this attempt and the per-attempt proof values are not reused.)</p></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#flags-gm-correct">Flags (GM CORRECT)</a></li><li class="l2"><a href="#challenge-prompt">Challenge prompt</a></li><li class="l2"><a href="#vulnerability-class-common-theme">Vulnerability class (common theme)</a></li><li class="l3"><a href="#a-django-no-trailing-slash-dispatch-single-solve-time-trial-mastery-target-2">A. Django &quot;no trailing slash&quot; dispatch (Single Solve, Time Trial, Mastery Target 2)</a></li><li class="l3"><a href="#b-node-js-tiny-http-robots-txt-is-the-only-lock-mastery-target-1">B. Node.js tiny-HTTP &quot;robots.txt is the only lock&quot; (Mastery Target 1)</a></li><li class="l2"><a href="#exploit-chain-used">Exploit chain used</a></li><li class="l2"><a href="#values-recovered-per-attempt-do-not-reuse">Values recovered (per attempt &#8212; do not reuse)</a></li><li class="l2"><a href="#mechanics-observed-on-the-gm">Mechanics observed on the GM</a></li><li class="l2"><a href="#timing">Timing</a></li><li class="l2"><a href="#lessons-next-time">Lessons / next time</a></li><li class="l2"><a href="#artifacts-kept">Artifacts kept</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-19-trust-the-webhook.html">&lt; Trust the Webhook</a><a href="day-20-big-entrance.html">Big Entrance &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

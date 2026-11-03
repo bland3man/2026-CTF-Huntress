@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Opposite Day - Day 13 write-up</title>
+<meta name="description" content="Day 13 Warmups write-up: artifact0.bin is Atbash text: &quot;Nice work decoding this warmup! To solve, submit this exact answer to the Game Master: handy-candle-quartz-31">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-13.html">Day 13</a> / Opposite Day</p><p class="telemetry"><span>DAY 13</span><span class="sep">//</span><span>LANE: WARMUPS</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Opposite Day</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-warmups" href="../lanes/warmups.html">Warmups</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout"><article class="prose">
+<h1 id="opposite-day-warmups-day-13">Opposite Day (warmups, Day 13)</h1>
+<p>Prompt: "A met Z. They really hit it off." (A&lt;-&gt;Z: Atbash.)</p>
+<h2 id="single-solve-time-trial">Single Solve / Time Trial</h2>
+<p>artifact_0.bin is Atbash text: "Nice work decoding this warmup! To solve, submit this exact answer to the Game Master: handy-candle-quartz-31". AUTOSOLVE got both modes CORRECT.</p>
+<ul><li>single_solve flag: <span class="flag" data-flag><span class="fl">Token</span><span class="fv">95cdd8b66cc3ec5eaaedd8afd2e217a2</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li><li>time_trial flag: <span class="flag" data-flag><span class="fl">Token</span><span class="fv">943b5c9aa0b9ccda1f07e6961299236c</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li></ul>
+<h2 id="mastery">Mastery</h2>
+<p>The assigned artifact is a zip of 63 files (blob-NN.txt, one answer id setNN.message each). Each file has 13 numbered lines ("NN&lt;TAB&gt;data"). Every line holds one chunk of the same sentence ("Nice work decoding this warmup! To solve, submit this exact answer to the Game Master: &lt;slug&gt;"), and the encoding is fixed by line number:</p>
+<p>1 base64, 2 rot13, 3 hex, 4 binary, 5 decimal, 6 octal, 7 percent, 8 HTML entities, 9 JSON \u escapes, 10 base32, 11 base64url, 12 reversed text, 13 Atbash.</p>
+<p>Decode each line and concatenate the chunks (chunk boundaries fall mid-word and mid-slug, so the slug words are split across lines 11-13). The last word-word-word-NN in the text is the answer.</p>
+<p>The generic autosolve peeler decoded lines independently and let its slug-regex oracle accept mis-decoded fragments (for example "quiet-gvzzhf-kyxxiv-23" = Atbash chunk not reversed/joined); it was submitted twice and scored incorrect (no variant spent: 256 untimed attempts remained). Solving locally from the real bytes fixed it: scripts/solve_mastery.py decoded all 63 files, one GM submit was CORRECT.</p>
+<ul><li>mastery flag: <span class="flag" data-flag><span class="fl">Token</span><span class="fv">8fc369a0e37c8713a4b379719322c37d</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li></ul>
+<p>Example: blob-01 -&gt; quiet-summit-copper-23 (line 11 b64url "...er: quiet", line 12 reverse "-timmus-" -&gt; "-summit-", line 13 Atbash "xlkkvi-23" -&gt; "copper-23").</p>
+<p>Scripts: scripts/solve_mastery.py, scripts/submit_mastery.py, scripts/mastery_blob.bin (the assigned mastery zip).</p>
+<p>Note: I re-ran autosolve.py on mastery once before reading the failure (an avoidable extra attempt; it only returned incorrect).</p></article></div><nav class="pager" aria-label="Write-up navigation"><a href="day-13-keystore-misuse.html">&lt; Keystore Misuse</a><a href="day-13-product-placement.html">Product Placement &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

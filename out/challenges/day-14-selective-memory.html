@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Selective Memory - Day 14 write-up</title>
+<meta name="description" content="Day 14 Binary RE write-up: GM prompt: &quot;Objective-C never forgets: every class, every selector, every string is registered and waiting. Read the persistence descriptor ">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-14.html">Day 14</a> / Selective Memory</p><p class="telemetry"><span>DAY 14</span><span class="sep">//</span><span>LANE: BINARY RE</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Selective Memory</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-binary" href="../lanes/binary.html">Binary RE</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
+<h1 id="selective-memory-day-14-binary-reverse-engineering">Selective Memory (Day 14, binary-reverse-engineering)</h1>
+<ul><li>GM id: <code>binary-reverse-engineering-day-14-objective-c-persistence-descriptor</code></li><li>Lane: binary-reverse-engineering | Agent: agent-2 (homestation)</li><li>Modes: single_solve CORRECT, time_trial CORRECT, mastery CORRECT (all three in one banked AUTOSOLVE pass)</li><li>Artifact: <code>challenges/Day 14/_stage/Selective_Memory/artifact_0.bin</code> (32,246,719 bytes, sha256 <code>cd745ce710566bf4...</code>), AES zip, password <code>infected</code>, 15 members</li><li>Fields: 140 (single/time_trial), 420 (mastery = 3 sets)</li></ul>
+<h2 id="flags-gm-accepted">Flags (GM-accepted)</h2>
+<div class="table-wrap"><table><thead><tr><th>Mode</th><th>Flag</th><th>Time</th></tr></thead><tbody><tr><td>single_solve</td><td><span class="flag" data-flag><span class="fl">Token</span><span class="fv">9d185d00fb1174989880389c6efbd07d</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td><td>3.1 s</td></tr><tr><td>time_trial</td><td><span class="flag" data-flag><span class="fl">Token</span><span class="fv">e6cea396710c51585ed115f66b8dadc9</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td><td>9.4 s</td></tr><tr><td>mastery</td><td><span class="flag" data-flag><span class="fl">Token</span><span class="fv">d94fe227e767da1179b2bbe543ad2835</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td><td>48.6 s</td></tr></tbody></table></div>
+<p>Solved under handle <code>sudo_who_farted</code>; all three submits returned 200 CORRECT on the first attempt (no ranked/run_for_time entry was used, per standing policy).</p>
+<h2 id="the-challenge">The challenge</h2>
+<p>GM prompt: <em>"Objective-C never forgets: every class, every selector, every string is registered and waiting. Read the persistence descriptor and learn what this binary remembers."</em></p>
+<p>This is the same cumulative multi-field forensic inventory the lane has asked every day since Day 1. The evidence zip bundles one specimen per earlier day (<code>d01</code> .. <code>d14</code>) and asks the same ~17 answer shapes over each: ELF/PE header facts, container and architecture labels, section and symbol tables, a <code>recover_code</code> disassembly, JAR compression methods, .NET metadata version, and the embedded single-byte-XOR <code>HCFG</code> config record.</p>
+<p>Day 14's new layer is the <strong>toolchain only</strong>: an Objective-C (GNUstep / libobjc2 runtime, GNU gold linker) native x86-64 ELF.</p>
+<h2 id="day-14-member">Day 14 member</h2>
+<p><code>d14--variant-000.elf</code>, 17,304 bytes, <code>\x7fELF</code> ELF64 LSB, 38 sections. The Objective-C runtime registration tables the prompt alludes to are plain ELF sections, GNUstep-style (not the Apple <code>__objc_classlist</code> / <code>__objc_methname</code> Mach-O spelling, which is why an Apple-flavoured grep finds nothing here):</p>
+<pre class="code"><code>__objc_selectors  __objc_class_refs  __objc_classes  __objc_constant_string
+__objc_cats  __objc_protocols  __objc_protocol_refs  __objc_class_aliases</code></pre>
+<p>Symbols confirm one user class and its registered selectors:</p>
+<ul><li>class: <code>_OBJC_CLASS_TriggerDescriptor</code> (+ <code>_OBJC_METACLASS_</code>, <code>_OBJC_INIT_CLASS_</code>, <code>_OBJC_REF_CLASS_</code>), base <code>NSObject</code></li><li>ivar: <code>__objc_ivar_offset_TriggerDescriptor._triggerName.</code></li><li>selectors: <code>triggerName</code>, <code>initWithTrigger:</code>, <code>eventCountForModel:</code> (typed <code>_i24</code>), plus runtime <code>alloc</code>, <code>copy</code>, <code>init</code></li><li>constant string: <code>objc_str_UserLogin</code> (an <code>NSConstantString</code> in <code>__objc_constant_string</code>)</li><li>runtime glue: <code>objc_init</code>, <code>objc_ctor</code>, <code>objcv2_load_function</code>, <code>__objc_load</code>, <code>objc_msgSend</code>, <code>objc_autoreleasePoolPush</code></li></ul>
+<h2 id="the-persistence-descriptor-hcfg">The persistence descriptor (<code>.hcfg</code>)</h2>
+<p>Unchanged family mechanic: a <code>.hcfg</code> section holding <code>HCFG</code> + version byte + XOR key + CRC32, then a single-byte-XOR JSON blob.</p>
+<ul><li>section <code>.hcfg</code>, record at file offset <strong>4000</strong></li><li>header: <code>48 43 46 47</code> <code>01</code> (version 1) <code>a1</code> (XOR key <code>0xa1</code>) <code>6f 01</code> <code>da 91 f4 79</code> (crc32 LE = <code>0x79f491da</code>)</li><li>decoded payload:</li></ul>
+<pre class="code"><code class="lang-json">{"campaign":"BR14-000","domain":"node-000.day14.example.invalid","ipv4":"198.51.100.20",
+ "url":"https://node-000.day14.example.invalid/api/BR14-000","mutex":"Global\\HuntressBR14_000", ...}</code></pre>
+<p>Submitted <code>d14_*</code> answers (10 ids, all reusing existing slot shapes):</p>
+<div class="table-wrap"><table><thead><tr><th>id</th><th>value</th></tr></thead><tbody><tr><td><code>d14_artifact_sha256_1</code></td><td><code>d93c0e4d52fc9111b9133ca56b8da3122c9b4186f967102c3bb5b0fe9fd3b617</code></td></tr><tr><td><code>d14_analysis_format</code></td><td><code>elf</code></td></tr><tr><td><code>d14_analysis_architecture</code></td><td><code>x86-64</code></td></tr><tr><td><code>d14_analysis_machine</code></td><td><code>x86-64</code></td></tr><tr><td><code>d14_analysis_config_campaign</code></td><td><code>BR14-000</code></td></tr><tr><td><code>d14_analysis_config_domain</code></td><td><code>node-000.day14.example.invalid</code></td></tr><tr><td><code>d14_analysis_config_url</code></td><td><code>https://node-000.day14.example.invalid/api/BR14-000</code></td></tr><tr><td><code>d14_analysis_config_mutex</code></td><td><code>Global\HuntressBR14_000</code></td></tr><tr><td><code>d14_analysis_config_crc32_hex</code></td><td><code>0x79f491da</code></td></tr><tr><td><code>d14_analysis_has_hcfg_section</code></td><td><code>true</code></td></tr></tbody></table></div>
+<h2 id="why-it-was-a-zero-work-day">Why it was a zero-work day</h2>
+<p><code>challenges/_lib/autosolve_binary.py</code> (plus <code>binary_facts</code> / <code>hdr_struct</code> / <code>config_facts</code>) already covers every slot shape in this contract. The prebrief contract diff said it outright: single/time_trial <code>shared 130, changed 0, new 10</code>; mastery <code>shared 390, changed 0, new 30</code> - i.e. the <code>d14</code> block is ten copies of shapes the adapter has answered since Day 2, so <strong>zero new slots</strong> (the fourth day in a row: D11 D/LDC, D12 Pascal, D13 Crystal, D14 Objective-C). The readiness gate reported 140/140 and 420/420 ids resolved on the Single stand-in, so AUTOSOLVE opened the timed windows itself:</p>
+<ul><li>time_trial: EARLY slot, rehearsed finish T+16.9 s &lt;= T+18 s -&gt; started immediately, CORRECT at 9.4 s</li><li>mastery: rehearsed finish was past T+20 s, so the LATE slot rule held it to T+60 s with nothing spent, then CORRECT at 48.6 s</li></ul>
+<p>No adapter extension, no new extractor, no <code>.needuser</code>. The novelty words (descriptor, selector, registered, remembers) pointed at the runtime tables, which turned out to be flavour rather than a new question.</p>
+<h2 id="reusable-notes">Reusable notes</h2>
+<ul><li>GNUstep Objective-C on Linux registers via <code>__objc_selectors</code> / <code>__objc_classes</code> / <code>__objc_constant_string</code> sections and <code>objcv2_load_function</code>; Apple section names (<code>__objc_methname</code>, <code>_OBJC_CLASS_$_</code>) do <strong>not</strong> appear - classify by the GNUstep spelling when the container is ELF.</li><li>The <code>.hcfg</code> XOR key is in the record header byte 5 (here <code>0xa1</code>); it does not need guessing, and the CRC32 at bytes 8..11 is little-endian.</li><li>Grader label conventions held again: <code>elf</code>, <code>x86-64</code>, lowercase <code>0x</code> hex, <code>true</code> / <code>false</code> as strings, base-10 integers.</li></ul>
+<h2 id="files">Files</h2>
+<ul><li><code>scripts/inspect_d14.py</code> - extracts the AES zip, lists members, fingerprints the d14 ELF (sections, ObjC markers, HCFG offset)</li><li><code>scripts/decode_hcfg.py</code> - recovers the XOR key and decodes the <code>.hcfg</code> JSON, lists the ObjC class/selector symbols</li><li><code>scripts/wu_extract.py</code> - pulls the GM op/answer record for this writeup</li></ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#flags-gm-accepted">Flags (GM-accepted)</a></li><li class="l2"><a href="#the-challenge">The challenge</a></li><li class="l2"><a href="#day-14-member">Day 14 member</a></li><li class="l2"><a href="#the-persistence-descriptor-hcfg">The persistence descriptor (.hcfg)</a></li><li class="l2"><a href="#why-it-was-a-zero-work-day">Why it was a zero-work day</a></li><li class="l2"><a href="#reusable-notes">Reusable notes</a></li><li class="l2"><a href="#files">Files</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-14-predictable-crypto.html">&lt; Predictable Crypto</a><a href="day-14-seven-steps.html">Seven Steps &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

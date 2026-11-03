@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Little Endian on the Prairie - Day 19 write-up</title>
+<meta name="description" content="Day 19 Metadata Forensics write-up: Artifact is a zip with one member, collector-001.elf. The answer comes from the ELF header bytes, not from the filename or any note: ELF64 (">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-19.html">Day 19</a> / Little Endian on the Prairie</p><p class="telemetry"><span>DAY 19</span><span class="sep">//</span><span>LANE: METADATA FORENSICS</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Little Endian on the Prairie</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-metadata" href="../lanes/metadata.html">Metadata Forensics</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
+<h1 id="little-endian-on-the-prairie-metadata-forensics-day-19">Little Endian on the Prairie (metadata-forensics, Day 19)</h1>
+<p>GM id: metadata-forensics-day-19-little-endian-on-the-prairie</p>
+<h2 id="task">Task</h2>
+<p>Question: <code>Determine elf.e_machine_u16_hex for collector-001.elf.</code> Answer shape: lowercase hexadecimal with a 0x prefix, no explanatory text.</p>
+<h2 id="method">Method</h2>
+<ul><li>Artifact is a zip with one member, <code>collector-001.elf</code>.</li><li>The answer comes from the ELF header bytes, not from the filename or any note: ELF64 (EI_CLASS=2), little endian (EI_DATA=1), so e_machine is the u16 at offset 0x12, read little endian.</li><li>Bytes at offset 0x12 give 0x003e (x86-64). Width follows the field type: u16 -&gt; 4 hex digits.</li><li>Answer: <code>0x003e</code>.</li><li>The banked autosolver (challenges/_lib/autosolve_metadata.py, hdr_struct ELF table) derived the same value for all three modes from each attempt's own bytes.</li></ul>
+<h2 id="results-all-accepted-by-the-gm">Results (all accepted by the GM)</h2>
+<ul><li>Single Solve: CORRECT, flag <span class="flag" data-flag><span class="fl">Token</span><span class="fv">40f7fe19c7ac8391ce7ec5cca3dc8e29</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li><li>Time Trial: CORRECT, flag <span class="flag" data-flag><span class="fl">Token</span><span class="fv">3b79f3700b81f6c7aea4bcdd6bdd2e80</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li><li>Mastery: CORRECT (ranked), flag <span class="flag" data-flag><span class="fl">Token</span><span class="fv">2afdce6244a357f8236f81302027226f</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li></ul>
+<h2 id="notes">Notes</h2>
+<ul><li>No new extractor was needed: the ELF field table was already prepared (NEXT-LAYER candidate "elf").</li><li>Pre-brief gap lines for Time Trial / Mastery (roster-filename, evidence-note-copy-filename) were not hit; the mutated attempts still resolved from the header.</li></ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#task">Task</a></li><li class="l2"><a href="#method">Method</a></li><li class="l2"><a href="#results-all-accepted-by-the-gm">Results (all accepted by the GM)</a></li><li class="l2"><a href="#notes">Notes</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-19-jack-in-the-box.html">&lt; Jack in the Box</a><a href="day-19-little-things.html">Little Things &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reflect Upon This - Day 21 write-up</title>
+<meta name="description" content="Day 21 Web Exploitation write-up: GET / shows a &quot;Search Mirror&quot; Fastify app. GET /api/clues returns the feature route (/execute-...), the callback route (/callback-...) and a">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-21.html">Day 21</a> / Reflect Upon This</p><p class="telemetry"><span>DAY 21</span><span class="sep">//</span><span>LANE: WEB EXPLOITATION</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Reflect Upon This</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-web" href="../lanes/web.html">Web Exploitation</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
+<h1 id="reflect-upon-this-writeup">Reflect Upon This - Writeup</h1>
+<p>Lane: web-exploitation. Day 21. GM challenge id: web-exploitation-day-06-reflect-upon-this. Modes: Single Solve, Time Trial, Mastery. Solved by: Blandman3 (workstation Commander, GM-confirmed CORRECT).</p>
+<h2 id="result">Result</h2>
+<div class="table-wrap"><table><thead><tr><th>Mode</th><th>Targets</th><th>GM result</th></tr></thead><tbody><tr><td>Single Solve</td><td>Target 1 (Search Mirror)</td><td>CORRECT</td></tr><tr><td>Time Trial</td><td>Target 1 (Search Mirror)</td><td>CORRECT</td></tr><tr><td>Mastery</td><td>Target 1 (Search Mirror) + Target 2 (Tiny Uptime)</td><td>CORRECT</td></tr></tbody></table></div>
+<p>Proof values recorded here:</p>
+<ul><li>Single Solve, Search Mirror: <span class="flag" data-flag><span class="fl">Proof</span><span class="fv">proof_b2479b0125054d1daab1f89674f1525f</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li><li>Mastery proof-1, Tiny Uptime (from the settings backup): <span class="flag" data-flag><span class="fl">Proof</span><span class="fv">proof_21fbb3024ba34ad5bd09ab02bfff42a9</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li><li>Time Trial proof and Mastery proof-2 (Search Mirror): the GM accepted both. The target then reported <code>state: completed</code>, and the proof values were not written to a file during the run, so they are not recorded here. Re-solve with <code>scripts/solve_reflect_upon_this.py</code> to recover them if needed.</li></ul>
+<h2 id="recon-and-solve-search-mirror-target">Recon and solve, Search Mirror target</h2>
+<ol><li><code>GET /</code> shows a "Search Mirror" Fastify app. <code>GET /api/clues</code> returns the feature route (<code>/execute-...</code>), the callback route (<code>/callback-...</code>) and a per-target nonce.</li><li>The feature route reflects the <code>q</code> parameter as raw HTML inside <code>&lt;div id="preview"&gt;</code>. A test tag comes back unescaped, so this is an HTML injection point. Template and dollar expressions are not evaluated.</li><li>The callback route refuses a direct request with <code>browser_callback_required</code>. It accepts the request when <code>Referer</code> is the feature page, and then returns <code>{"ok": true, "effect": "isolated_browser_callback", "evidence": "&lt;proof&gt;"}</code>.</li><li>The proof is the evidence value.</li></ol>
+<h2 id="solve-tiny-uptime-target-mastery-target-1">Solve, Tiny Uptime target (Mastery Target 1)</h2>
+<ol><li>The home page is a status page with a deployment note comment: "review crawler policy before launch".</li><li><code>robots.txt</code> disallows <code>/releases-bcb84/</code>.</li><li><code>/releases-bcb84/</code> is a directory index ("Deployment archive") that lists <code>release-settings-ada2b7.json.bak</code> and <code>release-notes.txt</code>.</li><li>The settings backup contains <code>support_note: &lt;proof&gt;</code>.</li></ol>
+<h2 id="process-notes">Process notes</h2>
+<ul><li>Time Trial and Mastery starts used the client's authorized timed slot, not a prebrief readiness gate. The web lane has no staged data, so the gate cannot run for it. The Single Solve was verified before any timed start.</li><li>Plain GET requests only. No token or credential is in this file or in the solver.</li></ul>
+<h2 id="scripts">Scripts</h2>
+<ul><li><code>scripts/solve_reflect_upon_this.py</code>: the callback step for the Search Mirror target.</li></ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#result">Result</a></li><li class="l2"><a href="#recon-and-solve-search-mirror-target">Recon and solve, Search Mirror target</a></li><li class="l2"><a href="#solve-tiny-uptime-target-mastery-target-1">Solve, Tiny Uptime target (Mastery Target 1)</a></li><li class="l2"><a href="#process-notes">Process notes</a></li><li class="l2"><a href="#scripts">Scripts</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-21-package-deal.html">&lt; Package Deal</a><a href="day-21-session-impression.html">Session Impression &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

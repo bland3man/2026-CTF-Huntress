@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resourceful - Day 20 write-up</title>
+<meta name="description" content="Day 20 Binary RE write-up: Every mode answered 100% SURE: 240 sure, 0 probe, 0 unknown, then 1200 sure, 0 probe, 0 unknown.">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-20.html">Day 20</a> / Resourceful</p><p class="telemetry"><span>DAY 20</span><span class="sep">//</span><span>LANE: BINARY RE</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Resourceful</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-binary" href="../lanes/binary.html">Binary RE</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
+<h1 id="day-20-resourceful-binary-reverse-engineering">Day 20 - Resourceful (binary-reverse-engineering)</h1>
+<p>GM id: <code>binary-reverse-engineering-day-20-resources-and-overlays</code> Lane: binary-reverse-engineering | Agent: agent-2 | Solver name: sudo_who_farted</p>
+<h2 id="result-all-three-modes-correct">Result - all three modes CORRECT</h2>
+<div class="table-wrap"><table><thead><tr><th>Mode</th><th>Result</th><th>Flag</th><th>Notes</th></tr></thead><tbody><tr><td>Single Solve</td><td>CORRECT</td><td><span class="flag" data-flag><span class="fl">Token</span><span class="fv">a124e62e531036df8a4eb5a2cb891143</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td><td>240/240 fields, untimed</td></tr><tr><td>Time Trial</td><td>CORRECT (RANKED)</td><td><span class="flag" data-flag><span class="fl">Token</span><span class="fv">dc6ab539a6a3032226fb3ba3f4c18621</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td><td>240 fields in 3.2 s inside a 79 s window; hall_of_fame_eligible</td></tr><tr><td>Mastery</td><td>CORRECT (RANKED)</td><td><span class="flag" data-flag><span class="fl">Token</span><span class="fv">9dbddffb135535fda341804421dbc434</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td><td>1200 fields (5 sets) in 15.3 s inside a 324 s window; hall_of_fame_eligible</td></tr></tbody></table></div>
+<p>Every mode answered 100% SURE: <code>240 sure, 0 probe, 0 unknown</code>, then <code>1200 sure, 0 probe, 0 unknown</code>.</p>
+<h2 id="prompt">Prompt</h2>
+<blockquote><p>Binaries have attics: resources, overlays, bytes past the end of the sections. Rummage through this one's hidden storage and map every boundary.</p></blockquote>
+<h2 id="artifact">Artifact</h2>
+<p><code>artifact_0.bin</code> - a 33,207,971-byte AES-encrypted ZIP (password <code>infected</code>), 23 members, the cumulative day-prefixed evidence bundle: <code>d01--variant-000.elf</code> ... <code>d20--variant-000.elf</code> plus the <code>d03</code> .NET DLL + runtimeconfig, two JARs (<code>d06</code>, <code>d07</code>), the <code>d15</code> symbolized/stripped ELF pair and the <code>d16</code> direct/compact <code>.wasm</code> pair. 238 of the 240 fields were already covered by the banked <code>autosolve_binary</code> spine; only the day's new layer needed building.</p>
+<h2 id="the-day-s-new-layer">The day's new layer</h2>
+<p>AUTOSOLVE HELD the Single with <code>238 accepted, 2 remaining</code>. The residue named exactly two ids:</p>
+<ul><li><code>d20_analysis_overlay_offset</code> - <em>"Locate the final overlay magic named by this unit (PK19 for Day 19 or RS20 for Day 20) and submit its zero-based byte offset in the member."</em></li><li><code>d20_analysis_hcfg_resource_size</code> - <em>"In the final RS20 resource overlay, read the little-endian HCFG resource size field and submit it in base 10."</em></li></ul>
+<p>The first id is shared with Day 19, which it already answered for the <code>d19</code> member - so the Day 19 parser was being handed a Day 20 member whose overlay has a <strong>different shape</strong>. Day 19 (Jack in the Box) appended a <em>packed stub</em>: <code>magic(4) | +5 k1 | +6 k2 | +8 u32le packed length | +12 sha256(unpacked) | +44 packed bytes</code>, where the record always ends exactly at EOF. On <code>d20--variant-000.elf</code> no offset satisfied <code>off + 44 + len == EOF</code>, so <code>_overlay()</code> correctly returned <code>None</code> rather than guessing.</p>
+<h3 id="finding-the-rs20-record">Finding the RS20 record</h3>
+<p>Scanning the member for the magic put it at the tail:</p>
+<pre class="code"><code>RS20 at 1200888, 463 bytes from EOF (member length 1,201,351)
+52533230 01000000 7c010000 23000000 90209a4c...bab  48434647 0151 7001 cedd0d57 ...
+^RS20    ^ver=1   ^380     ^35      ^32-byte sha256 ^HCFG ...</code></pre>
+<p>Day 20's overlay is a <strong>resource header that declares the boundaries of what it stores</strong> - which is the literal reading of "map every boundary":</p>
+<div class="table-wrap"><table><thead><tr><th>Offset</th><th>Size</th><th>Field</th><th>Value on variant-000</th></tr></thead><tbody><tr><td>+0</td><td>4</td><td>magic</td><td><code>RS20</code></td></tr><tr><td>+4</td><td>4</td><td>u32le version</td><td>1</td></tr><tr><td>+8</td><td>4</td><td><strong>u32le HCFG resource size</strong></td><td><strong>380</strong></td></tr><tr><td>+12</td><td>4</td><td>u32le trailer size</td><td>35</td></tr><tr><td>+16</td><td>32</td><td>SHA-256 of the trailer bytes</td><td><code>90209a4c...81bab</code></td></tr><tr><td>+48</td><td>380</td><td>the HCFG record</td><td><code>HCFG</code> + version 1 + XOR key <code>0x51</code> + u32le len 368 + CRC32 + payload</td></tr><tr><td>+428</td><td>35</td><td>trailer text</td><td><code>private-scratch:BR20-000:inert-only</code></td></tr></tbody></table></div>
+<p>Three facts confirm the field is the HCFG resource size and not something else, so the evidence is <strong>SURE</strong>, not inferred:</p>
+<ol><li><code>48 + 380 + 35 == 1201351</code>, the member length exactly - the two declared sizes account for every remaining byte.</li><li>The 380-byte resource begins with the <code>HCFG</code> magic and parses as a complete HCFG record: its own u32le payload length is 368, and <code>12 + 368 == 380</code>. The declared resource size <em>is</em> the whole HCFG record, header included.</li><li><code>sha256(trailer) == the 32 bytes at +16</code> - verified, not assumed. A random four-byte magic match cannot pass this.</li></ol>
+<p>The recovered config (XOR key <code>0x51</code>) is the familiar HCFG JSON, which is why the other <code>d20</code> config fields were already accepted:</p>
+<pre class="code"><code class="lang-json">{"campaign":"BR20-000","domain":"node-000.day20.example.invalid","ipv4":"198.51.100.130",
+ "url":"https://node-000.day20.example.invalid/api/BR20-000","mutex":"Global\\HuntressBR20_000",
+ "windows_path":"C:\\ProgramData\\HuntressLab\\day20\\BR20-000.dat",
+ "linux_path":"/var/tmp/huntress-lab/day20/BR20-000.dat","service":"HuntressLab-Day20-000",
+ "host_model":"workstation"}</code></pre>
+<h3 id="answers">Answers</h3>
+<div class="table-wrap"><table><thead><tr><th>id</th><th>Single</th><th>Time Trial</th><th>Mastery set1..set5</th></tr></thead><tbody><tr><td><code>d20_analysis_overlay_offset</code></td><td>1200888</td><td>1200888</td><td>1200888 (all sets)</td></tr><tr><td><code>d20_analysis_hcfg_resource_size</code></td><td>380</td><td>380</td><td>380 (all sets)</td></tr><tr><td><code>d19_analysis_overlay_offset</code></td><td>10808</td><td>10808</td><td>10808 (all sets)</td></tr><tr><td><code>d19_analysis_overlay_size</code></td><td>424</td><td>424</td><td>424 (all sets)</td></tr></tbody></table></div>
+<p>The timed variants mutate the <em>config contents</em> (<code>BR20-000</code> -&gt; <code>BR20-004</code> for the Time Trial, <code>BR20-005</code>, <code>-006</code>, <code>-007</code>, <code>-000</code>, <code>-001</code> across the five Mastery sets) while the overlay geometry stays fixed. The extractor reads both from the bytes either way, so nothing was hardcoded.</p>
+<h2 id="fix-applied-to-the-adapter">Fix applied to the adapter</h2>
+<p><code>challenges/_lib/autosolve_binary.py</code> - the spine was not rebuilt, only extended:</p>
+<ul><li><code>_resource_overlay_at(data, off)</code> parses the Day 20 header and returns <code>None</code> unless all three checks above pass. Sizes are bounds-checked <strong>before</strong> any slice, repeating the Day 19 lesson (a multi-MB member matches the <code>[A-Z]{2}[0-9]{2}</code> magic regex ~100k times; slicing first cost 133 s per member).</li><li><code>_resource_overlay(data)</code> scans backwards from EOF (last MiB first, then a full scan) and returns the last match that verifies - "the final overlay magic". The magic is read out of the bytes, so a future <code>XX21</code> needs no code change.</li><li><code>_any_overlay(data)</code> returns whichever banked form verifies - Day 19's packed stub or Day 20's resource overlay - and on the (unseen) case of both, the later offset wins.</li><li><code>analysis_overlay_offset</code> / <code>analysis_overlay_size</code> now go through <code>_any_overlay</code>; a new <code>analysis_hcfg_resource_size</code> branch returns the u32le at +8.</li></ul>
+<p>Cross-checked against both members with no contamination: <code>d19</code> resolves only as <code>packed</code> (off 10808), <code>d20</code> only as <code>resource</code> (off 1200888).</p>
+<h2 id="evidence-rating">Evidence rating</h2>
+<p><strong>SURE</strong> for both new fields. Not a pattern guess: the overlay's two declared sizes close the member to the byte, the resource is a self-describing HCFG record whose own length matches the declared size, and the embedded SHA-256 of the trailer verifies. All three modes then graded CORRECT on the GM's own ground truth.</p>
+<h2 id="scripts">Scripts</h2>
+<p>Saved under <code>challenges/Day 20/Resourceful/scripts/</code>:</p>
+<ul><li><code>probe_d20.py</code> - extracts the <code>d20</code> member and locates the <code>RS20</code> / <code>HCFG</code> magics in its tail.</li><li><code>probe_rs20.py</code> - proves the field layout: sizes closing to EOF, the HCFG record length, the trailer SHA-256, and the Day 19 packed stub for contrast.</li><li><code>check_patch.py</code> - regression check of the patched adapter over the <code>d19</code> + <code>d20</code> members.</li></ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#result-all-three-modes-correct">Result - all three modes CORRECT</a></li><li class="l2"><a href="#prompt">Prompt</a></li><li class="l2"><a href="#artifact">Artifact</a></li><li class="l2"><a href="#the-day-s-new-layer">The day&#x27;s new layer</a></li><li class="l3"><a href="#finding-the-rs20-record">Finding the RS20 record</a></li><li class="l3"><a href="#answers">Answers</a></li><li class="l2"><a href="#fix-applied-to-the-adapter">Fix applied to the adapter</a></li><li class="l2"><a href="#evidence-rating">Evidence rating</a></li><li class="l2"><a href="#scripts">Scripts</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-20-loaded-later.html">&lt; Loaded Later</a><a href="day-20-stay-in-your-directory.html">Stay in Your Directory &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

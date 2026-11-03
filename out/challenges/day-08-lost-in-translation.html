@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lost in Translation - Day 08 write-up</title>
+<meta name="description" content="Day 08 Script Analysis write-up: Day 08 extends the Day 02/03/06/07 script-inventory family (PS1 -&gt; +JScript/batch -&gt; +Bash -&gt; +Node/Python-packers) with cross-language IOC ">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-08.html">Day 08</a> / Lost in Translation</p><p class="telemetry"><span>DAY 08</span><span class="sep">//</span><span>LANE: SCRIPT ANALYSIS</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Lost in Translation</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-script" href="../lanes/script.html">Script Analysis</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
+<h1 id="lost-in-translation">Lost in Translation</h1>
+<h2 id="challenge">Challenge</h2>
+<ul><li>Lane: script-analysis (Day 08)</li><li>GM id: <code>script-analysis-day-08-cross-language-iocs</code></li><li>Modes: Single Solve, Time Trial, Mastery (all solved)</li><li>Prompt: "The same indicators show up in every language the campaign speaks, each with its own quoting, escaping, and encoding accent. Normalize them to their exact form and find the one that doesn't match its siblings."</li></ul>
+<h2 id="artifacts">Artifacts</h2>
+<ul><li><code>evidence.zip</code> (AES, password <code>infected</code>) containing inert fixtures across many languages: PowerShell, JScript, batch, Python (various packer-recovered forms), PHP/HTA/WSF polyglot webshells, Bash, and Node (.mjs).</li><li>Mastery delivers one outer zip of nested per-set zips <code>evidence-01.zip</code> .. <code>evidence-05.zip</code> (each itself AES, password <code>infected</code>).</li></ul>
+<h2 id="triage">Triage</h2>
+<p>Day 08 extends the Day 02/03/06/07 script-inventory family (PS1 -&gt; +JScript/batch -&gt; +Bash -&gt; +Node/Python-packers) with cross-language IOC normalization. 615 per-field answers (Single Solve / Time Trial); Mastery is 5 sets x 615 = 3075. Each fixture carries a self-describing <code>Material_&lt;id&gt;</code> + <code>Codec_&lt;id&gt;</code> descriptor that decodes to a <code>v=1|feature=..|primitive=..|campaign_id=..|stage_count=..|steps=..</code> (or <code>v=3|language=..|role=..</code>) line. The banked autosolver (<code>autosolve_script.py</code> -&gt; <code>solve_poly_d8.py</code>) handles the bulk.</p>
+<h2 id="investigation">Investigation</h2>
+<ol><li>GM <code>start</code> on the timed entries returned HTTP 503 <code>training_rotation_invalid</code>. This was NOT the whole timed pool being down - every other Day-08 challenge's timed start worked at the same moment. Only this challenge's rotation was wedged server-side.</li><li>An explicit <code>op=retry</code> on <code>script-analysis-day-08-cross-language-iocs/time_trial</code> (which itself returns 409 <code>start_required</code>) followed by <code>op=start</code> cleared the bad rotation and returned a live, no-deadline attempt with all 615 answer_ids. That retry-then-start is the unblock for <code>training_rotation_invalid</code>.</li><li>Time Trial: the banked solver resolved 608/615. The 7 holdouts were the array-slicing bash-advanced fixture (a .sh file inside evidence.zip). Its <code>Codec_</code> was <code>xor_hex|3e</code>; decoding the Material gave <code>v=1|feature=array_slicing|primitive=indexed_array_slice|campaign_id=BASHX-A5DFB46B|stage_count=1|steps=recognize_syntax,reconstruct_intent</code>. Mapping: role=<code>advanced_syntax</code>, attack=<code>T1059.004</code>, feature/primitive/campaign/stage-count verbatim, steps joined with <code>&gt;</code>. Submitted -&gt; CORRECT.</li><li>Mastery: solver resolved 3040/3075; the 35 holdouts were the <code>bash-advanced</code> fixtures in sets 1/3/5. Each used a DIFFERENT codec: <code>xor_hex|&lt;key&gt;</code>, <code>percent_hex</code>, <code>reversed_base64</code>, <code>base64_literal</code>, <code>hex_compact</code>. Decoded each nested per-set zip, applied the right codec per descriptor, mapped all 7 fields x 5 fixtures = 35. Submitted -&gt; CORRECT.</li></ol>
+<h2 id="flag-recovery">Flag Recovery</h2>
+<p>Flags are the GM completion of each mode (per-field grading, not a single <code>flag{}</code>):</p>
+<ul><li>Single Solve flag: <span class="flag" data-flag><span class="fl">Token</span><span class="fv">8e0983befb2b5e872c00ddf97230a8a6</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li><li>Time Trial / Mastery: GM returned <code>{"result":"CORRECT","solved_by":{"name":"Blandman3"}}</code>.</li></ul>
+<h2 id="fix-banked">Fix banked</h2>
+<p><code>challenges/_lib/solve_poly_d8.py</code> -&gt; <code>bash_adv_desc</code> previously only tried base64 / reversed-base64. Added <code>bash_adv_decode(material, codec)</code> which honors the <code>Codec_</code> string: <code>xor_hex|&lt;hexkey&gt;</code>, <code>percent_hex</code>, <code>reversed_base64</code>, <code>base64_literal</code>, <code>hex_compact</code>, plus an optional trailing <code>reverse_bytes</code> step (legacy base64 guesses kept as fallback). Unit-tested against the live fixtures and <code>_test_autosolve_script.py</code> (still PASS, 0 diffs). The next bash-advanced variant now auto-solves instead of needing hand-decoding.</p>
+<h2 id="minimal-reproduction">Minimal Reproduction</h2>
+<ol><li><code>retry</code> then <code>start</code> the timed entry to clear <code>training_rotation_invalid</code>.</li><li><code>python3 challenges/_lib/autosolve_script.py script-analysis-day-08-cross-language-iocs/time_trial</code> (then <code>/mastery</code>). With the solver fix above, all fields resolve in one shot.</li></ol>
+<h2 id="lessons-learned">Lessons Learned</h2>
+<ul><li><code>training_rotation_invalid</code> 503 is per-challenge, not pool-wide; confirm against a sibling challenge before assuming the server is down, and clear it with retry-then-start.</li><li>Self-describing <code>Material_/Codec_</code> fixtures: always decode per the <code>Codec_</code> string rather than guessing one transform - Day 08 used five distinct codecs for the same bash-advanced family.</li></ul>
+<h2 id="additional-notes-merged-from-writeup-md">Additional notes (merged from writeup.md)</h2>
+<h1 id="lost-in-translation-day-08-script-analysis">Lost in Translation (Day 08, script-analysis)</h1>
+<ul><li>Single Solve: CORRECT (615 fields). Autosolve banked 469; the remaining 146 were new fixtures:
+<ul><li>php polyglot-<em>.php and host-</em> (hta/wsf/php webshell) files carry <code>HUNTRESS_ANALYSIS_V1:&lt;KIND&gt;-&lt;payload&gt;</code> where KIND is B64, HEX, FRAG (dot-joined hex chunks) or HB64 (hex of base64). Decoded text is a <code>v=3|language=..|role=..|attack=..|adapter=..|host_profile=..|obfuscation_profile=..|stage_profile=..|next_language=..|stage_count=..|steps=..|campaign_id=..|url=..|file_path=..</code> descriptor. Field suffix -&gt; key map in solve_poly_d8.py; steps use <code>&gt;</code>.</li><li>bash-advanced-* (associative-arrays.sh, array-slicing.sh): Material/Codec base64 (optionally reversed) <code>v=1|feature|primitive|campaign_id|stage_count|steps</code>; role advanced_syntax, attack T1059.004.</li></ul></li><li>Solver: challenges/_lib/solve_poly_d8.py (hooked into autosolve_script.solve_fields_ext). Offline 615/615 resolved.</li><li>Time Trial / Mastery: GM start returned HTTP 503 training_rotation_invalid (server side); not attempted further. Rerun: <code>python3 challenges/_lib/autosolve_script.py script-analysis-day-08-cross-language-iocs/time_trial</code> (and /mastery).</li></ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#challenge">Challenge</a></li><li class="l2"><a href="#artifacts">Artifacts</a></li><li class="l2"><a href="#triage">Triage</a></li><li class="l2"><a href="#investigation">Investigation</a></li><li class="l2"><a href="#flag-recovery">Flag Recovery</a></li><li class="l2"><a href="#fix-banked">Fix banked</a></li><li class="l2"><a href="#minimal-reproduction">Minimal Reproduction</a></li><li class="l2"><a href="#lessons-learned">Lessons Learned</a></li><li class="l2"><a href="#additional-notes-merged-from-writeup-md">Additional notes (merged from writeup.md)</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-08-entity-relations.html">&lt; Entity Relations</a><a href="day-08-swift-justice.html">Swift Justice &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

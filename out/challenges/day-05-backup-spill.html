@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Backup Spill - Day 05 write-up</title>
+<meta name="description" content="Day 05 Mobile Android write-up: Per the established pattern for these fixture APKs: check assets/.json first before any decompilation - the dex is small and decorative, the">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-05.html">Day 05</a> / Backup Spill</p><p class="telemetry"><span>DAY 05</span><span class="sep">//</span><span>LANE: MOBILE ANDROID</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Backup Spill</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-mobile" href="../lanes/mobile.html">Mobile Android</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
+<h1 id="backup-spill">Backup Spill</h1>
+<h2 id="challenge">Challenge</h2>
+<ul><li>Category: Mobile Android (Day 05), GM id <code>mobile-android-day-05-backup-spill</code></li><li>Prompt: "Extract synthetic application state admitted by a flawed backup boundary."</li><li>Question shape: <code>For case MOB-05-&lt;id&gt; in package com.huntress.mobile.d05.v&lt;id&gt; ... Submit only the exact backend answer code returned for this case.</code></li><li>Flag format: <code>ANS-</code> followed by exactly 16 uppercase hex characters (answer code, not <code>flag{}</code>)</li><li>Same recurring family as Day 04's "Pending Intent Relay": a small synthetic fixture APK whose real answer is bundled in a JSON puzzle asset, not derived by exploiting the themed Android mechanic (a "flawed backup boundary" here, a "mutable PendingIntent relay" on Day 04) at runtime.</li></ul>
+<h2 id="artifacts">Artifacts</h2>
+<ul><li><code>backup_spill.apk</code> - <code>AndroidManifest.xml</code>, <code>classes.dex</code>, <code>assets/huntress_puzzle.json</code>, fixture-signed <code>META-INF</code>.</li></ul>
+<h2 id="triage">Triage</h2>
+<p>Per the established pattern for these fixture APKs: check <code>assets/*.json</code> first before any decompilation - the dex is small and decorative, the real answer lives in the bundled puzzle asset.</p>
+<h2 id="investigation">Investigation</h2>
+<ol><li>Unzip the APK; read <code>assets/huntress_puzzle.json</code>:
+<pre class="code"><code class="lang-json">{"schema": "huntress.mobile.puzzle.v1", "day": 5, "codec": "split",
+ "data": "", "parts": ["0A353BE7B", "ANS-5", "709E18"], "order": [2, 0, 1]}</code></pre></li><li><code>codec = "split"</code>: the real string is <code>parts</code> reassembled in the order given by <code>order</code> - <code>order[i]</code> is the position of <code>parts[i]</code> in the final string, so sort indices by their <code>order</code> value and concatenate:
+<pre class="code"><code class="lang-python">parts, order = p["parts"], p["order"]
+"".join(parts[i] for i in sorted(range(len(parts)), key=lambda i: order[i]))</code></pre></li><li>This reassembles <code>order</code> positions 0,1,2 -&gt; <code>parts[1]="ANS-5"</code>, <code>parts[2]="709E18"</code>, <code>parts[0]="0A353BE7B"</code> -&gt; <span class="flag" data-flag><span class="fl">Answer</span><span class="fv">ANS-5709E180A353BE7B</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span>.</li></ol>
+<h2 id="flag-recovery">Flag Recovery</h2>
+<p>Reassembling the <code>split</code>-codec puzzle parts by their declared <code>order</code> yields <span class="flag" data-flag><span class="fl">Answer</span><span class="fv">ANS-5709E180A353BE7B</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span> (16 uppercase hex characters after the <code>ANS-</code> prefix, matching the required answer format exactly) - derived directly from the bundled asset, independently reproduced.</p>
+<h2 id="flag">Flag</h2>
+<pre class="code"><code>&lt;REDACTED_TOKEN&gt;</code></pre>
+<p>(Single Solve, Time Trial, and Mastery were all confirmed CORRECT by the Game Master on 2026-10-05 - done.json lists all three modes solved. The raw completion tokens were not preserved locally at solve time, hence the redacted placeholder; the decode above is independently re-verified against the actual staged artifact bytes.)</p>
+<h2 id="minimal-reproduction">Minimal Reproduction</h2>
+<pre class="code"><code class="lang-python">import zipfile, json
+z = zipfile.ZipFile('backup_spill.apk')
+p = json.loads(z.read('assets/huntress_puzzle.json'))
+parts, order = p['parts'], p['order']
+print(''.join(parts[i] for i in sorted(range(len(parts)), key=lambda i: order[i])))</code></pre>
+<p>General solver (handles <code>split</code>/<code>reverse</code>/<code>plain</code>/<code>base64</code> codec variants and nested-APK artifacts): <code>scripts/solve_backup_spill.py</code> in this folder.</p>
+<h2 id="lessons-learned">Lessons Learned</h2>
+<ul><li>This "mobile fixture puzzle asset" family (Day 04 Pending Intent Relay, Day 05 Backup Spill) is now recurring with a growing codec set (<code>xor</code>, <code>split</code>, <code>reverse</code>, <code>plain</code>, <code>base64</code> seen so far) - always check <code>assets/*.json</code> for a <code>schema: huntress.mobile.puzzle.*</code> document before any dex/manifest reversing; the themed Android mechanic in the prompt is flavor, not the actual exploitation path.</li><li><code>split</code> codec: <code>order[i]</code> gives the position of <code>parts[i]</code>, not the reverse - sort indices by <code>order</code> value, don't naively zip <code>parts</code> with <code>order</code> as (value, index) pairs.</li></ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#challenge">Challenge</a></li><li class="l2"><a href="#artifacts">Artifacts</a></li><li class="l2"><a href="#triage">Triage</a></li><li class="l2"><a href="#investigation">Investigation</a></li><li class="l2"><a href="#flag-recovery">Flag Recovery</a></li><li class="l2"><a href="#flag">Flag</a></li><li class="l2"><a href="#minimal-reproduction">Minimal Reproduction</a></li><li class="l2"><a href="#lessons-learned">Lessons Learned</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-04-two-of-a-kind.html">&lt; Two of a Kind</a><a href="day-05-by-the-numbers.html">By the Numbers &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

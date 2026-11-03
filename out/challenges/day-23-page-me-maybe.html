@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Page Me Maybe - Day 23 write-up</title>
+<meta name="description" content="Day 23 Metadata Forensics write-up: One answer id: d23-sqlite-001-sqlite-page-size-bytes. The staged database-001.sqlite reads 4096 at offset 16-17 (u16 BE page size). AUTOSOLV">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-23.html">Day 23</a> / Page Me Maybe</p><p class="telemetry"><span>DAY 23</span><span class="sep">//</span><span>LANE: METADATA FORENSICS</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Page Me Maybe</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-metadata" href="../lanes/metadata.html">Metadata Forensics</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
+<h1 id="page-me-maybe-day-23-metadata-forensics">Page Me Maybe (Day 23, metadata-forensics)</h1>
+<p>GM id: <code>metadata-forensics-day-23-page-me-maybe</code>. Lane: metadata-forensics. Agent: agent-4.</p>
+<h2 id="result">Result</h2>
+<p>All three modes CORRECT. The Mastery was banked as a RANKED (Hall-of-Fame) attempt.</p>
+<div class="table-wrap"><table><thead><tr><th>Mode</th><th>Result</th><th>GM flag</th><th>Ranked</th></tr></thead><tbody><tr><td>single_solve</td><td>CORRECT (1.9s)</td><td><span class="flag" data-flag><span class="fl">Token</span><span class="fv">094bb8647c20c86aa575cb97214d7cd1</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td><td>no</td></tr><tr><td>time_trial</td><td>CORRECT (per-field diagnosis)</td><td><span class="flag" data-flag><span class="fl">Token</span><span class="fv">276c5d9346ebedbc9c1123f4da1adeb3</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td><td>no</td></tr><tr><td>mastery</td><td>CORRECT (7.7s)</td><td><span class="flag" data-flag><span class="fl">Token</span><span class="fv">b4939eae932dd0b5b3b56e10758bb4dc</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td><td>yes</td></tr></tbody></table></div>
+<h2 id="prompt">Prompt</h2>
+<blockquote><p>Application databases have been copied, truncated, embedded, and mislabeled. Validate page geometry, connect databases to parent applications, and find the impossible claim.</p></blockquote>
+<h2 id="single-solve">Single Solve</h2>
+<p>One answer id: <code>d23-sqlite-001-sqlite-page-size-bytes</code>. The staged <code>database-001.sqlite</code> reads 4096 at offset 16-17 (u16 BE page size). AUTOSOLVE submitted 4096 in 1.9 s.</p>
+<h2 id="time-trial">Time Trial</h2>
+<p>28 answer ids repeating every lane field so far (D04 jpeg, D05 png, D06 pdf, D07 zip, D09 pe, D12 dotnet, D13 msi, D14 lnk, D15 ooxml, D16 email, D17 audio, D18 video, D19 elf, D20 macho, D21 apk, D22 jar) plus the Day 23 sqlite field and a sha256 synthesis. The first autosolve pass was rejected as a batch with no per-field feedback. The GM's <code>op=submit</code> route accepts partial batches and returns <code>{"result":"accepted","accepted_ids":[...],"remaining":N}</code> per field, so single-field submits isolated the two wrong extractors:</p>
+<ol><li>**<code>d07-zip-001-zip-central-directory-member-names</code>** - rejected in central-directory order; accepted when the array is sorted lexically. (OOXML's <code>external_relationship_targets</code> already sorted since Day 15; Day 23 extended that convention to zip CD names.)</li><li>**<code>d20-macho-001-macho-cpu-type-set</code>** - rejected in file order; accepted when the unique cputypes are sorted ascending as 8-digit hex: <code>["0x00000007","0x00000012","0x01000007"]</code> (i386, PPC, x86_64 w/ABI64).</li></ol>
+<p>Every other field was accepted on the first per-field submit (including PE ARMNT 0x01c4, ELF 64-bit header with EM_PPC 0x0014, dotnet MVID in LE reading [id], MSI product_code with braces upper <code>{[id]}</code>, SQLite page_size 1024, synthesis order <code>["video-001.mp4","panel-001.png","evidence-note.txt","database-001.sqlite","installer-001.msi"]</code>).</p>
+<h2 id="mastery">Mastery</h2>
+<p>Multi-set bundle (set1..set6 of the same question shape). After the Time Trial exposed the two format bugs, both extractors were patched - <code>zip.central_directory_member_names</code> sorted, <code>macho.cpu_type_set</code> sorted set - and the Mastery autosolve ran once: ranked, CORRECT in 7.7 s.</p>
+<h2 id="fixes-landed-in-the-framework">Fixes landed in the framework</h2>
+<ul><li><code>challenges/_lib/autosolve_metadata.py::zip_central_directory_member_names</code> now returns <code>sorted(names)</code> instead of CD scan order. The GM switched to sorted on Day 23; CD-scan order was rejected for every batch.</li><li><code>challenges/_lib/hdr_facts.py::macho_facts</code> now returns <code>jarr(sorted(set(cpus)))</code> instead of <code>jarr(dict.fromkeys(cpus))</code> for <code>cpu_type_set</code> on fat Mach-Os. 8-digit lowercase hex sorts numerically.</li></ul>
+<h2 id="lessons">Lessons</h2>
+<ul><li><code>op=submit</code> accepts partial batches. On a batch rejected without feedback, bisect by submitting each answer id alone - the response names <code>accepted_ids</code> and <code>remaining</code>, so one wrong field is pinpointed in N free reads. Set <code>HUNTRESS_SUBMIT_CAP=0</code> so the client-side cap does not refuse the probe sweep.</li><li>Day 23 moved the macho and zip collections to the same "sorted set" convention that OOXML has used since Day 15. Treat every multi-value field in metadata-forensics as sorted by default from Day 23 on.</li><li>The challenge's "find the impossible claim" wording did NOT point at a header-vs-reality lie that we had to correct. It referred to the format convention mismatch: our file-order answers were the "impossible claim" (an unsorted set).</li></ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#result">Result</a></li><li class="l2"><a href="#prompt">Prompt</a></li><li class="l2"><a href="#single-solve">Single Solve</a></li><li class="l2"><a href="#time-trial">Time Trial</a></li><li class="l2"><a href="#mastery">Mastery</a></li><li class="l2"><a href="#fixes-landed-in-the-framework">Fixes landed in the framework</a></li><li class="l2"><a href="#lessons">Lessons</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-23-hook-line-and-signal.html">&lt; Hook Line and Signal</a><a href="day-24-fail-open-friday.html">Fail Open Friday &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

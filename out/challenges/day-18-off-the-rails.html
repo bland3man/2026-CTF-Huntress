@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Off the Rails - Day 18 write-up</title>
+<meta name="description" content="Day 18 Warmups write-up: Blob is the carrier sentence (&quot;Nice work decoding this warmup! To solve, submit this exact answer to the Game Master: &lt;slug&gt;&quot;) transposed wi">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-18.html">Day 18</a> / Off the Rails</p><p class="telemetry"><span>DAY 18</span><span class="sep">//</span><span>LANE: WARMUPS</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Off the Rails</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-warmups" href="../lanes/warmups.html">Warmups</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
+<h1 id="day-18-off-the-rails-warmups-day-18">Day 18 - Off the Rails (warmups-day-18)</h1>
+<p>Prompt: "Three rails. One very zigzag commute."  Layer: <strong>rail fence cipher, 3 rails</strong>.</p>
+<h2 id="single-solve-time-trial">Single Solve / Time Trial</h2>
+<p>Blob is the carrier sentence ("Nice work decoding this warmup! To solve, submit this exact answer to the Game Master: &lt;slug&gt;") transposed with a 3-rail rail fence. Decoding with k=3 recovers it. AUTOSOLVE (rail-fence crib decode) solved both live.</p>
+<ul><li>single_solve: CORRECT, flag <span class="flag" data-flag><span class="fl">Token</span><span class="fv">cd9560835728caf286a2b8556e3c8e8c</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li><li>time_trial: CORRECT, flag <span class="flag" data-flag><span class="fl">Token</span><span class="fv">060bbc46a75ecf9873c67623ebc8df31</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li></ul>
+<h2 id="mastery">Mastery</h2>
+<p>88 sets, each a blob-NN.txt of 18 numbered lines, one fixed codec per line, concatenating to the carrier + slug: 1 base64, 2 rot13, 3 hex, 4 binary, 5 decimal, 6 octal, 7 percent, 8 html entities, 9 JSON \u, 10 base32, 11 base64, 12 reverse, 13 atbash, 14 caesar+7, 15 rot47, 16 Morse spelling hex bytes, 17 Baconian (a..p = hex nibbles), <strong>18 (new) 3-rail rail fence on the final slug tail</strong>. Line boundaries shift per set, so the lines are concatenated. First attempt failed adapter validation (line 18 unknown, nothing submitted). Fix: added <code>LINE_DECODERS["rail3"]</code> and appended "rail3" to <code>LADDER_NAMES</code> in challenges/_lib/autosolve_warmups.py; offline check decoded 88/88 dumped sets (solver: scripts/solve_mastery.py, check: scripts/check_adapter.py). Rerun of autosolve submitted via op=practice.</p>
+<ul><li>mastery: CORRECT, flag <span class="flag" data-flag><span class="fl">Token</span><span class="fv">4193e013ac835ee9808a2408dd77e2fd</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span> (example set1 slug: lucky-pillow-copper-56)</li></ul>
+<h2 id="lesson">Lesson</h2>
+<p>New mastery line = a new transposition on the slug tail; add the decoder to the ladder (one line), validate offline on the dumped blob.</p></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#single-solve-time-trial">Single Solve / Time Trial</a></li><li class="l2"><a href="#mastery">Mastery</a></li><li class="l2"><a href="#lesson">Lesson</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-18-frame-of-reference.html">&lt; Frame of Reference</a><a href="day-18-orphan-process.html">Orphan Process &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

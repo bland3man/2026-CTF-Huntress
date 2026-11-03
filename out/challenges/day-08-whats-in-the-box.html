@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Whats in the Box - Day 08 write-up</title>
+<meta name="description" content="Day 08 Metadata Forensics write-up: File-type-driven metadata extraction, one field per answerid. The only new work over prior days is the nested ZIP: parse its End Of Central ">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-08.html">Day 08</a> / Whats in the Box</p><p class="telemetry"><span>DAY 08</span><span class="sep">//</span><span>LANE: METADATA FORENSICS</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Whats in the Box</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-metadata" href="../lanes/metadata.html">Metadata Forensics</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
+<h1 id="what-s-in-the-box">What's in the Box?</h1>
+<h2 id="challenge">Challenge</h2>
+<ul><li>Category / lane: Metadata Forensics (Huntress CTF 2026, Day 08)</li><li>GM id: <code>metadata-forensics-day-08-whats-in-the-box</code></li><li>Prompt: "The count was only the beginning. Inventory every stored path, preserve directory context, and identify the archive whose names reveal an impossible provenance claim."</li><li>Modes: Single Solve, Time Trial, Mastery</li><li>Answers are submitted as per-field <code>answer_ids</code> through the Game Master; flags are returned by the GM on a correct submission.</li></ul>
+<p>This challenge extends the Day 02-07 metadata-forensics lane with one new layer: ZIP end-of-central-directory inspection (<code>zip.eocd_total_entries</code> and <code>zip.central_directory_member_names</code>), including an archive nested inside the bundle.</p>
+<h2 id="artifacts">Artifacts</h2>
+<ul><li><code>metadata-day-08-evidence.zip</code> (3308 bytes, sha256 <code>12f42a7fcd717ee6105698873b38b6144ac698b7a6a145dbb2c0a5af7110c9c6</code>) - the Single Solve bundle, saved in this folder.</li></ul>
+<p>Bundle members (central directory order):</p>
+<pre class="code"><code>evidence-note.txt
+camera-001.jpg
+panel-001.png
+document-001.pdf
+evidence-drop-001.zip   (nested archive)</code></pre>
+<h2 id="triage">Triage</h2>
+<p>File-type-driven metadata extraction, one field per answer_id. The only new work over prior days is the nested ZIP: parse its End Of Central Directory record for the total entry count and list its central-directory member names in stored order. The themed "impossible provenance claim" is the first evidence note's content, whose first 16 bytes decode to ASCII <code>Case A9706EAF1E5</code>.</p>
+<h2 id="investigation">Investigation</h2>
+<p>All values derived from the real downloaded bytes (never retyped):</p>
+<p>evidence-note.txt</p>
+<ul><li>filename: <code>evidence-note.txt</code></li><li>size: <code>33</code> bytes</li><li>MD5: <code>cd836b3a174d0ab06510b15c8a9877a0</code></li><li>SHA-1: <code>44afd711074d6af55f5f3c17766a71322993d036</code></li><li>SHA-256: <code>017617c9fe59ab6cc5fab5a6672ca02b7d12b09988a429e022654451d84b1a40</code></li><li>first 16 bytes (hex): <code>43617365204139373036454146314535</code></li><li>UTF-8 BOM present: <code>false</code></li></ul>
+<p>image / document headers</p>
+<ul><li>camera-001.jpg JPEG SOF dimensions: <code>257x146</code></li><li>panel-001.png PNG IHDR dimensions: <code>269x153</code></li><li>document-001.pdf header version: <code>%PDF-1.4</code></li></ul>
+<p>nested archive evidence-drop-001.zip (the new layer)</p>
+<ul><li>EOCD total entries: <code>2</code></li><li>central-directory member names (compact JSON, stored order): <code>["room-01/item-1.txt","room-02/item-1.txt"]</code></li></ul>
+<p>The single-solve values were produced by the lane adapter <code>challenges/_lib/autosolve_metadata.py</code> (extended this day for <code>zip.central_directory_member_names</code>) and cross-checked by the derivation script in <code>scripts/</code>.</p>
+<h2 id="flag-recovery">Flag Recovery</h2>
+<p>The Game Master validates each mode's per-field answers and returns a completion flag. Verified via <code>op=status</code> for each mode (solved_by <code>Blandman3</code>):</p>
+<ul><li>single_solve - CORRECT @ 2026-10-08T13:01:16Z</li><li>time_trial  - CORRECT @ 2026-10-08T13:23:52Z</li><li>mastery     - CORRECT @ 2026-10-08T13:23:53Z</li></ul>
+<p>The Time Trial / Mastery <code>start</code> route returned <code>HTTP 503 training_rotation_invalid</code> for roughly the first 25 minutes after release (the limited <em>timed Hall-of-Fame rotation</em> pool, affecting multiple lanes event-wide, not our solver). Completing a mode does not require the ranked timed rotation - regular play completes it - and the timed pool recovered by 13:23Z, at which point both timed modes were accepted.</p>
+<h2 id="flag">Flag</h2>
+<ul class="flag-list"><li><span class="count">single_solve</span> <span class="flag" data-flag><span class="fl">Token</span><span class="fv">0ab8ac7679c1a5f32c7bf39420316565</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li><li><span class="count">time_trial</span> <span class="flag" data-flag><span class="fl">Token</span><span class="fv">3adcfffcd7df56efb4cfdfecd9d15602</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li><li><span class="count">mastery</span> <span class="flag" data-flag><span class="fl">Token</span><span class="fv">9bb1953a6aca9aaea7c9f4994def3b36</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li></ul>
+<h2 id="minimal-reproduction">Minimal Reproduction</h2>
+<pre class="code"><code class="lang-python">import zipfile, io, hashlib, struct
+z = zipfile.ZipFile('metadata-day-08-evidence.zip')
+b = z.read('evidence-note.txt')
+len(b), hashlib.md5(b).hexdigest(), b[:16].hex(), b[:3] == b'\xef\xbb\xbf'
+iz = zipfile.ZipFile(io.BytesIO(z.read('evidence-drop-001.zip')))
+len(iz.infolist()), iz.namelist()          # EOCD total entries, member names</code></pre>
+<p>Submit each value under its <code>answer_id</code> via the Game Master (<code>op=submit</code>, challenge <code>metadata-forensics-day-08-whats-in-the-box</code>).</p>
+<h2 id="lessons-learned">Lessons Learned</h2>
+<ul><li><code>training_rotation_invalid</code> 503 is the <em>timed ranked rotation</em> pool, a separate dual-pool route (<code>run_for_time:true</code>) from regular play. Per the GM openapi/guidance a mode is still completable via regular untimed play / <code>op=practice</code> - do not treat the 503 as "unsolvable", and do not hammer <code>start</code> on a shared timer.</li><li><code>op=status</code> is read-only and reports the current <code>result</code>/<code>flag</code> per mode - the cheapest way to learn a mode is already solved (ours showed all three CORRECT once the rotation recovered) and to reconcile a stale local board against GM ground truth.</li><li>The new layer was exactly one step over Day 07 (nested-ZIP EOCD/central-directory inventory); the banked metadata adapter handled the rest.</li></ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#challenge">Challenge</a></li><li class="l2"><a href="#artifacts">Artifacts</a></li><li class="l2"><a href="#triage">Triage</a></li><li class="l2"><a href="#investigation">Investigation</a></li><li class="l2"><a href="#flag-recovery">Flag Recovery</a></li><li class="l2"><a href="#flag">Flag</a></li><li class="l2"><a href="#minimal-reproduction">Minimal Reproduction</a></li><li class="l2"><a href="#lessons-learned">Lessons Learned</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-08-swift-justice.html">&lt; Swift Justice</a><a href="day-09-all-the-world-s-a-stager.html">All the World&#x27;s a Stager &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

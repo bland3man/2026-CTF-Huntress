@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Setup - how the team ran</title>
+<meta name="description" content="Our architecture during Huntress CTF 2026.">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="index.html">Overview</a>
+      <a href="setup.html" aria-current="page">Setup</a>
+      <a href="game-master.html">GM contract</a>
+      <a href="days/index.html">Days</a>
+      <a href="lanes/index.html">Lanes</a>
+      <a href="challenges/index.html">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="telemetry"><span>SYSTEMS</span><span class="sep">//</span><span>AS FLOWN DURING THE EVENT</span></p><h1>Ship systems</h1><p class="lede">How the team was set up during the event: an AI Commander per station, lane agents, deterministic per-lane solvers, and a daily learning loop.</p></div></div>
+<main id="main">
+  <div class="wrap">
+<section>
+  <h2 class="sec-title">Command structure <span class="code">SYS // ORG</span></h2>
+  <div class="grid c3">
+    <div class="panel">
+      <p class="panel-label">Bridge</p>
+      <h3>The Commander</h3>
+      <p>One AI session per station acted as Commander. It owned challenge state, validation and the rule that a flag is printed only once it is verified. It did not solve the standard lanes itself: it routed work, watched the agents, read their output and decided. A challenge in a lane nobody owned (web, special drops) was claimed and solved by the Commander directly.</p>
+    </div>
+    <div class="panel teal">
+      <p class="panel-label">Two hulls, one fleet</p>
+      <h3>Workstation + homestation</h3>
+      <p>Two machines ran the same framework in tandem. The workstation owned the warmups, metadata-forensics and mobile lanes; the homestation owned script analysis and binary reverse engineering (and later web). The two Commanders talked through a shared, git-backed note channel: claims, solves, lessons and end-of-day handshakes, with an agreed rule that neither side finalised a day alone.</p>
+    </div>
+    <div class="panel">
+      <p class="panel-label">Crew</p>
+      <h3>Lane agents + specialists</h3>
+      <p>Each daily lane had one agent seat (three on one station, two on the other), so every mode had exactly one owner. Ten specialist roles (malware RE, Windows DFIR, network, web/API, exploitation, crypto/stego, OSINT, adversarial AI, scripting/data, Linux) existed as workers the Commander could call; they returned findings and never declared a challenge solved.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2 class="sec-title">Release sequence <span class="code">SYS // FLOW</span></h2>
+  <div class="layout">
+    <div class="panel">
+      <ol class="flow">
+        <li><h3>Pre-release handshake</h3><p>Before each daily release both stations checked that they ran the same code revision and an equivalent environment, then posted a ready signal. A scheduled task spawned the lane agents a few minutes before release so they were warm and waiting.</p></li>
+        <li><h3>Release watcher and stager</h3><p>A single poller per station watched the Game Master's challenge list. The moment the day's challenges appeared it staged each one: started the Single Solve, fetched the assigned artifact once, wrote a digest, and dropped an entry into a local pool. Agents never polled the Game Master themselves; they waited on local files.</p></li>
+        <li><h3>Claim and dispatch</h3><p>Each waiting agent made one blocking call that claimed the first unclaimed challenge in its lane. Ownership was an atomic lock, so no two runners could ever spend the same ranked attempt.</p></li>
+        <li><h3>Deterministic autosolve first</h3><p>At claim time the lane's banked solver ran immediately, with no model in the loop. Each lane had a day-generic adapter that turned the Game Master's question contract plus the attempt's own bytes into answers: a layered decode chain for warmups, byte-level extractors for metadata, codec and bytecode handling for mobile APKs, an inventory parser for scripts, and a format-dispatching field solver for binaries.</p></li>
+        <li><h3>Agent on the gaps</h3><p>When a day added a layer the adapter did not know yet, the agent worked only on the missing piece, extended the adapter, re-ran it, and submitted. Single Solve first; Time Trial and Mastery immediately after, because their material was freshly generated per attempt and had to be derived from those exact bytes.</p></li>
+        <li><h3>Verification</h3><p>A mode counted as done only when the Game Master said CORRECT. A blocked mode was recorded as needing a person, never as done. Every exchange with the Game Master was recorded locally for later analysis.</p></li>
+        <li><h3>Close and learn</h3><p>Each solved challenge ended with a challenge-named write-up (the pages on this site). Agents logged a structured lesson after every correct mode; at the end of the day the Commanders turned gaps into code changes and tests, synchronised both stations, and wrote a short review of what the agents had taught them.</p></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2 class="sec-title">Subsystems <span class="code">SYS // MODULES</span></h2>
+  <div class="grid c2">
+    <div class="panel">
+      <p class="panel-label">Comms</p>
+      <h3>Game Master client</h3>
+      <p>A small REST client for the event's Game Master service over HTTPS with a personal bearer credential (paired once, never printed or committed). It handled list, status, start, retry/practice and submit, bounded its retries on rate limits, and exposed one helper that runs a solver against a mode's question contract.</p>
+    </div>
+    <div class="panel">
+      <p class="panel-label">Recognition</p>
+      <h3>File-type recognizer and decode chain</h3>
+      <p>One recognizer identified about a hundred artifact formats by structure rather than by file name, and mapped each to a lane and a first move. A stdlib "magic"-style decode chain peeled stacked encodings (base families, hex, binary, octal, rot/caesar/xor, compression, escapes, Morse) automatically.</p>
+    </div>
+    <div class="panel">
+      <p class="panel-label">Memory</p>
+      <h3>Accepted-value and format bank</h3>
+      <p>The Game Master grades exact strings and gives no per-field feedback; one wrong field rejects a whole batch. So every value and value format the Game Master ever accepted was banked per field, and solvers read it back to pick the right spelling, width or casing the next time a field appeared.</p>
+    </div>
+    <div class="panel">
+      <p class="panel-label">Replay</p>
+      <h3>Offline replay of accepted answers</h3>
+      <p>Archived timed attempts were kept as sanitised fixtures. Any change to a lane solver was replayed against those attempts and compared with the answers the Game Master had accepted, so a fix could be proven offline without spending a live attempt.</p>
+    </div>
+    <div class="panel">
+      <p class="panel-label">Prediction</p>
+      <h3>Lane progression model</h3>
+      <p>Every lane turned out to be the previous day's challenge plus one new layer. A small data file per lane recorded the axis that changed, the sequence so far and ranked candidates for the next layer; a novelty check compared the day's prompt with earlier days to name what was new before an agent started.</p>
+    </div>
+    <div class="panel">
+      <p class="panel-label">Learning loop</p>
+      <h3>Lessons, mistakes, and the daily review</h3>
+      <p>Agents filed lessons by kind (gap, trick, format, speed, mistake). Commander corrections were logged by class, and the rule was to fix the class with code or a test, not the single instance. The end-of-day sweep flagged any challenge with no lesson as a gap and turned it into the next morning's prebuild.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2 class="sec-title">Standing orders <span class="code">SYS // RULES</span></h2>
+  <div class="panel">
+    <dl class="kv">
+      <dt>One owner</dt><dd>One owner per lane and per mode. Two runners on one ranked attempt burn it.</dd>
+      <dt>GM is truth</dt><dd>A mode is done only when the Game Master says so. Local notes never mark anything solved.</dd>
+      <dt>Second method</dt><dd>Any claim that something is missing or empty needs a second, independent check.</dd>
+      <dt>General tool first</dt><dd>Run the installed general-purpose tool before hand-building an extractor.</dd>
+      <dt>Never guess</dt><dd>A held answer beats a wrong submit; timed attempts are scarce.</dd>
+      <dt>Neutral wording</dt><dd>Plain, accurate language in prompts and notes (decode, parse, extract, classify).</dd>
+      <dt>No secrets</dt><dd>Credentials stayed out of prompts, logs, notes and the repository.</dd>
+    </dl>
+  </div>
+</section>
+
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="assets/site.js" defer></script>
+</body>
+</html>

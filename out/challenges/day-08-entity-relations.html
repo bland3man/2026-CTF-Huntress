@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entity Relations - Day 08 write-up</title>
+<meta name="description" content="Day 08 Warmups write-up: Fingerprinted instantly against the warmupdecode family in challenges/lib/kb/families.json (not known-hard, Sonnet-medium base tier - borne ">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-08.html">Day 08</a> / Entity Relations</p><p class="telemetry"><span>DAY 08</span><span class="sep">//</span><span>LANE: WARMUPS</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Entity Relations</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-warmups" href="../lanes/warmups.html">Warmups</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
+<h1 id="entity-relations">Entity Relations</h1>
+<h2 id="challenge">Challenge</h2>
+<ul><li>Category/lane: Warmups (Huntress CTF 2026, Day 08)</li><li>GM id: <code>warmups-day-08</code></li><li>Prompt: "The browser understands. Do you?"</li><li>Modes: Single Solve, Time Trial, Mastery (Mastery = 38 new dynamic tasks, per the GM's own Mastery prompt text).</li><li>Answer format: a single question id <code>message</code>; the answer is the exact slug a fully-decoded blob's final non-empty line instructs - "three lowercase words separated by hyphens, followed by a hyphen and a two-digit number; submit the slug only" (trim normalization).</li></ul>
+<h2 id="triage">Triage</h2>
+<p>Fingerprinted instantly against the <code>warmup_decode</code> family in <code>challenges/_lib/kb/families.json</code> (not known-hard, Sonnet-medium base tier - borne out: this challenge solved in seconds). The title itself is the hint, consistent with the family's naming-pun convention from every prior day ("Half a Turn" = ROT13, "Eight Is Enough" = octal, "Percent Chance" = percent/URL encoding). "The browser understands" points at a browser-native encoding, not a general-purpose one.</p>
+<h2 id="investigation">Investigation</h2>
+<p>Ran the assigned blob through <code>challenges/_lib/decode_chain.py</code> (the universal layered decoder already banked for this family); it fully decoded in one automated pass with no manual layer identification needed, and the final decoded line gave the exact answer slug per the GM's stated format.</p>
+<h2 id="flag-recovery">Flag Recovery</h2>
+<p>Solved via <code>challenges/_lib/autosolve_warmups.py</code>, the day-generic adapter for this family - it ran automatically at claim time, before any agent reasoning was needed. All three modes graded CORRECT independently; Mastery's 38 fresh dynamic tasks (not a repeat of Single Solve) were each derived from that attempt's own assigned bytes, never a memorized value.</p>
+<h2 id="flag">Flag</h2>
+<ul class="flag-list"><li><span class="count">single_solve 3 seconds after release -</span> <span class="flag" data-flag><span class="fl">Token</span><span class="fv">a43c961cb1da97df79b39acf66e3196a</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li><li><span class="count">time_trial</span> <span class="flag" data-flag><span class="fl">Token</span><span class="fv">914aa968abf54fd2de978b26f8d1ecca</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li><li><span class="count">mastery</span> <span class="flag" data-flag><span class="fl">Token</span><span class="fv">cd267453f538104082d41325e5d32098</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li></ul>
+<p>All three modes were solved and graded CORRECT by 2026-10-08T13:00:07Z, 7 seconds after the 09:00 ET release - this was the day's First Blood.</p>
+<h2 id="minimal-reproduction">Minimal Reproduction</h2>
+<ol><li>Fingerprint the challenge against <code>warmup_decode</code> (title pun names the encoding layer).</li><li>Run <code>challenges/_lib/autosolve_warmups.py</code> against the challenge id; it downloads the assigned blob, runs <code>decode_chain.py</code>'s layered decoder, and submits the final line's slug.</li><li>Mastery reuses the identical adapter against each of its 38 freshly-assigned tasks in one run.</li></ol>
+<h2 id="lessons-learned">Lessons Learned</h2>
+<ul><li>The fastest lane in the game is also the one most completely automated end-to-end (claim -&gt; autosolve -&gt; submit, zero model reasoning) - this is the target shape for every other lane's adapter as it matures.</li><li>Warmups still gets a full writeup like every other challenge - "trivial" does not mean "undocumented" (corrected 2026-10-08; a prior convention of skipping the warmup lane's writeup was wrong and is retired starting this entry).</li></ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#challenge">Challenge</a></li><li class="l2"><a href="#triage">Triage</a></li><li class="l2"><a href="#investigation">Investigation</a></li><li class="l2"><a href="#flag-recovery">Flag Recovery</a></li><li class="l2"><a href="#flag">Flag</a></li><li class="l2"><a href="#minimal-reproduction">Minimal Reproduction</a></li><li class="l2"><a href="#lessons-learned">Lessons Learned</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-08-cleartext-session.html">&lt; Cleartext Session</a><a href="day-08-lost-in-translation.html">Lost in Translation &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

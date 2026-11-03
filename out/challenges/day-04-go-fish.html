@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Go Fish - Day 04 write-up</title>
+<meta name="description" content="Day 04 Binary RE write-up: Same family as Day 03 &quot;Table Manners&quot; (dual-format RE inventory); new layer = the Go ELF. KB match: dualformatre. Reused the banked solver, ">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-04.html">Day 04</a> / Go Fish</p><p class="telemetry"><span>DAY 04</span><span class="sep">//</span><span>LANE: BINARY RE</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Go Fish</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-binary" href="../lanes/binary.html">Binary RE</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
+<h1 id="go-fish">Go Fish</h1>
+<h2 id="challenge">Challenge</h2>
+<p>Binary reverse engineering, Huntress CTF 2026 Day 04 (lane: binary-reverse-engineering, 32 fields). Prompt: "Go binaries are chatty: they ship with build info, function names, and file paths baked right in. Fish them out and map what this one was built to do." Modes: Single Solve (static), Time Trial, Mastery (2 evidence sets). Scored per field by the Game Master (partial credit, accepted fields accumulate).</p>
+<h2 id="artifacts">Artifacts</h2>
+<p><code>artifact_0.bin</code> = AES zip (password <code>infected</code>, inert fixtures) holding four evidence items per set:</p>
+<ul><li>d01 dynamically linked x86-64 ELF (not stripped): header facts, section names, symbols, <code>recover</code> function disassembly.</li><li>d02 x86-64 ELF with an HCFG config blob.</li><li>d03 .NET PE32 DLL (+ runtimeconfig.json) with an XOR'd config.</li><li>d04 statically linked, stripped Go ELF (buildinfo present) with an HCFG config blob.</li></ul>
+<h2 id="triage">Triage</h2>
+<p>Same family as Day 03 "Table Manners" (dual-format RE inventory); new layer = the Go ELF. KB match: dual_format_re. Reused the banked solver, extended only d04.</p>
+<h2 id="investigation">Investigation</h2>
+<ol><li>Extracted the zip, hashed every file, ran <code>file</code>/<code>readelf</code> on d04 (ELF64, EXEC, little endian, EM_X86_64, Go build info at <code>.go.buildinfo</code>).</li><li>Scanned d04 for the <code>HCFG</code> magic: layout is magic(4) + version(1) + XOR key(1) + len(2 LE)... same as Day 02/03; XOR the payload, CRC32 matches the header value. JSON holds campaign/domain/mutex/url.</li><li>d01-d03 answers come from <code>scripts/tm_base.py</code> (copy of the Day 03 solver): section names, non-empty symbol names, <code>mov eax, &lt;recover_code&gt;</code> / <code>ret</code>, <code>pe_cli</code> / <code>i386</code> / CLR metadata version for the .NET DLL.</li><li>Submitted the 30 verified fields on the Single Solve (CORRECT). The two d04 label fields (architecture, format) were resolved in the Time Trial by submitting the sure batch first, then probing one field at a time: <code>amd64</code> incorrect, <code>x86-64</code> accepted; format <code>elf</code> accepted.</li><li>Time Trial and Mastery ran as one automated shot each (<code>scripts/run_gf.py</code>), about 2 s end to end. Mastery needs per-set answers (<code>setN.</code> prefix); one 429 rate-limit hit mid-run was handled by adding submit backoff (start resumes the same attempt).</li></ol>
+<h2 id="flag-recovery">Flag Recovery</h2>
+<p>Each mode returned its completion token from the GM on CORRECT; values live on the GM/CourseStack and are not reproduced here.</p>
+<h2 id="flag">Flag</h2>
+<pre class="code"><code>Single Solve: CORRECT (completion token &lt;REDACTED_TOKEN&gt;)
+Time Trial:   CORRECT (completion token &lt;REDACTED_TOKEN&gt;)
+Mastery:      CORRECT (completion token &lt;REDACTED_TOKEN&gt;)</code></pre>
+<h2 id="minimal-reproduction">Minimal Reproduction</h2>
+<p><code>python3 "challenges/Day 04/Go Fish/scripts/run_gf.py" time_trial</code> (and <code>mastery</code>) from the framework root inside WSL, with the GM token in place. Offline check: <code>python3 .../solve_gf.py</code> against <code>extracted/</code>.</p>
+<h2 id="lessons-learned">Lessons Learned</h2>
+<ul><li>Banked solvers cover the spine; only the new runtime (Go) needed work and the HCFG scan was format-agnostic.</li><li>Field labels for new fields: architecture = <code>x86-64</code>, format = <code>elf</code>. Probe label fields after a sure batch because the GM accumulates accepted fields.</li><li>Add 429 backoff to timed runners when several agents share one token.</li></ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#challenge">Challenge</a></li><li class="l2"><a href="#artifacts">Artifacts</a></li><li class="l2"><a href="#triage">Triage</a></li><li class="l2"><a href="#investigation">Investigation</a></li><li class="l2"><a href="#flag-recovery">Flag Recovery</a></li><li class="l2"><a href="#flag">Flag</a></li><li class="l2"><a href="#minimal-reproduction">Minimal Reproduction</a></li><li class="l2"><a href="#lessons-learned">Lessons Learned</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-04-dim-and-dimmer.html">&lt; Dim and Dimmer</a><a href="day-04-pending-intent-relay.html">Pending Intent Relay &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

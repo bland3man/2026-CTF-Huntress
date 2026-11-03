@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Permission to Slip - Day 02 write-up</title>
+<meta name="description" content="Day 02 Web Exploitation write-up: Up to Day 19, the web lane had NEVER staged live - all web coverage was synthetic offline against the four webcontracts.py executors (hash, ">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-02.html">Day 02</a> / Permission to Slip</p><p class="telemetry"><span>DAY 02</span><span class="sep">//</span><span>LANE: WEB EXPLOITATION</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Permission to Slip</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-web" href="../lanes/web.html">Web Exploitation</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
+<h1 id="permission-to-slip">Permission to Slip</h1>
+<p>Day 2 - Web Exploitation - IDOR via activity-feed leak - all three modes CORRECT on 2026-10-19 via the homestation Commander (agent-6 did not claim it; it was taken by the Commander as a backlog web challenge after the daily lanes ran).</p>
+<div class="table-wrap"><table><thead><tr><th>Mode</th><th>GM result</th><th>Flag</th><th>Author of the solving method</th></tr></thead><tbody><tr><td>Single Solve</td><td>CORRECT</td><td>451e72a00fb0e97e79a80c706f1e696e</td><td>Commander (homestation)</td></tr><tr><td>Time Trial</td><td>CORRECT</td><td>acaac99e7e7a67703b455c46ff5cc08a</td><td>Commander (homestation)</td></tr><tr><td>Mastery</td><td>CORRECT</td><td>c8bca23301908774c2fe850355ebf3f0</td><td>Commander (homestation)</td></tr></tbody></table></div>
+<p>GM evidence for every mode: the real <code>op=submit</code> response had <code>"result":"CORRECT"</code> and <code>solved_by.name:"sudo_who_farted"</code>. Nothing was guessed; every proof came from the live target's own JSON response.</p>
+<h2 id="prompt-and-lane">Prompt and lane</h2>
+<p>Prompt (verbatim from the GM start response):</p>
+<blockquote><p>Your neighbor's records are none of your business. Pity the object API never got that memo - see if you can slip into somebody else's row.</p></blockquote>
+<p>Category: Web Exploitation. The GM delivers no artifact for this lane; it hands the agent a live target URL in <code>targets[0].url</code> per started attempt. The three modes share one live-Web pool slot: Single Solve has a persistent target; Time Trial spawns a fresh variant per attempt; Mastery spawns TWO targets inside one attempt and both proofs must be submitted together.</p>
+<h2 id="shape-same-template-three-skins">Shape (same template, three skins)</h2>
+<p>Every variant is the same web app with slightly different trim:</p>
+<ul><li>Dashboard at <code>/</code> renders as "Signed in as &lt;USER&gt;" with three cards (owner=the current user). Each card has a per-case link that goes to a case-detail page.</li><li>A workspace-activity feed is linked from the dashboard. It is the key leak: the feed returns the current user's events AND one event for a case owned by a DIFFERENT user (always <code>owner:"executive"</code>), marked <code>"visibility":"reference_only"</code>.</li><li>The case-detail page is a thin HTML wrapper. The real data comes from a JSON object API at <code>/api/&lt;prefix&gt;/&lt;id&gt;</code> (prefix varies: <code>briefs</code>, <code>incidents</code>, ...).</li><li>The object API has NO authorization check on the id. Fetching the foreign id returns the hidden case, whose <code>note</code> field is the proof.</li></ul>
+<div class="table-wrap"><table><thead><tr><th>Variant</th><th>Dashboard title / brand</th><th>Case route</th><th>Object API path</th><th>Activity feed path</th></tr></thead><tbody><tr><td>Single Solve</td><td>Pocket SOC</td><td>/briefs/&lt;id&gt;</td><td>/api/briefs/&lt;id&gt;</td><td>/api/history</td></tr><tr><td>Time Trial</td><td>Incident Picnic (M.)</td><td>/incidents/&lt;id&gt;</td><td>/api/incidents/&lt;id&gt;</td><td>/api/events</td></tr><tr><td>Mastery T1</td><td>Status Sprout (uptime)</td><td>n/a</td><td>/deploy-7d42d/environment-copy-66e6e6.json.bak</td><td>n/a (robots.txt leak)</td></tr><tr><td>Mastery T2</td><td>Incident Picnic (Jules)</td><td>/briefs/&lt;id&gt;</td><td>/api/briefs/&lt;id&gt;</td><td>/api/timeline</td></tr></tbody></table></div>
+<p>Mastery Target 1 is NOT an IDOR; it is a MIXED challenge. Its home page is a public uptime-status page with no login and no case model. The hint lives in the HTML comment "deployment note: remember to review crawler policy before launch". <code>robots.txt</code> disallows <code>/deploy-7d42d/</code>; that directory is listed and serves <code>environment-copy-66e6e6.json.bak</code>, a JSON backup whose <code>support_note</code> field is the proof. Same deploy-backup-via-robots.txt pattern recurs on Query Me This Mastery T1 (which routes <code>/archives-a7ba9/release-settings-92415c.json.bak</code>), so it is a reusable pattern, not a one-off.</p>
+<h2 id="step-by-step-reproducible-against-any-variant">Step by step (reproducible against any variant)</h2>
+<ol><li>From the GM, <code>op=start</code> -&gt; <code>targets[0].url</code> is the live site; a session cookie <code>case_session=&lt;hex&gt;</code> is set on the first GET of <code>/</code>.</li><li>From <code>/</code>, grep for <code>action='...'</code> on the search form (not applicable here; this challenge has no search box - skip this step for IDOR). Instead, extract three things from the HTML:
+<ul><li>the signed-in user name ("Signed in as &lt;USER&gt;");</li><li>every <code>href="/&lt;prefix&gt;/&lt;id&gt;"</code> for case links (the user's own case ids);</li><li>the activity-feed href (<code>/api/&lt;something&gt;</code>).</li></ul></li><li>GET the activity feed with the session cookie. Its <code>events[]</code> contains ONE event with a <code>case_id</code> whose <code>owner</code> differs from <code>current_user</code>. That is the target id.</li><li>GET <code>/api/&lt;prefix&gt;/&lt;foreign_id&gt;</code> with the same cookie. The JSON object API has no authorization check and returns the hidden case. <code>note</code> is the proof.</li><li>Submit <code>proof-&lt;n&gt;</code> -&gt; <code>&lt;the exact note value&gt;</code> under the GM's answer_format (<code>exact_text</code> with trim normalization).</li></ol>
+<h2 id="mastery">Mastery</h2>
+<p>Mastery returns two targets at once; both must be solved under one attempt. The variant mix is intentional: Target 1 is a non-IDOR deploy-backup leak, Target 2 is the same IDOR template as Time Trial. Solve both in parallel; the GM accepts both proofs in a single <code>op=submit</code>:</p>
+<pre class="code"><code class="lang-json">{"proof-1":"proof_...from backup...", "proof-2":"proof_...from foreign case..."}</code></pre>
+<h2 id="why-no-autosolve-adapter-had-this-covered-before">Why no autosolve adapter had this covered before</h2>
+<p>Up to Day 19, the web lane had NEVER staged live - all web coverage was synthetic offline against the four <code>web_contracts.py</code> executors (<code>hash</code>, <code>jwt</code>, <code>config</code>, <code>http</code>). None of them covers:</p>
+<ul><li>an id-bearing JSON API on a path the agent must discover from an activity feed,</li><li>a deploy-backup leak behind <code>robots.txt</code>.</li></ul>
+<p>As a result, <code>autosolve.py 2 web-exploitation-day-02-idor web ...</code> returned <code>gate_blocked (0 accepted, None remaining)</code> on every mode. The Commander took the challenge on behalf of agent-6, who had no claim since the lane was empty on the 09:00 release.</p>
+<h2 id="lessons-learned-banked">Lessons learned (banked)</h2>
+<ul><li><strong>Live-web IDOR has a reliable shape.</strong> The leak is always an activity/history/ events endpoint that returns a reference to a foreign-owned object. The agent does not need to brute-force ids. See [[kb-web-idor-activity-feed]].</li><li><strong>Robots.txt is a real primitive on this organiser's web track.</strong> The hidden deployment folder is literally listed in <code>Disallow:</code>. The folder is a directory index whose JSON backup carries <code>support_note</code> = the proof. Both days 02 Mastery T1 and 03 Mastery T1 use the same pattern. See [[kb-web-deploy-backup-leak]].</li><li><strong>One live-Web target per team is a shared slot.</strong> Starting Query Me This while Permission to Slip Mastery was still active parked the other at <code>result:preparing</code> for minutes. The Commander must sequence web challenges, not run them concurrently.</li><li>**The proof format on this track is always <code>proof_&lt;32 hex&gt;</code>.** Submitting any other shape burns an attempt; the answer_format <code>exact_text + trim</code> accepts that exact token.</li><li><strong>Timed-start safeguard requires an override for Commander-run web work.</strong> When the Web lane has no claimed agent, the Commander opens Time Trial / Mastery with <code>HUNTRESS_TIMED_START=commander-override</code> after the Single is CORRECT. The readiness gate is explicitly disabled with <code>HUNTRESS_GATE=0</code> because the Web lane has no rehearsed prebrief and the Commander is the ONLY actor on the challenge.</li></ul>
+<h2 id="files">Files</h2>
+<ul><li>(this writeup) <code>Permission_to_Slip_Writeup.md</code></li><li>Working artifacts (purged post-solve per <code>feedback-purge-gm-downloads</code>): home-page HTML snapshots for each variant and the activity-feed JSON were fetched to the project working dir, read, then removed. The hashes recorded by the GM record (<code>challenges/Day 02/_gm_record/web-exploitation-day-02-idor.homestation.jsonl</code>) are the authoritative paper trail; nothing lives in AppData/TEMP.</li></ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#prompt-and-lane">Prompt and lane</a></li><li class="l2"><a href="#shape-same-template-three-skins">Shape (same template, three skins)</a></li><li class="l2"><a href="#step-by-step-reproducible-against-any-variant">Step by step (reproducible against any variant)</a></li><li class="l2"><a href="#mastery">Mastery</a></li><li class="l2"><a href="#why-no-autosolve-adapter-had-this-covered-before">Why no autosolve adapter had this covered before</a></li><li class="l2"><a href="#lessons-learned-banked">Lessons learned (banked)</a></li><li class="l2"><a href="#files">Files</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-02-mangled.html">&lt; Mangled</a><a href="day-03-bom-voyage.html">BOM Voyage &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

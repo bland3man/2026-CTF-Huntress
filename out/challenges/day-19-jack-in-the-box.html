@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jack in the Box - Day 19 write-up</title>
+<meta name="description" content="Day 19 Binary RE write-up: Solved by sudowhofarted. Mastery ran as a RANKED attempt inside a 324 s server window (deadline 2026-10-19T13:27:34.585Z) and answered 1140 ">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-19.html">Day 19</a> / Jack in the Box</p><p class="telemetry"><span>DAY 19</span><span class="sep">//</span><span>LANE: BINARY RE</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Jack in the Box</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-binary" href="../lanes/binary.html">Binary RE</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
+<h1 id="day-19-jack-in-the-box-binary-reverse-engineering">Day 19 - Jack in the Box (binary-reverse-engineering)</h1>
+<ul><li>GM id: <code>binary-reverse-engineering-day-19-static-unpacking</code></li><li>Lane: binary-reverse-engineering | Agent: agent-2 | Date: 2026-10-19</li><li>Prompt: "There's a payload hiding inside this binary, and a little decoder stub wound up to pop it out. Find the stub, watch it work, and catch what's inside - statically."</li></ul>
+<h2 id="result-all-three-modes-correct">Result - all three modes CORRECT</h2>
+<div class="table-wrap"><table><thead><tr><th>Mode</th><th>Fields</th><th>Result</th><th>Time</th><th>Flag</th></tr></thead><tbody><tr><td>Single Solve</td><td>228</td><td>CORRECT</td><td>137.2 s</td><td><span class="flag" data-flag><span class="fl">Token</span><span class="fv">508c337ce227bc34d36ce6931acb377f</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td></tr><tr><td>Time Trial</td><td>228</td><td>CORRECT</td><td>7.1 s</td><td><span class="flag" data-flag><span class="fl">Token</span><span class="fv">6bf12b4873775f60d3422c9f6d577d86</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td></tr><tr><td>Mastery</td><td>1140 (5 sets)</td><td>CORRECT, hall_of_fame_eligible</td><td>28.4 s</td><td><span class="flag" data-flag><span class="fl">Token</span><span class="fv">df7f927e86882b37dd1948db6b9723cf</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td></tr></tbody></table></div>
+<p>Solved by <code>sudo_who_farted</code>. Mastery ran as a RANKED attempt inside a 324 s server window (deadline <code>2026-10-19T13:27:34.585Z</code>) and answered 1140 fields in 15.3 s with 0 probes and 0 unknowns.</p>
+<h2 id="artifact">Artifact</h2>
+<p><code>artifact_0.bin</code> - a 32,838,781-byte AES ZIP (password <code>infected</code>), the lane's cumulative evidence bundle: 22 members, <code>d01--variant-000.elf</code> through <code>d19--variant-000.elf</code> (16 ELF, 2 JAR, 2 WASM, 1 .NET DLL, 1 runtimeconfig.json). 216 of the 228 answer ids are the inventory questions Days 1-18 already established; the 12 new ones are the <code>d19_*</code> slots.</p>
+<p>Today's deliverable: <code>d19--variant-000.elf</code>, 11,232 bytes, ET_EXEC x86-64 ELF64, SHA-256 <code>cf82c07ef9325c0a7012dd43e49182664513d57fa46eac312d26e98dc2231fbe</code>.</p>
+<h2 id="the-new-layer-a-packed-overlay-not-a-section">The new layer: a packed overlay, not a section</h2>
+<p>Every earlier day hid the HCFG config record <em>inside</em> the file - raw in <code>.hcfg</code>, base64 in <code>.rodata</code>, a C const array, a wasm data segment. Day 19 does not: <code>grep -c HCFG</code> on the member is <strong>0</strong>, and the section-header table ends at file offset 0x2378 while the member is 11,232 bytes long. The record lives in an <strong>overlay appended after the end of the real ELF</strong>, which is exactly what "a payload hiding inside this binary, and a little decoder stub wound up to pop it out" means, and why the questions ask for an overlay offset and size for the first time (<code>d19_analysis_overlay_offset</code>, <code>d19_analysis_overlay_size</code> - two brand-new question keys).</p>
+<p>The GM states the stub layout in the question text, so nothing had to be hand-traced out of the <code>.text</code> disassembly. At the <strong>final</strong> occurrence of the magic (<code>PK19</code> for Day 19, and the question names <code>RS20</code> for Day 20 - so the magic is data, not a constant):</p>
+<pre class="code"><code>+0   magic          'PK19' (4 bytes)
++5   k1             u8
++6   k2             u8
++8   packed_len     u32 little-endian
++12  sha256         32 bytes - SHA-256 of the UNPACKED bytes
++44  packed bytes   packed_len bytes, running to EOF</code></pre>
+<p>Unpack transform, per packed byte:</p>
+<pre class="code"><code>plain = ror8(packed ^ k2, 3) ^ k1          ror8(x,3) = ((x &gt;&gt; 3) | (x &lt;&lt; 5)) &amp; 0xFF</code></pre>
+<p>The unpacked buffer then carries the familiar HCFG record at offset 0: <code>'HCFG' | version u8 | xor_key u8 | payload_len u16le | crc32 u32le | payload</code>, payload XORed with the one-byte key and parsed as UTF-8 JSON.</p>
+<h3 id="measured-on-the-real-member">Measured on the real member</h3>
+<pre class="code"><code>member length    : 11232
+overlay_offset   : 10808          (single occurrence of 'PK19')
+overlay_size     : 424            = 11232 - 10808 = 44 header + 380 packed
+k1, k2           : 0x21, 0xa4
+packed_len       : 380
+SHA-256 of unpacked bytes verified : True
+HCFG version     : 1
+HCFG xor key     : 0x91
+HCFG crc32       : 0xd02e2211     verified : True</code></pre>
+<p>Both integrity checks pass - the overlay's embedded SHA-256 and the HCFG CRC32 - so the extraction is proved, not guessed.</p>
+<h3 id="recovered-config-decoded-hcfg-json">Recovered config (decoded HCFG JSON)</h3>
+<pre class="code"><code class="lang-json">{
+  "campaign":     "BR19-000",
+  "domain":       "node-000.day19.example.invalid",
+  "host_model":   "workstation",
+  "ipv4":         "198.51.100.110",
+  "linux_path":   "/var/tmp/huntress-lab/day19/BR19-000.dat",
+  "mutex":        "Global\\HuntressBR19_000",
+  "service":      "HuntressLab-Day19-000",
+  "url":          "https://node-000.day19.example.invalid/api/BR19-000",
+  "windows_path": "C:\\ProgramData\\HuntressLab\\day19\\BR19-000.dat"
+}</code></pre>
+<h3 id="the-12-d19-answers-single-solve">The 12 d19 answers (Single Solve)</h3>
+<div class="table-wrap"><table><thead><tr><th>answer id</th><th>value</th></tr></thead><tbody><tr><td><code>d19_artifact_sha256_1</code></td><td><code>cf82c07ef9325c0a7012dd43e49182664513d57fa46eac312d26e98dc2231fbe</code></td></tr><tr><td><code>d19_analysis_format</code></td><td><code>elf</code></td></tr><tr><td><code>d19_analysis_architecture</code></td><td><code>x86-64</code></td></tr><tr><td><code>d19_analysis_machine</code></td><td><code>x86-64</code></td></tr><tr><td><code>d19_analysis_overlay_offset</code></td><td><code>10808</code></td></tr><tr><td><code>d19_analysis_overlay_size</code></td><td><code>424</code></td></tr><tr><td><code>d19_analysis_hcfg_version</code></td><td><code>1</code></td></tr><tr><td><code>d19_analysis_config_crc32_hex</code></td><td><code>0xd02e2211</code></td></tr><tr><td><code>d19_analysis_config_campaign</code></td><td><code>BR19-000</code></td></tr><tr><td><code>d19_analysis_config_domain</code></td><td><code>node-000.day19.example.invalid</code></td></tr><tr><td><code>d19_analysis_config_mutex</code></td><td><code>Global\HuntressBR19_000</code></td></tr><tr><td><code>d19_analysis_config_url</code></td><td><code>https://node-000.day19.example.invalid/api/BR19-000</code></td></tr></tbody></table></div>
+<h2 id="what-was-built">What was built</h2>
+<p><code>challenges/_lib/autosolve_binary.py</code> (the lane spine was not rebuilt - only the new layer added):</p>
+<ol><li><code>_ror8</code>, <code>_overlay_unpack</code>, <code>_overlay</code> - find the final 4-byte <code>[A-Z]{2}[0-9]{2}</code> magic whose declared length ends exactly at EOF and whose embedded SHA-256 verifies, and return the unpacked bytes. The magic is read from the member, so Day 20's <code>RS20</code> needs no code change.</li><li><code>config()</code> - after collecting the container's blobs, each blob's verified overlay is unpacked and appended as one more HCFG carrier. The existing <code>_pick_hcfg</code> uniqueness rule still applies, so a second distinct carrier would Hold rather than guess. The d19 member has exactly one.</li><li><code>answer()</code> - <code>analysis_overlay_offset</code> / <code>analysis_overlay_size</code> resolve from <code>_overlay</code> and Hold (never guess) when no SHA-256-verified stub exists.</li></ol>
+<p>Supporting files in this folder:</p>
+<ul><li><code>scripts/pk19_overlay.py</code> - standalone, self-documenting unpacker (<code>python3 pk19_overlay.py &lt;member&gt; [MAGIC]</code>).</li><li><code>scripts/local_check.py</code> - offline resolver for every <code>d19_*</code> id through <code>autosolve_binary.answer()</code>, no GM call. Printed 12/12 OK before any submit; a full sweep resolved all 228 fields SURE, 0 probes.</li><li><code>challenges/_lib/_test_binary_overlay.py</code> - new lane catalog test, 16 checks, <code>RESULT: PASS</code>: independent <code>struct</code>-based parse vs the adapter on the real member; a re-packed <code>RS20</code> overlay with different keys; a corrupted SHA-256 and an overlay-less member yielding nothing; and a scan-cost guard. Existing lane tests re-run clean: container catalog 19/19, universe 45 shapes / 1372 answers, unseen slots, hdr_struct 10/10 - all <code>RESULT: PASS</code>.</li></ul>
+<h2 id="the-one-real-mistake-and-the-cost">The one real mistake, and the cost</h2>
+<p>The first implementation sliced the declared payload <strong>before</strong> bounds-checking its length. Any 4-byte <code>LLDD</code> text in a member looked like a candidate magic, and the 67 MB <code>d08</code> member matches that pattern about 65,000 times - each match slicing up to 67 MB. The overlay scan took <strong>133.7 s on d08 alone</strong>. The Single Solve still graded CORRECT (137.2 s, untimed), but the same run then spent ~10 minutes of CPU on the Time Trial's variant and had to be killed.</p>
+<p>Checked before doing anything else: a free <code>op=status</code> on both timed entries returned <code>409 start_required</code>, i.e. <strong>no timed window had been opened and no variant was spent</strong> - the stall happened in the pre-start compute. The fix was to test <code>off + 44 + ln == len(data)</code> before touching the payload (the stub runs to EOF by definition) and to search backwards from the last MiB, returning the first verified hit. d08's scan went from 133.7 s to 0.00 s, and all 228 fields now resolve in 1.5 s. The rerun took the Time Trial in 7.1 s and the Mastery in 28.4 s.</p>
+<p>Lesson for the lane: a byte-scanning extractor must bounds-check a length field read from untrusted bytes <em>before</em> slicing, and any new scan belongs on the clock-cost guard in the catalog test - a slow extractor is a lost timed window even when every answer it produces is right.</p>
+<h2 id="reproduce">Reproduce</h2>
+<pre class="code"><code class="lang-bash">RUN="wsl --cd [local path] python3"
+
+</code></pre>
+<h1 id="unzip-the-evidence-bundle-password-infected-and-unpack-the-day-19-stub">unzip the evidence bundle (password 'infected') and unpack the Day 19 stub</h1>
+<p>$RUN "challenges/Day 19/scripts/local_check.py"          # 12/12 d19 ids, no GM call $RUN challenges/_lib/_test_binary_overlay.py             # RESULT: PASS (16 checks) $RUN challenges/_lib/autosolve.py 19 binary-reverse-engineering-day-19-static-unpacking binary-reverse-engineering</p>
+<pre class="code"><code></code></pre></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#result-all-three-modes-correct">Result - all three modes CORRECT</a></li><li class="l2"><a href="#artifact">Artifact</a></li><li class="l2"><a href="#the-new-layer-a-packed-overlay-not-a-section">The new layer: a packed overlay, not a section</a></li><li class="l3"><a href="#measured-on-the-real-member">Measured on the real member</a></li><li class="l3"><a href="#recovered-config-decoded-hcfg-json">Recovered config (decoded HCFG JSON)</a></li><li class="l3"><a href="#the-12-d19-answers-single-solve">The 12 d19 answers (Single Solve)</a></li><li class="l2"><a href="#what-was-built">What was built</a></li><li class="l2"><a href="#the-one-real-mistake-and-the-cost">The one real mistake, and the cost</a></li><li class="l2"><a href="#reproduce">Reproduce</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-18-orphan-process.html">&lt; Orphan Process</a><a href="day-19-little-endian-on-the-prairie.html">Little Endian on the Prairie &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

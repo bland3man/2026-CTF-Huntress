@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Where Do We Begin - Day 10 write-up</title>
+<meta name="description" content="Day 10 Metadata Forensics write-up: Correction to the first draft: this file recorded Time Trial / Mastery as &quot;returned 409 timedintentnotavailable; rerun when they open&quot;. They">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-10.html">Day 10</a> / Where Do We Begin</p><p class="telemetry"><span>DAY 10</span><span class="sep">//</span><span>LANE: METADATA FORENSICS</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Where Do We Begin</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-metadata" href="../lanes/metadata.html">Metadata Forensics</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout"><article class="prose">
+<h1 id="where-do-we-begin-day-10-metadata-forensics">Where Do We Begin? (Day 10, metadata-forensics)</h1>
+<p>Question: pe.address_of_entry_point_rva_hex for telemetry-agent-001.exe. Solve: zip (password infected) holds one PE32 (machine 0x14c). AddressOfEntryPoint = u32 at e_lfanew+40 = 0x00065bd0 (ImageBase 0x400000). Gotcha: 0x65bd0 was rejected; the GM wants the RVA zero-padded to 8 hex digits: 0x00065bd0. Flag (Single Solve): <span class="flag" data-flag><span class="fl">Token</span><span class="fv">e164fa97bc9479d39353f3ebb153239a</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span> Banked: autosolve_metadata.py field pe.address_of_entry_point_rva_hex -&gt; 0x%08x. Flag (Time Trial): <span class="flag" data-flag><span class="fl">Token</span><span class="fv">81e1e3b6012e32127af42db2ab3833b0</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span> (CORRECT, 13:03:19Z) Flag (Mastery): <span class="flag" data-flag><span class="fl">Token</span><span class="fv">22bb5df5542e33db8f176e2dcb49feb6</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span> (CORRECT, 13:03:29Z)</p>
+<p>Correction to the first draft: this file recorded Time Trial / Mastery as "returned 409 timed_intent_not_available; rerun when they open". They were not gated. On a LEGACY single-pool timed route the GM rejects the run_for_time property itself (true OR false), while a plain op=start with the property omitted opens a normal hall_of_fame_eligible attempt. The same unchanged adapter solved both modes about 2 minutes later. Root cause and the permanent fix (ctf_gm.GM.start, autosolve_script.start, regression cases in _test_rotation_fix.py) are documented in challenges/Day 10/Bind Over Matter/Bind_Over_Matter_Writeup.md. Day 10 finished 15/15.</p></article></div><nav class="pager" aria-label="Write-up navigation"><a href="day-10-thirty-two-below.html">&lt; Thirty-Two Below</a><a href="day-10-zig-zag.html">Zig Zag &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

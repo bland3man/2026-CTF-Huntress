@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dim and Dimmer - Day 04 write-up</title>
+<meta name="description" content="Day 04 Script Analysis write-up: Known family scriptinventory (KB match). Reused challenges/lib/solvescriptinventory.py for PS1/JS/BAT (159 fields resolved unchanged) and ad">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-04.html">Day 04</a> / Dim and Dimmer</p><p class="telemetry"><span>DAY 04</span><span class="sep">//</span><span>LANE: SCRIPT ANALYSIS</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Dim and Dimmer</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-script" href="../lanes/script.html">Script Analysis</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
+<h1 id="dim-and-dimmer">Dim and Dimmer</h1>
+<h2 id="challenge">Challenge</h2>
+<ul><li>Lane: Script Analysis (Day 04), id <code>script-analysis-day-04-shell-contrast</code></li><li>Prompt: "These VBScript specimens hide their material behind character codes, reversible transforms, and winding control flow. Unwind every representation on paper, classify each behavior, and find out which stage passes the baton to which."</li><li>Scoring: 231 per-field answers per set (Mastery = 2 sets = 462). Partial credit via the Game Master; a batch containing any wrong field is rejected whole.</li><li>Single Solve: CORRECT (completion token <code>&lt;REDACTED_TOKEN&gt;</code>)</li><li>Time Trial: CORRECT (completion token <code>&lt;REDACTED_TOKEN&gt;</code>)</li><li>Mastery: CORRECT (completion token <code>&lt;REDACTED_TOKEN&gt;</code>) (tokens are per attempt/identity; redacted per project policy, see Lessons Learned)</li></ul>
+<h2 id="artifacts">Artifacts</h2>
+<p><code>evidence.zip</code> (AES, password <code>infected</code>): 30 inert fixtures = 3 PS1, 9 JScript, 9 Batch, 9 VBScript. The VBS layer is the new part; PS1/JS/BAT are the Day 03 "Expansion Pack" family.</p>
+<h2 id="triage">Triage</h2>
+<p>Known family <code>script_inventory</code> (KB match). Reused <code>challenges/_lib/solve_script_inventory.py</code> for PS1/JS/BAT (159 fields resolved unchanged) and added only the VBS layer (72 fields).</p>
+<h2 id="investigation">Investigation</h2>
+<ol><li>Each <code>.vbs</code> holds <code>Const Material_x</code> (encoded bytes), <code>Const Codec_x = "&lt;representation&gt;|&lt;transform&gt;|&lt;param&gt;"</code> and Load/Decode/Recover/Inspect functions. Decoding is static: parse the representation, undo the transform, check the plaintext is <code>v=1|steps=...|adapter=...|campaign_id=...|key=value</code>.
+<ul><li>Representations seen: decimal_pipe/dash/comma, hex_compact/colon/dash, reversed_decimal, reversed_hex, base64_literal, base64_chunks.</li><li>Transforms seen: identity, subtract_modulo_256 (code adds N), single_byte_xor, repeating_key_xor (key in <code>keyBytes = Array(..)</code>), rolling_xor (prev = previous ciphertext byte), reverse_bytes, reverse_then_xor.</li></ul></li><li>Role comes from the <code>steps</code> signature (same table as Day 03; relay-handoff with 4 steps is <code>staged_chain</code>). VBS attack id for launcher/chain/relay is the language technique <code>T1059.005</code>; others as Day 03 (T1105/T1140/T1041/T1486/none).</li><li><code>representation</code> / <code>transform</code> answers are the Codec tokens verbatim (GM accepted).</li><li>Control-flow label, read from the body of <code>Recover_*</code> only (decoy wrappers such as <code>If True Then</code>, <code>LCase(UCase("Host"))</code>, <code>If (2 &gt; 1) ...</code> are noise):
+<ul><li>plain straight line -&gt; <code>direct</code>; <code>Select Case</code> -&gt; <code>select_case</code>; <code>Do ... Exit Do ... Loop</code> -&gt; <code>do_once</code>; <code>While p &lt; 1 ... Wend</code> -&gt; <code>while_once</code>; <code>For i = 0 To 0</code> -&gt; <code>for_once</code>; <code>On Error Resume Next</code> + <code>Err.Number</code> check -&gt; <code>error_guard</code>.</li><li>Batch: <code>for /l</code> form -&gt; <code>call_subroutine</code> (first confirmed Day 04); other batch labels as Day 03. Batch expansion/control are form-derived (27/27 predicted correctly on the single solve).</li></ul></li><li>Failed guesses worth keeping: <code>do_loop</code>, <code>while_wend</code> were rejected; the GM label is <code>&lt;keyword&gt;_once</code>. Found by probing the untimed Single Solve per field.</li></ol>
+<h2 id="flag-recovery">Flag Recovery</h2>
+<p>Single Solve (untimed lab): submitted the 204 byte-derived fields in one batch (accepted), then probed the 27 expansion/control fields one at a time (accumulates accepted fields) until CORRECT. Time Trial / Mastery: windows are about 6-7 seconds. First two Time Trial shots failed (decoder crashed on a new codec; a brute-force decoder accepted an off-by-one key because it only checked the first 4 bytes). Fixes: generic parser plus strict validation (fully printable, <code>v=1|steps=[a-z_,]+|adapter=</code>), per-thread GM clients, and a parallel per-field fallback. A lab run (<code>lab_probe.py</code>) inside a window produced ground-truth control labels; the next attempt was CORRECT. Mastery was CORRECT on the first full submit (2.4 s from start).</p>
+<h2 id="minimal-reproduction">Minimal Reproduction</h2>
+<pre class="code"><code>wsl python3 "challenges/Day 04/Dim and Dimmer/scripts/run_timed.py" single|time_trial|mastery   # from framework root</code></pre>
+<p>(<code>run_timed.py</code> handles time_trial/mastery; single solve was run with <code>run_single.py</code>.) Needs <code>node</code> in WSL (<code>wsl sudo apt-get install -y nodejs</code>).</p>
+<h2 id="lessons-learned">Lessons Learned</h2>
+<ul><li>The raw 32-hex completion tokens were originally printed in plain text in this file's Challenge section - a direct violation of the project's own redaction rule (and the global secrets-handling standard). Found and fixed on review 2026-10-04 before this file could be published to the shared repo. Never print a real completion token into a writeup; use <code>&lt;REDACTED_TOKEN&gt;</code>.</li><li>Never use <code>\b</code> inside heredoc-built Python strings: it becomes a backspace byte and the regex silently never matches (cost one wrong timed shot).</li><li>Brute-forcing a decoder with a 4-byte prefix check is not validation; require full-text sanity.</li><li>GM HTTP client is not thread-safe: one <code>GM()</code> per thread.</li><li>Timed windows are about 6 s: probe labels in the untimed Single Solve or in a lab window, never debug inside the window.</li><li>Reusable code: <code>challenges/_lib/solve_dim_dimmer.py</code>, <code>decode_vbs.py</code>, <code>run_timed.py</code>.</li></ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#challenge">Challenge</a></li><li class="l2"><a href="#artifacts">Artifacts</a></li><li class="l2"><a href="#triage">Triage</a></li><li class="l2"><a href="#investigation">Investigation</a></li><li class="l2"><a href="#flag-recovery">Flag Recovery</a></li><li class="l2"><a href="#minimal-reproduction">Minimal Reproduction</a></li><li class="l2"><a href="#lessons-learned">Lessons Learned</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-03-table-manners.html">&lt; Table Manners</a><a href="day-04-go-fish.html">Go Fish &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

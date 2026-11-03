@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Looks Can Be Deceiving - Day 02 write-up</title>
+<meta name="description" content="Day 02 Metadata Forensics write-up: Theme &quot;Metadata Forensics&quot; + title &quot;Looks Can Be Deceiving&quot; -&gt; the note text is almost certainly a decoy; the real channel is file bytes/met">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-02.html">Day 02</a> / Looks Can Be Deceiving</p><p class="telemetry"><span>DAY 02</span><span class="sep">//</span><span>LANE: METADATA FORENSICS</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x1</span></span></p><h1>Looks Can Be Deceiving</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-metadata" href="../lanes/metadata.html">Metadata Forensics</a> <span class="pips" aria-label="Modes reported correct: SS"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip" title="Time Trial: not reported CORRECT in the write-up">TT</span><span class="pip" title="Mastery: not reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
+<h1 id="looks-can-be-deceiving">Looks Can Be Deceiving</h1>
+<h2 id="challenge">Challenge</h2>
+<ul><li>Event: Huntress CTF 2026, Day 02</li><li>Category: Metadata Forensics</li><li>Game Master ID: <code>metadata-forensics-day-02-looks-can-be-deceiving</code> (plus <code>/time_trial</code>, <code>/mastery</code>)</li><li>Modes: Single Solve, Time Trial, Mastery</li><li>Answer format: a lowercase hex string (the first 16 bytes of the assigned file). Not a <code>flag{...}</code> wrapper.</li></ul>
+<p>The assigned artifact is a ZIP containing a plausible-looking forensic "evidence note". The note is written to make the reader believe the case identifiers in its <em>text</em> are the evidence. They are the deception named in the title: the grader scores the <strong>raw leading bytes of the assigned file</strong>, not anything parsed from the note's prose.</p>
+<h2 id="artifacts">Artifacts</h2>
+<p>Local sample (one attempt's copy; the Game Master assigns fresh bytes per attempt):</p>
+<ul><li><code>looks_can_be_deceiving.zip</code> - 287 bytes, SHA-256 <code>c356020d0dafda86d80d000b3e3e1c0524f3a0c1a84ade856a74959047c1be67</code></li><li><code>extracted/evidence-note.txt</code> - 126 bytes, the single ZIP member</li></ul>
+<p>Sample note contents (decoy):</p>
+<pre class="code"><code>Huntress Metadata Forensics evidence note
+Case marker: CASE-52F88184C9D3
+Endpoint: WS-8ADC1123
+Collected sequence: 5558590970</code></pre>
+<h2 id="triage">Triage</h2>
+<ul><li>Theme "Metadata Forensics" + title "Looks Can Be Deceiving" -&gt; the note text is almost certainly a decoy; the real channel is file bytes/metadata.</li><li>This is the Day 02 sibling of Day 01 "You Must Be This Hash to Ride", which used the same <code>evidence-note.txt</code> shell and also scored the file's own bytes (hashes), never the note's prose.</li><li>Specialist lane: deterministic Game Master solver (no deep RE needed); the owning session drove it with GPT-6 Luna inside the AI Homebase VM, which is where the Game Master is reachable.</li></ul>
+<h2 id="investigation">Investigation</h2>
+<p>The decoy was confirmed by exhausting the "note text encodes the flag" hypothesis and getting nothing:</p>
+<ul><li>ZIP container metadata is clean and self-consistent (one member, matching local/central headers, no archive comment, plain <code>2026-01-01 00:00</code> DOS time and matching <code>UT</code> extended timestamp). The container is not the channel.</li><li>The three identifiers (<code>52F88184C9D3</code>, <code>8ADC1123</code>, <code>5558590970</code>) were swept through hex/base32/ base64/base85, int-in-base-{10,16,32,36,58,62}, little/big-endian, reversals, every concatenation order, single-byte and known-plaintext repeating-key XOR (forcing <code>flag{</code> only yielded garbage tails), and recursive base decoding. No <code>flag{</code>, no <code>huntress</code>, no readable plaintext. The decoded hex bytes are high-entropy, i.e. they were never meant to be decoded.</li></ul>
+<p>The actual task comes from the Game Master <code>start</code> response: <strong>report the hex of the first 16 bytes of the assigned file.</strong> The deception is that a reader fixates on the note's "case markers" while the grader only ever looks at <code>file[:16]</code>.</p>
+<p>Deterministic check on the local sample:</p>
+<pre class="code"><code>$ head -c16 extracted/evidence-note.txt | xxd -p
+48756e7472657373204d657461646174          # ASCII "Huntress Metadat"
+
+$ head -c16 looks_can_be_deceiving.zip | xxd -p
+504b03041400080008000000215c0000          # the PK\x03\x04 local-file-header</code></pre>
+<p>So for any assigned file the answer is just its leading-16-byte signature rendered as lowercase hex - the ZIP/member magic, not the human-readable claims inside it.</p>
+<h2 id="flag-recovery">Flag Recovery</h2>
+<p>Per-attempt flow (run inside the Homebase VM where <code>http://[ip]/huntress-ctf-proxy</code> is reachable, one HTTP session):</p>
+<ol><li><code>start</code> the challenge -&gt; receive the <code>answer_ids</code> and the capability/download reference.</li><li>Download the assigned file for that attempt.</li><li>Read its first 16 bytes and hex-encode them (lowercase).</li><li>Submit that hex under the attempt's <code>answer_id</code>; the Game Master validates and auto-completes the matching CourseStack question.</li></ol>
+<p>Because each attempt is assigned different bytes, the submitted value is computed live from the attempt's own file - never reused from another attempt or from this local sample.</p>
+<h2 id="flag">Flag</h2>
+<p>This challenge has no <code>flag{...}</code> token; each mode's answer is the computed first-16-byte hex of that attempt's assigned file, submitted via the Game Master. Example value, computed from the local sample <code>evidence-note.txt</code>:</p>
+<ul class="flag-list"><li><span class="flag" data-flag><span class="fl">Token</span><span class="fv">48756e7472657373204d657461646174</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li></ul>
+<p>Outcome (owning session, verified in CourseStack): Single Solve, Time Trial, and Mastery all <code>CORRECT</code> -&gt; SUBMITTED_ACCEPTED, 3/3 (10 pts).</p>
+<h2 id="minimal-reproduction">Minimal Reproduction</h2>
+<pre class="code"><code class="lang-bash"></code></pre>
+<h1 id="given-an-assigned-file-f-from-the-game-master">Given an assigned file F from the Game Master:</h1>
+<p>head -c16 F | xxd -p        # -&gt; lowercase hex of F's first 16 bytes = the answer</p>
+<pre class="code"><code>
+Then submit that hex string under the mode's `answer_id` through the Game Master proxy (reachable
+from inside the Homebase VM), which auto-completes the CourseStack question.
+
+</code></pre>
+<h2 id="lessons-learned">Lessons Learned</h2>
+<ul><li>"Looks can be deceiving" / "evidence note" is a decoy pattern: the human-readable identifiers are there to burn your time. Confirm the real channel (here: <code>file[:16]</code> bytes) before decoding prose.</li><li>This is the direct sibling of Day 01 "You Must Be This Hash to Ride" - same evidence-note shell, same "score the bytes, not the labels" idea. Recognizing the family immediately short-circuits the encoding rabbit hole.</li><li>A fast falsification sweep (bases, XOR, known-plaintext, recursion) is worth a minute: a uniformly high-entropy result is itself evidence that the values are not an encoding and the answer lies elsewhere (the raw bytes / Game Master task).</li><li>Keep the solve deterministic and per-attempt: <code>start -&gt; download assigned bytes -&gt; hex(file[:16]) -&gt; submit</code> in one run beats any hard-coded value, which is essential for the timed Time Trial / Mastery modes.</li></ul>
+<pre class="code"><code></code></pre></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#challenge">Challenge</a></li><li class="l2"><a href="#artifacts">Artifacts</a></li><li class="l2"><a href="#triage">Triage</a></li><li class="l2"><a href="#investigation">Investigation</a></li><li class="l2"><a href="#flag-recovery">Flag Recovery</a></li><li class="l2"><a href="#flag">Flag</a></li><li class="l2"><a href="#minimal-reproduction">Minimal Reproduction</a></li><li class="l2"><a href="#lessons-learned">Lessons Learned</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-02-host-with-the-most.html">&lt; Host With the Most</a><a href="day-02-mangled.html">Mangled &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

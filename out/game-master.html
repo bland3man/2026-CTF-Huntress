@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Game Master contract</title>
+<meta name="description" content="What each challenge mode required, with invented example values.">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="index.html">Overview</a>
+      <a href="setup.html">Setup</a>
+      <a href="game-master.html" aria-current="page">GM contract</a>
+      <a href="days/index.html">Days</a>
+      <a href="lanes/index.html">Lanes</a>
+      <a href="challenges/index.html">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="telemetry"><span>GM CONTRACT</span><span class="sep">//</span><span>SINGLE // TIME TRIAL // MASTERY</span></p><h1>Game Master contract</h1><p class="lede">Challenges were played through a Game Master service. This is the shape of what it asked for, per mode.</p></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="note">Every value on this page marked <span class="example-tag">example</span> is invented for illustration. No real attempt identifiers, download capabilities, credentials or per-team answers appear here. Field names are reproduced as the service used them.</div>
+
+<section>
+  <h2 class="sec-title">How a challenge was played <span class="code">GM // OVERVIEW</span></h2>
+  <div class="grid c3">
+    <div class="panel">
+      <p class="panel-label">Mode 1</p>
+      <h3>Single Solve</h3>
+      <p>Untimed. Start the challenge, receive the assigned artifact (or a live target for web challenges) and a list of questions, submit answers. The artifact is fixed for the attempt, so it can be fetched once and analysed at leisure.</p>
+    </div>
+    <div class="panel teal">
+      <p class="panel-label">Mode 2</p>
+      <h3>Time Trial</h3>
+      <p>Unlocked by a correct Single Solve. Same questions, but a freshly varied artifact per attempt and a short server-side deadline (often around thirty seconds). In practice only a solver that already works end to end can make it.</p>
+    </div>
+    <div class="panel">
+      <p class="panel-label">Mode 3</p>
+      <h3>Mastery</h3>
+      <p>Unlocked by a correct Time Trial. Several artifacts or targets at once (sets), each with its own copy of the questions, all due before one deadline. Answer identifiers carry a set prefix so each answer is tied to its artifact.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2 class="sec-title">Start response <span class="code">GM // START</span></h2>
+  <div class="layout with-side">
+    <div class="prose">
+      <p>Starting a mode returned the contract for that attempt. The fields our solvers relied on:</p>
+      <dl class="kv">
+        <dt>attempt_id</dt><dd>Opaque identifier of this attempt. Repeating a start resumed the same attempt rather than creating a new one.</dd>
+        <dt>answer_ids</dt><dd>The exact keys the submit had to use, for example <code>message</code>, or one key per field for multi-field challenges, or <code>set2.message</code> for Mastery.</dd>
+        <dt>questions</dt><dd>One entry per answer id: the question text, a pointer to the artifact (or archive member) it is about, and an <code>answer_format</code>.</dd>
+        <dt>answer_format</dt><dd>A kind (<code>exact_text</code>, <code>pattern</code>, <code>enum</code>, <code>ordered_tokens</code>, <code>integer</code>, <code>json</code>), a human-readable syntax, sometimes the allowed values, plus a normalisation note.</dd>
+        <dt>download / sha256</dt><dd>A capability link for the assigned artifact and its hash, so the solver could prove it analysed the right bytes.</dd>
+        <dt>targets</dt><dd>For web challenges: the live target URL(s) assigned to the attempt instead of a file.</dd>
+        <dt>deadline</dt><dd>Present on timed attempts: the server-side cut-off. Submissions after it come back <code>expired</code> with nothing graded.</dd>
+        <dt>run_for_time</dt><dd>On newer timed routes, a flag that selects a ranked (Hall of Fame) attempt instead of regular play; older routes were timed by default and rejected the property.</dd>
+      </dl>
+    </div>
+    <aside class="side">
+      <div class="panel teal">
+        <p class="panel-label">Start (single) <span class="example-tag">example</span></p>
+<pre class="code" style="margin:0;font-size:13px;white-space:pre-wrap"><code>{
+  "attempt_id": "example-0000",
+  "mode": "single",
+  "answer_ids": ["message"],
+  "questions": [{
+    "id": "message",
+    "artifact": "blob.txt",
+    "answer_format": {
+      "kind": "pattern",
+      "syntax": "three words, two digits"
+    }
+  }],
+  "download": "/download/EXAMPLE",
+  "sha256": "00ab...example"
+}</code></pre>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<section>
+  <h2 class="sec-title">Field contracts by mode <span class="code">GM // FIELDS</span></h2>
+  <div class="grid c3">
+    <div class="panel">
+      <p class="panel-label">Single Solve <span class="example-tag">example</span></p>
+<pre class="code" style="margin:0 0 12px;font-size:13px;white-space:pre-wrap"><code>answers:
+  message: "brisk-lantern-orbit-42"</code></pre>
+      <p>One field (warmups) or many fields, each named by the question, for example a file size, a hash, a header offset or a configuration value.</p>
+    </div>
+    <div class="panel">
+      <p class="panel-label">Time Trial <span class="example-tag">example</span></p>
+<pre class="code" style="margin:0 0 12px;font-size:13px;white-space:pre-wrap"><code>deadline: start + 30 s
+answers:
+  message: "quiet-harbor-pine-07"</code></pre>
+      <p>Same keys as the Single Solve, new bytes each attempt. Analysis, download and submit all had to fit inside the window.</p>
+    </div>
+    <div class="panel">
+      <p class="panel-label">Mastery <span class="example-tag">example</span></p>
+<pre class="code" style="margin:0 0 12px;font-size:13px;white-space:pre-wrap"><code>answers:
+  set1.message: "amber-signal-drift-11"
+  set2.message: "cold-meadow-relay-58"
+  set3.message: "north-cipher-gate-23"</code></pre>
+      <p>Several artifacts (or several web targets, answered as <code>proof-1</code>, <code>proof-2</code> ...) under one deadline.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2 class="sec-title">Results and refusals <span class="code">GM // CODES</span></h2>
+  <div class="grid c2">
+    <div class="panel">
+      <p class="panel-label">Submit results</p>
+      <dl class="kv">
+        <dt>CORRECT</dt><dd>Mode completed; the response carried the completion token for the mode.</dd>
+        <dt>accepted</dt><dd>Some fields accepted, with a count of how many remain.</dd>
+        <dt>incorrect</dt><dd>Nothing awarded. A batch with any wrong field was rejected as a whole, without saying which field.</dd>
+        <dt>expired</dt><dd>The timed window had closed; nothing was graded.</dd>
+      </dl>
+    </div>
+    <div class="panel">
+      <p class="panel-label">Conflicts we learned to read</p>
+      <dl class="kv">
+        <dt>prerequisite_required</dt><dd>An earlier mode is not CORRECT yet (Mastery before Time Trial).</dd>
+        <dt>timed_intent_not_available</dt><dd>The single ranked attempt is already spent, or the route is an older one that does not accept the ranked flag at all.</dd>
+        <dt>retry_variants_unavailable</dt><dd>No untimed variants left for a retry or practice run.</dd>
+        <dt>start_required</dt><dd>Status asked before starting; the response still included the public question contract, which let us prepare without opening a window.</dd>
+      </dl>
+    </div>
+  </div>
+  <div class="panel" style="margin-top:16px">
+    <p class="panel-label">Status probe <span class="example-tag">example</span></p>
+<pre class="code" style="margin:0 0 12px;font-size:13px;white-space:pre-wrap"><code>op=status  example-lane-day-00/time_trial
+  -&gt; result: "expired"
+     unique_attempts_remaining: 12</code></pre>
+    <p>A free status call reported how many attempt variants remained on a route. Reading it before opening a timed window was one of the cheapest protections we added: a zero meant the next attempt was the only one.</p>
+  </div>
+</section>
+
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="assets/site.js" defer></script>
+</body>
+</html>

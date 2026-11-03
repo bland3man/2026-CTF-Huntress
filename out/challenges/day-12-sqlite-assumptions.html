@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SQLite Assumptions - Day 12 write-up</title>
+<meta name="description" content="Day 12 Mobile Android write-up: Unzipped the APK (artifact0.bin): AndroidManifest.xml, classes.dex, META-INF signing files, assets/huntresspuzzle.json. assets/huntresspuzzl">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-12.html">Day 12</a> / SQLite Assumptions</p><p class="telemetry"><span>DAY 12</span><span class="sep">//</span><span>LANE: MOBILE ANDROID</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>SQLite Assumptions</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-mobile" href="../lanes/mobile.html">Mobile Android</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
+<h1 id="sqlite-assumptions-day-12-mobile-android">SQLite Assumptions - Day 12 (mobile-android)</h1>
+<p>GM id: mobile-android-day-12-sqlite-assumptions Case: MOB-12-4B4FA1A323, package com.huntress.mobile.d12.v4b4fa1a3235d</p>
+<h2 id="result">Result</h2>
+<ul><li>single_solve: CORRECT (AUTOSOLVE, 1.5 s)</li><li>time_trial: CORRECT (AUTOSOLVE, 2.3 s, derived from that attempt's own APK bytes)</li><li>mastery: CORRECT (AUTOSOLVE, 2.4 s)</li></ul>
+<h2 id="method">Method</h2>
+<ol><li>Unzipped the APK (artifact_0.bin): AndroidManifest.xml, classes.dex, META-INF signing files, assets/huntress_puzzle.json.</li><li>assets/huntress_puzzle.json = {"schema":"huntress.mobile.puzzle.v1","day":12,"codec":"hex","data":"414e532d30333946304439303731313131303530"}.</li><li>Codec "hex" (a codec already covered by autosolve_mobile.py): hex-decode data -&gt; ASCII.</li><li>Decoded Single Solve answer: <span class="flag" data-flag><span class="fl">Answer</span><span class="fv">ANS-039F0D9071111050</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span> (the GM accepted it as CORRECT via AUTOSOLVE).</li></ol>
+<p>The SQLite / authorization theme is flavour; the puzzle codec is the answer. The puzzle is per attempt, so timed attempts were derived by the autosolver from each attempt's own APK rather than reusing this value.</p>
+<h2 id="notes">Notes</h2>
+<ul><li>No extension of autosolve_mobile.py was needed: the existing hex codec handled today's variant.</li><li>A board.py todo check hit GM HTTP 429 rate_limited; not retried in a loop (rate-limit rule).</li></ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#result">Result</a></li><li class="l2"><a href="#method">Method</a></li><li class="l2"><a href="#notes">Notes</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-12-pascal-s-wager.html">&lt; Pascal&#x27;s Wager</a><a href="day-13-crystal-clear.html">Crystal Clear &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

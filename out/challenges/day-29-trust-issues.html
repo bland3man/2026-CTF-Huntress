@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trust Issues - Day 29 write-up</title>
+<meta name="description" content="Day 29 Metadata Forensics write-up: Artifact: single0.bin, 672 bytes, a ZIP (metadata-day-29-evidence.zip) holding one member, certificate-001.pem. Question: d29-x509-001-x509-">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-29.html">Day 29</a> / Trust Issues</p><p class="telemetry"><span>DAY 29</span><span class="sep">//</span><span>LANE: METADATA FORENSICS</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Trust Issues</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-metadata" href="../lanes/metadata.html">Metadata Forensics</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
+<h1 id="trust-issues-day-29-metadata-forensics-agent-4">Trust Issues - Day 29 (metadata-forensics) - agent-4</h1>
+<p>Challenge id: metadata-forensics-day-29-trust-issues Prompt: "Certificates appear in binaries, packages, mail, captures, and disk images. Fingerprint each one, collapse duplicates, and identify the trust claim unsupported by evidence."</p>
+<h2 id="results-from-the-local-runner-ledger">Results (from the local runner ledger)</h2>
+<div class="table-wrap"><table><thead><tr><th>Mode</th><th>Result</th><th>Time</th><th>Flag</th></tr></thead><tbody><tr><td>Single Solve</td><td>CORRECT</td><td>4.1 s</td><td><span class="flag" data-flag><span class="fl">Token</span><span class="fv">84ac96c5f081e2b5e9ce2505ecddcf32</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td></tr><tr><td>Time Trial</td><td>CORRECT</td><td>7.3 s</td><td><span class="flag" data-flag><span class="fl">Token</span><span class="fv">4a38b43147f0f46903b520b38f6d960f</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td></tr><tr><td>Mastery</td><td>CORRECT</td><td>7.0 s</td><td><span class="flag" data-flag><span class="fl">Token</span><span class="fv">2baf68cb907b0e36b40c87a795499e6c</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td></tr></tbody></table></div>
+<p>The runner (not me) made every GM call. I analysed bytes, edited the per-challenge journal and stayed off the GM.</p>
+<h2 id="single-solve-method">Single Solve method</h2>
+<ul><li>Artifact: <code>single_0.bin</code>, 672 bytes, a ZIP (<code>metadata-day-29-evidence.zip</code>) holding one member, <code>certificate-001.pem</code>.</li><li>Question: <code>d29-x509-001-x509-sha256-fingerprint</code> - "Determine x509.sha256_fingerprint for certificate-001.pem", exact 64-hex, case-insensitive.</li><li>Recipe: base64-decode the PEM body to DER, SHA-256 the DER bytes, print lowercase hex. The field key is <code>x509.sha256_fingerprint</code>; the shared adapter did not list it in FIELDS but resolved it through the GM-confirmed alias <code>x509.fingerprint_sha256</code> (kb/field_recipes). The fingerprint is of the certificate DER, not of the PEM text or the zip member.</li></ul>
+<h2 id="how-time-trial-and-mastery-differed">How Time Trial and Mastery differed</h2>
+<ul><li>Both are cumulative recaps in an <code>evidence.zip</code> (Mastery: 13 sets of ~34 ids, 442 ids in total, bundled in an ~8.7 MB artifact).</li><li>Time Trial had 34 ids: roster filename, evidence-note size/MD5/SHA-1/SHA-256/magic-16/BOM flag, the Day 4-28 field tokens (jpeg, png, pdf, zip x2, pe x3, dotnet, msi, lnk, ooxml, email, audio, video, elf, macho, apk, jar, sqlite, evtx, registry, prefetch, pcap, disk), the Day 29 x509 fingerprint, and the synthesis question <code>metadata-day-29-synthesis-sha256-order</code> (file names sorted by ascending full-file SHA-256, compact JSON array).</li><li>Mastery added per-set variants: renamed evidence-note copy filename/size/digests, roster size/digests, and evidence-note filename questions.</li><li>Recipes per family: digests/size/magic from the member's raw bytes; filenames from the zip listing (roster = the member whose basename starts with <code>roster</code>; renamed copy = the member with identical bytes to the evidence note under another name); format fields via the same autosolve_metadata extractors proven on Day 28 (24/24 offline test); synthesis = sort named files by their SHA-256 hex.</li><li>Answers were derived from each attempt's own bytes. Single Solve values were never reused.</li></ul>
+<h2 id="timeline-what-held-the-timed-modes">Timeline / what held the timed modes</h2>
+<ol><li>Runner first HELD Time Trial: the prediction journal did not exist (my fault: it had to be bound before the first timed attempt). I bound it.</li><li>HELD: the assignment snapshot carried no TT/MM answer IDs. Commander refreshed it (TT 34 ids, MM 442).</li><li>HELD: journal did not cover every id. I filled <code>covered_answer_ids</code>, transform, item shape and evidence after an offline TT-shaped fixture test of the clone matched independent calculations (x509 fingerprint, note digests/size/magic/BOM, pdf version, roster filename, sha256 order). Gate passed.</li><li>HELD: prebrief gate flagged <code>roster-filename</code> as "NO extractor" (97.1% coverage). I did not patch the clone, because the extractor already existed and the stand-in was the problem (see lessons). Commander resolved it; TT then went CORRECT in 7.3 s and Mastery followed at 7.0 s. I do not know which change the Commander made.</li></ol>
+<p>Structural vs runtime: the offline fixture test is structural; the CORRECT results come from the GM.</p>
+<h2 id="lessons-recommendations">LESSONS / RECOMMENDATIONS</h2>
+<ul><li>Missing piece: <code>roster-filename</code>. The adapter's "exact filename" branch already returns the single member of the zip whose basename starts with <code>roster</code> (Day 20 logic). The prebrief gate runs against the Single Solve zip as stand-in; that zip had only <code>certificate-001.pem</code>, and the roster question's artifact is the bare <code>evidence.zip</code> (no <code>-&gt; member</code>). <code>contract_preflight.split_unresolved</code> therefore classed it as "NO extractor" instead of "needs real bytes". It was a gate classification gap, not an extractor gap.</li><li>Stall: the timed modes were HELD across four rounds (journal missing, contract IDs missing, coverage empty, roster false positive). I cannot give an exact wall-clock figure; the runner log shows the first attempt at 09:00:03 and the pass only after the Commander's fix.</li><li>What would have been faster:
+<ol><li>Bind and fill the prediction journal immediately once Single Solve is CORRECT, instead of waiting for the held message (I only did it after the first HELD).</li><li>Have the release assignment carry TT/MM answer ids at stage time; the gate cannot pass without them.</li><li>In <code>contract_preflight.split_unresolved</code>, treat role-named members (roster, evidence-note copy, evidence-note) that are absent from the stand-in as needs-real-bytes. This is the shared fix; patching the clone to answer without a roster would fabricate data.</li><li>Add <code>x509.sha256_fingerprint</code> to FIELDS directly (it currently resolves through an alias recipe) and a fixture to the lane catalog test.</li></ol></li><li>Next-day candidate: the layer sequence suggests the recap bundle keeps growing by one field per day; keep the offline TT-shaped fixture test (certificate + roster + note) as a reusable check.</li></ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#results-from-the-local-runner-ledger">Results (from the local runner ledger)</a></li><li class="l2"><a href="#single-solve-method">Single Solve method</a></li><li class="l2"><a href="#how-time-trial-and-mastery-differed">How Time Trial and Mastery differed</a></li><li class="l2"><a href="#timeline-what-held-the-timed-modes">Timeline / what held the timed modes</a></li><li class="l2"><a href="#lessons-recommendations">LESSONS / RECOMMENDATIONS</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-29-rotten-base.html">&lt; Rotten Base</a><a href="day-29-white-box-key-recovery.html">White Box Key Recovery &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

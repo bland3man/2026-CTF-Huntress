@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Predictable Crypto - Day 14 write-up</title>
+<meta name="description" content="Day 14 Mobile Android write-up: The APK (artifact0.bin, 6 members) carries assets/huntresspuzzle.json: {&quot;schema&quot;:&quot;huntress.mobile.puzzle.v1&quot;,&quot;day&quot;:14,&quot;codec&quot;:&quot;caesar&quot;,&quot;data">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-14.html">Day 14</a> / Predictable Crypto</p><p class="telemetry"><span>DAY 14</span><span class="sep">//</span><span>LANE: MOBILE ANDROID</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Predictable Crypto</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-mobile" href="../lanes/mobile.html">Mobile Android</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
+<h1 id="predictable-crypto-mobile-android-day-14">Predictable Crypto (mobile-android, Day 14)</h1>
+<p>GM id: mobile-android-day-14-predictable-crypto Prompt: Exploit seeded nonces or weak derivation without bypassing earlier storage gates. Case: MOB-14-B14DCCA3D9, package com.huntress.mobile.d14.vb14dcca3d9ae</p>
+<h2 id="method">Method</h2>
+<ol><li>The APK (artifact_0.bin, 6 members) carries assets/huntress_puzzle.json: {"schema":"huntress.mobile.puzzle.v1","day":14,"codec":"caesar","data":"JW\\6L&gt;&lt;BL=A;OL&gt;NN:=?","key":9}</li><li>Today's codec is caesar with key 9. Applying it to data yields ANS- followed by 16 uppercase hex characters. The puzzle is generated per attempt, so each attempt's own APK is decoded rather than hard-coding an answer.</li><li>The existing autosolve_mobile.py adapter already handled the caesar codec (it was covered since Day 8), so no extension was needed. The Android topic (weak crypto / seeded nonces) is flavour; the puzzle codec is the answer.</li></ol>
+<h2 id="results-all-accepted-by-the-gm-solved-by-blandman3">Results (all accepted by the GM, solved_by Blandman3)</h2>
+<ul><li>single_solve: CORRECT, flag <span class="flag" data-flag><span class="fl">Token</span><span class="fv">7957dc2e7781fbc91b8187519e839a40</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li><li>time_trial: CORRECT, flag <span class="flag" data-flag><span class="fl">Token</span><span class="fv">0e0213c1264c31149bc0d320582fa218</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li><li>mastery: CORRECT, flag <span class="flag" data-flag><span class="fl">Token</span><span class="fv">ea85c737af2035317890979196117ee1</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li></ul>
+<h2 id="notes">Notes</h2>
+<ul><li>Time Trial and Mastery were run only by AUTOSOLVE after its readiness gate (early slots, finished in 2.6 s and 2.3 s).</li><li>No extra GM calls were made by this agent.</li></ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#method">Method</a></li><li class="l2"><a href="#results-all-accepted-by-the-gm-solved-by-blandman3">Results (all accepted by the GM, solved_by Blandman3)</a></li><li class="l2"><a href="#notes">Notes</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-13-zip-code.html">&lt; Zip Code</a><a href="day-14-selective-memory.html">Selective Memory &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Whats My Name Again - Day 11 write-up</title>
+<meta name="description" content="Day 11 Metadata Forensics write-up: Filenames on disk are randomized; the organiser&#x27;s own prompt is explicit that the recovery comes from the Windows PE VERSIONINFO resource in">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-11.html">Day 11</a> / Whats My Name Again</p><p class="telemetry"><span>DAY 11</span><span class="sep">//</span><span>LANE: METADATA FORENSICS</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Whats My Name Again</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-metadata" href="../lanes/metadata.html">Metadata Forensics</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
+<h1 id="whats-my-name-again-day-11-metadata-forensics">Whats My Name Again? (Day 11, metadata-forensics)</h1>
+<h2 id="summary">Summary</h2>
+<p>Filenames on disk are randomized; the organiser's own prompt is explicit that the recovery comes from the Windows PE VERSION_INFO resource instead. This attempt's delivery is one PE file, on disk as <code>telemetry-agent-001.exe</code>, whose embedded <code>VS_VERSION_INFO</code> -&gt; <code>StringFileInfo</code> -&gt; <code>OriginalFilename</code> field reads <code>pe-base-386.exe</code> - the impersonator the prompt asks to expose: the file calling itself <code>telemetry-agent-001.exe</code> on disk is, by its own internal record, <code>pe-base-386.exe</code>.</p>
+<h2 id="gap-found-and-fixed-same-day">Gap found and fixed same day</h2>
+<p><code>autosolve_metadata.py</code> had no handler for the <code>pe.version_original_filename</code> field token; the first autosolve attempt raised <code>ValueError: unknown structured field 'pe.version_original_filename'</code>. A new extractor, <code>challenges/_lib/pe_version.py</code>, was added and registered in <code>autosolve_metadata.py</code>: it walks the PE resource directory to the <code>VS_VERSION_INFO</code> resource, parses the fixed <code>VS_FIXEDFILEINFO</code> block and the <code>StringFileInfo</code> table, and exposes every standard VERSION_INFO string key (<code>OriginalFilename</code>, <code>InternalName</code>, <code>ProductName</code>, <code>CompanyName</code>, <code>FileDescription</code>, <code>FileVersion</code>, <code>ProductVersion</code>, etc.) under both the exact GM token spelling and the natural synonym spellings a future question could use. The fix cost under a second of agent time; the three modes solved immediately after.</p>
+<h2 id="results-all-three-modes-correct">Results - all three modes CORRECT</h2>
+<ul><li>Single Solve: <span class="flag" data-flag><span class="fl">Token</span><span class="fv">0e7262929537c2a3aa207d0eb5ff37de</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span> (autosolve, 1.6 s, after the pe_version.py fix).</li><li>Time Trial: <span class="flag" data-flag><span class="fl">Token</span><span class="fv">a994d84bf7688e3056585314bf3fcc76</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span> (2026-10-11T13:01:07.817Z, untimed fallback, 1.5 s).</li><li>Mastery: <span class="flag" data-flag><span class="fl">Token</span><span class="fv">f09afecd46d3e9e704e8d920818d3e86</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span> (2026-10-11T13:01:09.206Z, untimed fallback, 1.7 s).</li></ul>
+<h2 id="notes">Notes</h2>
+<ul><li><code>[gap]</code> lesson recorded same day: a new PE VERSION_INFO string-resource family, now a prepared extractor for any future <code>pe.version_*</code> field (OriginalFilename, InternalName, ProductName, CompanyName, FileDescription, FileVersion, ProductVersion and more) instead of a one-off patch.</li><li>This is the reference writeup for any future PE identity-recovery / impersonation-style challenge.</li></ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#summary">Summary</a></li><li class="l2"><a href="#gap-found-and-fixed-same-day">Gap found and fixed same day</a></li><li class="l2"><a href="#results-all-three-modes-correct">Results - all three modes CORRECT</a></li><li class="l2"><a href="#notes">Notes</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-11-safe-travels.html">&lt; Safe Travels</a><a href="day-12-autoit-takes-two.html">AutoIt Takes Two &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

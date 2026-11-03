@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shared Custody - Day 21 write-up</title>
+<meta name="description" content="Day 21 Binary RE write-up: Two new evidence-driven member selectors, applied in answer() only when the id carried no member tag and the dNN really has two or more bina">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-21.html">Day 21</a> / Shared Custody</p><p class="telemetry"><span>DAY 21</span><span class="sep">//</span><span>LANE: BINARY RE</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Shared Custody</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-binary" href="../lanes/binary.html">Binary RE</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
+<h1 id="day-21-shared-custody-binary-reverse-engineering">Day 21 - Shared Custody (binary-reverse-engineering)</h1>
+<ul><li>Challenge id: <code>binary-reverse-engineering-day-21-shared-library-boundaries</code></li><li>Lane: binary-reverse-engineering (agent-2, homestation)</li><li>Result: ALL THREE MODES CORRECT
+<ul><li>Single Solve (untimed): <strong>c02fa20ea735b069680c65448abaf5ee</strong> - 252/252 fields, 4.7 s</li><li>Time Trial (RANKED, Hall-of-Fame eligible): <strong>a2cad928077967288a88e1b177743235</strong> - 252/252 fields, 4.8 s in an 81 s window</li><li>Mastery (RANKED, Hall-of-Fame eligible): <strong>f78e3fe8db0e1052f437333a86dbffdc</strong> - 1260/1260 fields (5 sets), 16.1 s in a 326 s window</li></ul></li></ul>
+<h2 id="the-gm-s-own-framing">The GM's own framing</h2>
+<blockquote><p>No binary is an island - this one leans on shared libraries for everything. Trace the exports, the imports, and the loader's handshake, and mind the boundaries.</p></blockquote>
+<p>The day's new deliverable <code>d21</code> is a <strong>cooperating pair</strong> inside the cumulative <code>evidence.zip</code>:</p>
+<div class="table-wrap"><table><thead><tr><th>member (basename tail)</th><th>kind</th><th>role</th></tr></thead><tbody><tr><td><code>...-loader.elf</code></td><td>ELF64, <code>e_machine</code> 62 (x86-64)</td><td>the executable that dlopen()s the plugin; <strong>no HCFG config record</strong></td></tr><tr><td><code>...-plugin.cmxs</code></td><td>ELF64 shared object, <code>e_machine</code> 62</td><td>the shared library; carries the one CRC32-valid HCFG config record</td></tr></tbody></table></div>
+<p><code>.cmxs</code> is an OCaml-style dynamically loadable plugin extension, but the bytes are an ordinary ELF shared object - classified by bytes, not by extension, exactly as the lane's standing rule requires.</p>
+<h2 id="what-actually-held-and-why">What actually held, and why</h2>
+<p>The banked <code>autosolve_binary</code> adapter answered 248 of the 252 Single Solve ids on first contact. The four that held were the <em>untagged</em> HCFG config ids:</p>
+<pre class="code"><code>d21_analysis_config_campaign
+d21_analysis_config_domain
+d21_analysis_config_mutex
+d21_analysis_config_url</code></pre>
+<p>Root cause: on a multi-binary <code>dNN</code> the adapter selects the member from a <strong>tag inside the answer id</strong> (<code>_variant_tags</code>, built on Day 15's symbolized/stripped pair). That works for the ids that name their member - <code>d21_analysis_plugin_machine</code>, <code>d21_analysis_plugin_config_url</code> - but Day 21 asks the same config questions a second time with <strong>no tag at all</strong>, naming the member in the question <em>prose</em> only:</p>
+<blockquote><p>Use the d21-- plugin.cmxs member; <strong>the loader has no scored HCFG config</strong>. Scan the specified member for literal HCFG magic ...</p></blockquote>
+<p>With no tag, <code>deliverable()</code> returned the first <code>d21--</code> binary (the loader), the loader genuinely has no HCFG record, and <code>config()</code> correctly refused to invent one -&gt; <code>Hold</code>. The hold was the adapter being honest, not wrong.</p>
+<p>Note the two distinct selector phrasings the GM uses on the same day:</p>
+<ul><li><code>"Use the unique d21-- member whose basename ends plugin.cmxs."</code> (tagged ids)</li><li><code>"Use the d21-- plugin.cmxs member; the loader has no scored HCFG config."</code> (untagged ids)</li></ul>
+<h2 id="the-fix-challenges-lib-autosolve-binary-py">The fix (challenges/_lib/autosolve_binary.py)</h2>
+<p>Two new evidence-driven member selectors, applied in <code>answer()</code> only when the id carried <strong>no</strong> member tag and the <code>dNN</code> really has two or more binary members (<code>artifact_sha256_N</code> is never re-pointed - it is numbered from member order):</p>
+<ol><li><code>_member_from_question(question, ms)</code> - honour the <strong>question text's own</strong> selector. Both phrasings above are matched (<code>basename ends &lt;tok&gt;</code> and <code>-- &lt;tok&gt; member</code>); a token is accepted only when it looks like a basename tail (contains a dot) and <strong>exactly one</strong> member's basename ends with it. One match or nothing - never a first match.</li><li><code>_hcfg_member(ms)</code> - fallback for <code>analysis_config_*</code> / <code>analysis_xor_key_hex</code> / <code>analysis_hcfg_version</code> / <code>analysis_hcfg_offset</code>: try <code>config()</code> on every member and use the <strong>unique</strong> member whose bytes actually carry a readable record. Zero or several carriers -&gt; keep the ordinary deliverable, i.e. still hold. This reads the "the loader has no scored HCFG config" claim out of the bytes instead of trusting the prose.</li></ol>
+<p>After the patch: <code>binary: 252 sure, 0 probe, 0 unknown (3.7s)</code> and the GM graded the Single CORRECT.</p>
+<h2 id="hcfg-record-format-unchanged-restated-by-the-gm">HCFG record format (unchanged, restated by the GM)</h2>
+<pre class="code"><code>+0  "HCFG"            ASCII magic
++4  u8                version
++5  u8                XOR key
++6  u16le             payload length
++8  u32le             CRC32 of the DECODED payload
++12 payload           XOR every byte with the key -&gt; UTF-8 JSON</code></pre>
+<p>Bounds-check, XOR, verify CRC32, parse JSON, read the top-level property. The adapter's <code>config()</code> scans every member plus the container bytes and holds if two <em>distinct</em> CRC-valid carriers exist, so "the unique CRC32-valid HCFG record" is proven rather than assumed.</p>
+<h2 id="day-21-answers-gm-accepted-single-solve">Day 21 answers (GM-accepted, Single Solve)</h2>
+<div class="table-wrap"><table><thead><tr><th>id</th><th>value</th></tr></thead><tbody><tr><td><code>d21_artifact_sha256_1</code></td><td><code>a5fd9145ffc95a2dd330abf1e09404473527227fcba74062cc06ce3ee9cfb94e</code></td></tr><tr><td><code>d21_artifact_sha256_2</code></td><td><code>e5d298e7ccf93c74941d8459d4b2c34b89ed46306d7661f7aa256384e3778d19</code></td></tr><tr><td><code>d21_analysis_loader_machine</code></td><td><code>62</code></td></tr><tr><td><code>d21_analysis_plugin_machine</code></td><td><code>62</code></td></tr><tr><td><code>d21_analysis_config_campaign</code> / <code>d21_analysis_plugin_config_campaign</code></td><td><code>BR21-000</code></td></tr><tr><td><code>d21_analysis_config_domain</code> / <code>d21_analysis_plugin_config_domain</code></td><td><code>node-000.day21.example.invalid</code></td></tr><tr><td><code>d21_analysis_config_url</code> / <code>d21_analysis_plugin_config_url</code></td><td><code>https://node-000.day21.example.invalid/api/BR21-000</code></td></tr><tr><td><code>d21_analysis_config_mutex</code> / <code>d21_analysis_plugin_config_mutex</code></td><td><code>Global\HuntressBR21_000</code></td></tr></tbody></table></div>
+<p>The remaining 240 Single ids are the cumulative <code>d01</code>..<code>d20</code> recap (ELF/PE/.NET/Go/Rust/Java/Kotlin/Swift/Nim/Zig inventory plus each earlier day's HCFG record), all answered unchanged by the banked spine. Mastery asked the same shapes over five mutated sets (<code>set1.</code>..<code>set5.</code>, 1260 ids) and every value was derived from that attempt's own bytes.</p>
+<h2 id="timing">Timing</h2>
+<p>Single Solve was CORRECT before either timed mode was touched, so the readiness gate let both ranked windows open EARLY with no rehearsal wait: Time Trial finished 4.8 s into an 81 s window, Mastery 16.1 s into a 326 s window. Both were confirmed RANKED by the GM (<code>run_for_time</code>, <code>hall_of_fame_eligible</code>, and a deadline all reported).</p>
+<h2 id="lessons-for-the-lane">Lessons for the lane</h2>
+<ul><li>The day's layer was <strong>member routing</strong>, not a new toolchain or a new slot shape. The novelty words (<code>boundaries</code>, <code>custody</code>, <code>library</code>, <code>shared</code>) pointed at the pair, and the HYPOTHESIS "zero or one new slot per day" held: zero genuinely new slot shapes, one new <em>addressing</em> mode for existing slots.</li><li>When a pair day asks the same field twice, expect one copy with the member in the id and one with the member in the prose. Parse the question's selector; do not assume the first deliverable.</li><li>A <code>Hold</code> on a member that truly lacks the structure is the adapter working. The fix belongs in member selection, never in loosening <code>config()</code>.</li></ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#the-gm-s-own-framing">The GM&#x27;s own framing</a></li><li class="l2"><a href="#what-actually-held-and-why">What actually held, and why</a></li><li class="l2"><a href="#the-fix-challenges-lib-autosolve-binary-py">The fix (challenges/_lib/autosolve_binary.py)</a></li><li class="l2"><a href="#hcfg-record-format-unchanged-restated-by-the-gm">HCFG record format (unchanged, restated by the GM)</a></li><li class="l2"><a href="#day-21-answers-gm-accepted-single-solve">Day 21 answers (GM-accepted, Single Solve)</a></li><li class="l2"><a href="#timing">Timing</a></li><li class="l2"><a href="#lessons-for-the-lane">Lessons for the lane</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-21-session-impression.html">&lt; Session Impression</a><a href="day-21-stored-for-later.html">Stored for Later &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 17 - write-ups</title>
+<meta name="description" content="Huntress CTF 2026 Day 17 write-ups.">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html" aria-current="page">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / Day 17</p><p class="telemetry"><span>DAY 17</span><span class="sep">//</span><span>5 CONTACTS</span><span class="sep">//</span><span>ALL LOGGED MODES CORRECT</span></p><h1>Day 17</h1><p class="lede">Write-ups recorded for this release day.</p></div></div>
+<main id="main">
+  <div class="wrap">
+<section><ul class="cards"><li data-search="bacon bits warmups warmups day 17 day 17" data-lane="warmups"><a class="card lane-warmups" href="../challenges/day-17-bacon-bits.html"><span class="meta"><span class="day">DAY 17</span><span class="badge lane-warmups">Warmups</span><span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span></span><span class="card-title">Bacon Bits</span><p class="sum">Artifact: groups of 5 a/b -&gt; 0..15 -&gt; pairs of nibbles -&gt; ASCII &quot;Nice work decoding this warmup! To solve, submit this exact answer to the Game Master: tidy-rocket-harbor-20&quot;. Answer: ...</p><span class="chev" aria-hidden="true">&gt;</span></a></li><li data-search="decoder ring binary re binary day 17 day 17" data-lane="binary"><a class="card lane-binary" href="../challenges/day-17-decoder-ring.html"><span class="meta"><span class="day">DAY 17</span><span class="badge lane-binary">Binary RE</span><span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span></span><span class="card-title">Decoder Ring</span><p class="sum">Mastery returns zero per-field feedback on an incorrect whole submit. But a partial submit that is 100% correct for every included field returns accepted with acceptedids and remaining. So the oracle is: ...</p><span class="chev" aria-hidden="true">&gt;</span></a></li><li data-search="fetch quest script analysis script day 17 day 17" data-lane="script"><a class="card lane-script" href="../challenges/day-17-fetch-quest.html"><span class="meta"><span class="day">DAY 17</span><span class="badge lane-script">Script Analysis</span><span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span></span><span class="card-title">Fetch Quest</span><p class="sum">No new reversing was needed. The banked lane spine (challenges/lib/autosolvescript.py, driven by challenges/lib/autosolve.py) handled the whole thing:</p><span class="chev" aria-hidden="true">&gt;</span></a></li><li data-search="hear me out metadata forensics metadata day 17 day 17" data-lane="metadata"><a class="card lane-metadata" href="../challenges/day-17-hear-me-out.html"><span class="meta"><span class="day">DAY 17</span><span class="badge lane-metadata">Metadata Forensics</span><span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span></span><span class="card-title">Hear Me Out</span><p class="sum">The actual codec comes from the bytes (fmt chunk format tag 1, 16-bit, mono, 16 kHz), not the name: pcms16le (ffprobe codecname spelling). New extractor challenges/lib/mediacodec.py (ffprobe first, ...</p><span class="chev" aria-hidden="true">&gt;</span></a></li><li data-search="name collapse mobile android mobile day 17 day 17" data-lane="mobile"><a class="card lane-mobile" href="../challenges/day-17-name-collapse.html"><span class="meta"><span class="day">DAY 17</span><span class="badge lane-mobile">Mobile Android</span><span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span></span><span class="card-title">Name Collapse</span><p class="sum">Single, Time Trial and Mastery all CORRECT via autosolve (Single 1.1s, TT 3.5s, Mastery 2.6s). Single answer (decoded from the shipped APK): ANS-E26A5C21D3110FA1</p><span class="chev" aria-hidden="true">&gt;</span></a></li></ul></section><nav class="pager" aria-label="Day navigation"><a href="day-16.html">&lt; Day 16</a><a href="day-18.html">Day 18 &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

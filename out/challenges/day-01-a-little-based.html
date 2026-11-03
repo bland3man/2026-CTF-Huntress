@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Little Based - Day 01 write-up</title>
+<meta name="description" content="Day 01 Warmups write-up: FAST PATH. &quot;Sixty-four is a good base&quot; -&gt; Base64.">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-01.html">Day 01</a> / A Little Based</p><p class="telemetry"><span>DAY 01</span><span class="sep">//</span><span>LANE: WARMUPS</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>A Little Based</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-warmups" href="../lanes/warmups.html">Warmups</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
+<h1 id="a-little-based">A Little Based</h1>
+<h2 id="challenge">Challenge</h2>
+<ul><li>Category: Warmups (Day 01), 2 points (Single Solve)</li><li>Game Master ID: <code>warmups-day-01</code></li><li>Prompt:</li></ul>
+<blockquote><p>Everyone has to start somewhere. I hear sixty-four is a good base.</p>
+<p>You can download the single-solve file for this challenge here: a_little_based.txt (148 B) or ask the Game Master for your single-solve file in the AI Homebase virtual machine.</p></blockquote>
+<ul><li>Game Master question: "Decode the assigned blob completely. What exact answer slug does its final non-empty decoded line instruct you to submit?" (answer field <code>message</code>)</li></ul>
+<h2 id="artifacts">Artifacts</h2>
+<div class="table-wrap"><table><thead><tr><th>File</th><th>Source</th><th>SHA-256</th></tr></thead><tbody><tr><td><code>a_little_based.txt</code></td><td>CourseStack download link</td><td><code>18a470c3708678d69c1fb0a39e6b94b875b07e323f5f104c1662179c2f9632fa</code></td></tr><tr><td><code>blob.txt</code></td><td>Game Master, assigned to this attempt</td><td><code>939968bee79630a691e906f1e1a9f6af1d286a34ee8eae23d7a9485e519aa4cd</code></td></tr></tbody></table></div>
+<h2 id="triage">Triage</h2>
+<p>FAST PATH. "Sixty-four is a good base" -&gt; Base64.</p>
+<h2 id="investigation">Investigation</h2>
+<ol><li>I decoded the CourseStack download with one Base64 pass:
+<pre class="code"><code>Nice work decoding this warmup! To solve, submit this exact answer to the Game Master: dashing-tent-mosaic-17</code></pre></li><li>I submitted <code>dashing-tent-mosaic-17</code> to the Game Master, which answered <code>{"result":"incorrect"}</code>. This file did not match the artifact assigned to the attempt.</li><li>The Game Master start response named a different artifact, <code>blob.txt</code>, with SHA-256 <code>939968be...</code>. Downloaded through the Homebase proxy (<code>http://[ip]/huntress-ctf-proxy</code>), it contained:
+<pre class="code"><code>ZmxhZ3thODY2MjYxNWMyOGRiZmZhNTgzM2NkNzQxNGJjNTRjY30=</code></pre></li><li>One Base64 decode gave plaintext:
+<ul class="flag-list"><li><span class="flag" data-flag><span class="fl">Decoded</span><span class="fv">flag{a8662615c28dbffa5833cd7414bc54cc}</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li></ul></li><li>I submitted it under <code>message</code>, and the Game Master answered <code>{"result":"CORRECT","name":"A Little Based",...}</code>.</li></ol>
+<h2 id="flag-recovery">Flag Recovery</h2>
+<ul><li>Source: the assigned <code>blob.txt</code>. Its hash matches the one in the Game Master start response.</li><li>Transform: a single Base64 decode.</li><li>Verification: decoding locally gives the same plaintext, and the blob hash matches. The Game Master returned <code>CORRECT</code>.</li></ul>
+<h2 id="flag">Flag</h2>
+<ul class="flag-list"><li><span class="flag" data-flag><span class="fl">Decoded</span><span class="fv">flag{a8662615c28dbffa5833cd7414bc54cc}</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li></ul>
+<h2 id="time-trial-and-mastery">Time Trial and Mastery</h2>
+<p>The Homebase agent ran both from a script (<code>a_little_based_run.py</code>, saved in the Homebase workspace <code>[local path]</code>, not copied here). It used one HTTP session and no hand steps.</p>
+<ul><li>Mastery (<code>warmups-day-01/mastery</code>) is locked until the Time Trial is done. Starting it first returns HTTP 409 <code>prerequisite_required</code>.</li><li>Time Trial: start returns <code>attempt_id</code>, <code>download</code> (a capability URL), <code>sha256</code>, <code>answer_ids:["message"]</code> and a server <code>deadline</code> of start+30s. The script downloads, Base64-decodes and submits. Result: <code>CORRECT</code> in 1.363 s. That beat the server deadline but missed the 1 s stated on CourseStack.</li><li>Mastery: three artifacts (<code>blob-01..03.txt</code>), each with its own capability URL and SHA-256 in the start response, downloaded concurrently. Each blob starts with a <strong>numeric index and a tab</strong> before the Base64 payload, so strip that prefix before decoding. Answers go under <code>set1.message</code>, <code>set2.message</code> and <code>set3.message</code>. Result: <code>CORRECT</code> in 2.937 s.</li></ul>
+<div class="table-wrap"><table><thead><tr><th>Mode</th><th>Answer(s) the Game Master marked CORRECT</th></tr></thead><tbody><tr><td>Time Trial</td><td><span class="flag" data-flag><span class="fl">Decoded</span><span class="fv">flag{8b388c5593234cb644f27d67bcfc580c}</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td></tr><tr><td>Mastery set1</td><td><span class="flag" data-flag><span class="fl">Decoded</span><span class="fv">flag{dbc41d0e7827589462c583c56172b001}</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td></tr><tr><td>Mastery set2</td><td><span class="flag" data-flag><span class="fl">Decoded</span><span class="fv">flag{21ae3a17e5ccc787d0ccd2ada39fcf81}</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td></tr><tr><td>Mastery set3</td><td><span class="flag" data-flag><span class="fl">Decoded</span><span class="fv">flag{8b422c104b592939505f36b58dbe70ae}</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td></tr></tbody></table></div>
+<p>Verification: these are the Game Master's own <code>CORRECT</code> responses as relayed by the Homebase agent. The dynamic artifacts were not copied locally, so they could not be re-decoded independently.</p>
+<h2 id="minimal-reproduction">Minimal Reproduction</h2>
+<pre class="code"><code class="lang-bash"></code></pre>
+<h1 id="in-ai-homebase-fetch-the-attempt-s-blob-txt-via-the-game-master-proxy-then">in AI Homebase: fetch the attempt's blob.txt via the Game Master proxy, then</h1>
+<p>base64 -d blob.txt</p>
+<pre class="code"><code>
+</code></pre>
+<h2 id="lessons-learned">Lessons Learned</h2>
+<ul><li>The static CourseStack download and the Game Master's assigned artifact can differ. <strong>Always solve the artifact named in the Game Master start response, and check its SHA-256.</strong> The download's "answer slug" was a decoy for this attempt and was marked incorrect.</li><li>The Game Master's stated answer format ("slug") did not match what it accepted (a <code>flag{}</code> value). Trust the bytes, not the stated format.</li><li>Homebase uses the proxy <code>http://[ip]/huntress-ctf-proxy</code> (with <code>?op=list</code>, start, and submit operations). The CourseStack proxy URL works only after you click <strong>Connect</strong> on the challenge page, which issues the auth token.</li></ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#challenge">Challenge</a></li><li class="l2"><a href="#artifacts">Artifacts</a></li><li class="l2"><a href="#triage">Triage</a></li><li class="l2"><a href="#investigation">Investigation</a></li><li class="l2"><a href="#flag-recovery">Flag Recovery</a></li><li class="l2"><a href="#flag">Flag</a></li><li class="l2"><a href="#time-trial-and-mastery">Time Trial and Mastery</a></li><li class="l2"><a href="#minimal-reproduction">Minimal Reproduction</a></li><li class="l2"><a href="#lessons-learned">Lessons Learned</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><span></span><a href="day-01-back-up-a-minute.html">Back Up a Minute &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

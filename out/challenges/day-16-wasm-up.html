@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wasm Up - Day 16 write-up</title>
+<meta name="description" content="Day 16 Binary RE write-up: The banked lane adapter (challenges/lib/autosolvebinary.py) answered 156 of 160 fields at claim time and correctly HELD the rest rather than">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-16.html">Day 16</a> / Wasm Up</p><p class="telemetry"><span>DAY 16</span><span class="sep">//</span><span>LANE: BINARY RE</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Wasm Up</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-binary" href="../lanes/binary.html">Binary RE</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
+<h1 id="day-16-wasm-up-binary-reverse-engineering">Day 16 - Wasm Up (binary-reverse-engineering)</h1>
+<p>GM id: <code>binary-reverse-engineering-day-16-webassembly-optimization-equivalence</code> Agent: agent-2 | Lane: binary-reverse-engineering | 160 answer ids (Single / Time Trial), 800 (Mastery)</p>
+<h2 id="result-every-mode-correct">Result - every mode CORRECT</h2>
+<div class="table-wrap"><table><thead><tr><th>Mode</th><th>Result</th><th>Flag</th></tr></thead><tbody><tr><td>Single Solve</td><td>CORRECT</td><td><span class="flag" data-flag><span class="fl">Token</span><span class="fv">be2cbd8e8fbb533080b925755e0e72b2</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td></tr><tr><td>Time Trial</td><td>CORRECT</td><td><span class="flag" data-flag><span class="fl">Token</span><span class="fv">a7220f7810a88737d346487c757d49ca</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td></tr><tr><td>Mastery</td><td>CORRECT</td><td><span class="flag" data-flag><span class="fl">Token</span><span class="fv">401269f4f03755353fcd6e7060352979</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td></tr></tbody></table></div>
+<h2 id="the-challenge">The challenge</h2>
+<blockquote><p>WebAssembly runs in a sandbox, but the sandbox has doors: imports, memory, indirect calls. Map every door in this module and inventory what passes through.</p></blockquote>
+<p>The artifact is the lane's usual cumulative AES-ZIP evidence bundle (<code>artifact_0.bin</code>, 32,253,202 bytes, password <code>infected</code>), 19 members: the d01..d15 binaries from every earlier day in this lane plus the new Day 16 block - <strong>two WebAssembly modules</strong>:</p>
+<pre class="code"><code>d16--variant-000-direct.wasm    570 bytes
+d16--variant-000-compact.wasm   561 bytes</code></pre>
+<p>"Optimization equivalence" is the point of the pair: both export the same <code>evaluate</code> function (same type <code>(i32) -&gt; i32</code>) and the <code>direct</code> build spells the logic as nested <code>if/else</code> blocks while the <code>compact</code> build is the same function folded into <code>select</code> instructions - different code sections, identical semantics, identical embedded config.</p>
+<h2 id="what-was-already-solved-at-claim">What was already solved at claim</h2>
+<p>The banked lane adapter (<code>challenges/_lib/autosolve_binary.py</code>) answered <strong>156 of 160</strong> fields at claim time and correctly HELD the rest rather than guessing. The residue was exactly four ids, all of them the new wasm layer:</p>
+<pre class="code"><code>d16_analysis_direct_format      d16_analysis_direct_architecture
+d16_analysis_compact_format     d16_analysis_compact_architecture</code></pre>
+<p>Note what the contract does <strong>not</strong> ask: there is no <code>d16_analysis_machine</code>. Every earlier day pairs <code>analysis_machine</code> with <code>analysis_architecture</code>; a wasm module has no executable-header machine field, and the question set reflects that. That absence is the clue that <code>*_architecture</code> is a real, separate fact here, not a restatement of a machine code.</p>
+<p>The member-tag routing (<code>direct</code> / <code>compact</code> in the field id, the Day 15 "Stripped" shape) and the HCFG config extraction already worked on the wasm bytes - the config answers were among the 156 accepted - so only the two label families needed building.</p>
+<h2 id="solving-the-new-layer">Solving the new layer</h2>
+<h3 id="1-classify-from-the-bytes">1. Classify from the bytes</h3>
+<pre class="code"><code>00000000: 0061 736d 0100 0000   \0asm, version 1 (MVP)</code></pre>
+<p><code>autosolve_binary.kind()</code> returned <code>"unknown"</code> for <code>\0asm</code>, which is why the two label fields had no handler. Added the container:</p>
+<pre class="code"><code class="lang-python">if b[:8] == b"\x00asm\x01\x00\x00\x00" or (b[:4] == b"\x00asm" and len(b) &gt;= 8):
+    return "wasm"</code></pre>
+<h3 id="2-the-format-label">2. The format label</h3>
+<p>The GM's format vocabulary in this lane is the <strong>short lowercase container token</strong>, never a tool sentence - 96+ graded samples give <code>elf</code>, <code>pe</code>, <code>pe_cli</code>, <code>jar</code> (<code>accepted_values.py show</code>). So the wasm container token is <code>wasm</code>, not <code>WebAssembly (wasm) binary module version 0x1 (MVP)</code>.</p>
+<h3 id="3-the-architecture-label">3. The architecture label</h3>
+<p>A wasm module carries exactly one piece of address-width evidence: the limits flags byte of its memory type. Section id 5 of both members is:</p>
+<pre class="code"><code>05 83 80 80 80 00   section 5, LEB size (5-byte padded)
+01                  one memory
+00 01               limits flags 0x00, min 1 page</code></pre>
+<p>Flags bit <code>0x04</code> is the memory64 bit; it is clear, so the module addresses 32-bit memory -&gt; the wasm target name is **<code>wasm32</code>**. <code>_wasm_arch()</code> walks the sections LEB-aware (the generator pads every section size to 5 bytes, so a naive single-byte size read desynchronises immediately) and returns <code>wasm64</code> when that bit is set, <code>wasm32</code> otherwise.</p>
+<h3 id="4-the-doors-the-prompt-asks-about-read-then-answered-where-asked">4. The doors the prompt asks about (read, then answered where asked)</h3>
+<p>Section inventory of both members, identical:</p>
+<pre class="code"><code>sections : type, function, memory, export, code, data
+exports  : memory (memory 0), evaluate (func 0)
+imports  : 0   &lt;- the "doors": this module imports nothing
+tables   : none -&gt; no indirect call surface</code></pre>
+<p>So the sandbox doors are: **no imports, one exported 1-page memory, one exported function <code>evaluate</code>, no table and therefore no <code>call_indirect</code>**. What passes through the exported memory is the data segment - and that is where the lane's usual payload lives.</p>
+<h3 id="5-the-hcfg-record-inside-the-data-segment">5. The HCFG record inside the data segment</h3>
+<p>Data segment 0 is an active segment at <code>i32.const 0x400</code> holding the familiar record:</p>
+<pre class="code"><code>offset 125 (direct) / 116 (compact)
+'HCFG' 01 c1  6f 01  e5 27 cf f6   magic, version 1, xor key 0xc1, len 367 LE, crc32 LE</code></pre>
+<p>XOR the 367 payload bytes with <code>0xc1</code>:</p>
+<pre class="code"><code class="lang-json">{"campaign":"BR16-000","domain":"node-000.day16.example.invalid","ipv4":"198.51.100.60",
+ "url":"https://node-000.day16.example.invalid/api/BR16-000","mutex":"Global\\HuntressBR16_000",
+ "windows_path":"C:\\ProgramData\\HuntressLab\\day16\\BR16-000.dat",
+ "linux_path":"/var/tmp/huntress-lab/day16/BR16-000.dat",
+ "service":"HuntressLab-Day16-000","host_model":"workstation"}</code></pre>
+<p>Both members carry byte-identical configs - the "equivalence" again. A second data segment at <code>i32.const 0x800</code> holds the marker strings <code>huntress.binary.dynamic_trace.v1</code> and <code>sandboxed_module_inventory</code>.</p>
+<h2 id="submitted-values-for-the-four-new-ids">Submitted values for the four new ids</h2>
+<div class="table-wrap"><table><thead><tr><th>id</th><th>value</th></tr></thead><tbody><tr><td><code>d16_analysis_direct_format</code></td><td><code>wasm</code></td></tr><tr><td><code>d16_analysis_compact_format</code></td><td><code>wasm</code></td></tr><tr><td><code>d16_analysis_direct_architecture</code></td><td><code>wasm32</code></td></tr><tr><td><code>d16_analysis_compact_architecture</code></td><td><code>wasm32</code></td></tr><tr><td>(context) <code>d16_artifact_sha256_1</code></td><td><code>d7b5f809180c62f5033830a3d53158db6eae315046fa6b50a3caed52155a5269</code></td></tr><tr><td>(context) <code>d16_artifact_sha256_2</code></td><td><code>1c68c4062584495311c2f4894c3db30ba37e6372c17d8eede1e96a247751fdee</code></td></tr></tbody></table></div>
+<h2 id="verification-before-any-gm-call">Verification before any GM call</h2>
+<p><code>scripts/local_check.py</code> replays the saved contract plus the real artifact bytes through <code>autosolve_binary.analyse()</code> offline, with no GM call at all. It printed:</p>
+<pre class="code"><code>sure=160 probe=0 unknown=0</code></pre>
+<p>Only then was AUTOSOLVE rerun. One submit per mode:</p>
+<pre class="code"><code>binary: 160 sure, 0 probe, 0 unknown (3.7s)
+AUTOSOLVE single_solve: CORRECT in 9.8s
+AUTOSOLVE time_trial:   CORRECT in 4.4s   (160 sure, 0 probe, 0 unknown)
+AUTOSOLVE mastery:      CORRECT in 70.5s  (800 sure, 0 probe, 0 unknown)</code></pre>
+<p>The timed variants mutate the bundle but not the slot shapes, so the same extractor that solved the Single derived every answer from each attempt's own bytes - no re-analysis inside a 30 s window.</p>
+<h2 id="regression-cover-added">Regression cover added</h2>
+<p><code>challenges/_lib/_test_binary_universe.py</code> gained a self-contained wasm shape (no compiler needed): <code>build_wasm(tag, memory64=False)</code> emits a minimal valid module - type / function / memory / export / code / data - with the HCFG record as its active data segment. Three new checks:</p>
+<ul><li>a <code>direct</code> + <code>compact</code> pair: 12 fields correct (format <code>wasm</code>, architecture <code>wasm32</code>, config routed per member tag);</li><li><code>analysis_machine</code> on a wasm module stays HELD (no header field to read - never guessed);</li><li>a memory64 module answers <code>wasm64</code>.</li></ul>
+<p><code>RESULT: PASS</code> - 45 shapes, 1369 field answers correct, 59 checks, 0 wrong. Re-ran the neighbours: <code>_test_binary_container_catalog.py</code> 19/19 PASS, <code>_test_binary_hdr_struct.py</code> PASS.</p>
+<h2 id="lessons">Lessons</h2>
+<ol><li><strong>A missing question is evidence.</strong> The absence of <code>d16_analysis_machine</code> said the generator knew a wasm module has no e_machine, which made <code>*_architecture</code> a distinct fact (the address width) rather than a second spelling of a machine code.</li><li><strong>The grader's vocabulary is the short lowercase container token.</strong> 144 graded <code>analysis_format</code> samples (<code>elf</code> / <code>pe_cli</code> / <code>jar</code>) settle the spelling for any new container: <code>wasm</code>, not a <code>file</code> sentence.</li><li><strong>Parse wasm section sizes as LEB128.</strong> The generator pads every size to 5 bytes (<code>86 80 80 80 00</code> = 6); a single-byte size read desynchronises on the first section.</li><li>Only one layer changed. The spine (member-tag routing, HCFG scan, sha ordering, 156 of 160 fields) was already banked - extending <code>kind()</code> plus two label branches was the whole build.</li></ol></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#result-every-mode-correct">Result - every mode CORRECT</a></li><li class="l2"><a href="#the-challenge">The challenge</a></li><li class="l2"><a href="#what-was-already-solved-at-claim">What was already solved at claim</a></li><li class="l2"><a href="#solving-the-new-layer">Solving the new layer</a></li><li class="l3"><a href="#1-classify-from-the-bytes">1. Classify from the bytes</a></li><li class="l3"><a href="#2-the-format-label">2. The format label</a></li><li class="l3"><a href="#3-the-architecture-label">3. The architecture label</a></li><li class="l3"><a href="#4-the-doors-the-prompt-asks-about-read-then-answered-where-asked">4. The doors the prompt asks about (read, then answered where asked)</a></li><li class="l3"><a href="#5-the-hcfg-record-inside-the-data-segment">5. The HCFG record inside the data segment</a></li><li class="l2"><a href="#submitted-values-for-the-four-new-ids">Submitted values for the four new ids</a></li><li class="l2"><a href="#verification-before-any-gm-call">Verification before any GM call</a></li><li class="l2"><a href="#regression-cover-added">Regression cover added</a></li><li class="l2"><a href="#lessons">Lessons</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-16-same-same-but-different.html">&lt; Same Same, But Different</a><a href="day-17-bacon-bits.html">Bacon Bits &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

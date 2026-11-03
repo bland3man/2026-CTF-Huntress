@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>One More Thing - Day 31 write-up</title>
+<meta name="description" content="Day 31 Warmups write-up: Single / Time Trial: one blob, base64 -&gt; gzip -&gt; base32 -&gt; slug; solved by the stock decoder chain with no change. Mastery: 153 numbered-lin">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-31.html">Day 31</a> / One More Thing</p><p class="telemetry"><span>DAY 31</span><span class="sep">//</span><span>LANE: WARMUPS</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>One More Thing</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-warmups" href="../lanes/warmups.html">Warmups</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
+<h1 id="day-31-one-more-thing-warmups-agent-3">Day 31 - One More Thing (warmups) - agent-3</h1>
+<p>Prompt: "Thirty-two, a little pressure, then sixty-four. Unpack that thought." = base32 -&gt; gzip -&gt; base64 (peel base64, gunzip, base32).</p>
+<h2 id="results">Results</h2>
+<ul><li>Single Solve: CORRECT - FLAG <span class="flag" data-flag><span class="fl">Token</span><span class="fv">2a0ed481ad80fa6ad37a70f04926ef19</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li><li>Time Trial: CORRECT (4.9 s, ranked) - FLAG <span class="flag" data-flag><span class="fl">Token</span><span class="fv">2c0111e5970c53903c4ade871cd5cf83</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li><li>Mastery: CORRECT (4.3 s) - FLAG <span class="flag" data-flag><span class="fl">Token</span><span class="fv">086af78c8d697e0b1fbcd61641f9ddaa</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li></ul>
+<h2 id="method">Method</h2>
+<ul><li>Single / Time Trial: one blob, base64 -&gt; gzip -&gt; base32 -&gt; slug; solved by the stock decoder chain with no change.</li><li>Mastery: 153 numbered-line blobs of 31 rows each (ladder D30 plus a new row 31). Rows 1-30 were already covered. Row 31 = base64 of a gzip stream whose payload is base32 text (e.g. MUWTCOA=) that decodes to the slug tail. The existing <code>_container_texts</code> peeled base64+gzip but stopped at the base32 text, so <code>_structural_unique</code> found no slug and all 153 blobs were skipped (HELD, 0/153 coverage).</li><li>Fix (clone only): <code>_gzip_b32</code> decoder, <code>LINE_DECODERS["gzipb32"]</code>, <code>LADDER_NAMES_D31 = LADDER_NAMES_D30 + ["gzipb32"]</code>, and a <code>(31, LADDER_NAMES_D31)</code> entry first in <code>_KNOWN_LADDERS</code> in <code>scripts/warmups_wip.py</code>. Offline check: 153/153 blobs decode to a valid slug (<code>scripts/test_mm_offline.py</code>), then <code>assignment_runner.py --rerun</code> -&gt; CORRECT.</li></ul>
+<h2 id="lessons-d-1">Lessons + D+1</h2>
+<ul><li>Missing piece: a THREE-layer row (b64 -&gt; gzip -&gt; b32). <code>_container_texts</code> only composes one text codec plus one container layer.</li><li>Stall: roughly 10 min between the HELD (153 skipped) and the rerun. The first mastery window was a ranked attempt that went gate_blocked; the rerun used a fresh variant (255 left) via op=retry and finished in 4.3 s.</li><li>Keep in clone vs port: PORT to shared. Make <code>_structural_unique</code> / <code>_container_texts</code> follow up a container result with a second text-codec step (base32/base64/hex), and add <code>LADDER_NAMES_D31</code> to shared <code>autosolve_warmups.py</code>.</li><li>D+1: expect row 32 to append one more layer; the title/prompt names the layers in order ("Thirty-two ... pressure ... sixty-four").</li></ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#results">Results</a></li><li class="l2"><a href="#method">Method</a></li><li class="l2"><a href="#lessons-d-1">Lessons + D+1</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-31-no-artifact-left-behind.html">&lt; No Artifact Left Behind</a><span></span></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>
