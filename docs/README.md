@@ -6,7 +6,7 @@ Pages site: https://bland3man.github.io/2026-CTF-Huntress/
 
 ## What is here
 
-- 187 challenge write-ups, written during the event, one page each, grouped by day (31 of 31 days logged) and by lane
+- 188 challenge write-ups, written during the event, one page each, grouped by day (31 of 31 days logged) and by lane
   (warmups, metadata forensics, mobile, script analysis, binary reverse engineering, web, other).
 - How the team was set up: an AI Commander per station, lane agents, deterministic per-lane solvers and a daily learning loop.
 - The Game Master contract: what each mode (Single Solve, Time Trial, Mastery) asked for, with invented example values.
