@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Make It Make Sense - Day 29 write-up</title>
+<meta name="description" content="Day 29 Script Analysis write-up: Challenge id: script analysis day 29 makefile variant diff Lane: script analysis Agent: agent 1 (the team solver) Date solved: 2026 10 29 Mo">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-29.html">Day 29</a> / <a href="../lanes/script.html">Script Analysis</a> / Make It Make Sense</p><p class="telemetry"><span>DAY 29</span><span class="sep">//</span><span>LANE: SCRIPT ANALYSIS</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Make It Make Sense</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-script" href="../lanes/script.html">Script Analysis</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose"><h1 id="make-it-make-sense-day-29-script-analysis">Make It Make Sense (Day 29, script-analysis)</h1>
+<p>Challenge id: <code>script-analysis-day-29-makefile-variant-diff</code>
+Lane: script-analysis
+Agent: agent-1 (the team solver)
+Date solved: 2026-10-29</p>
+<h2 id="flags-all-three-modes-correct">Flags (all three modes CORRECT)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Flag</th>
+<th style="text-align: right;">Timing</th>
+<th>Ranked</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Single Solve</td>
+<td><code>e56d3ebde626f7c4e5e084bc9f1d599f</code></td>
+<td style="text-align: right;">18.7 s</td>
+<td>no</td>
+</tr>
+<tr>
+<td>Time Trial</td>
+<td><code>2e8dda3a4fe1656df47be52d7238cdf9</code></td>
+<td style="text-align: right;">35.1 s</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Mastery</td>
+<td><code>218111bd0cc658306e716a52ff1a7f7d</code></td>
+<td style="text-align: right;">271.0 s</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="prompt">Prompt</h2>
+<p>"Unseen Makefile variants and their prior-language build chains differ in layered variables and target flow. Diff them carefully, and keep only the tradecraft conclusions that hold up across every variant."</p>
+<h2 id="artifacts">Artifacts</h2>
+<ul>
+<li><code>artifacts/single_0.bin</code>   159,137 bytes, SHA256 <code>0ba75808186d63e2269cd7d69f2d6d2835cd6425300ce2aa9a389204218a1525</code></li>
+<li>AES-encrypted ZIP, password <code>infected</code>, 16+ member script fixtures (ps1, js, vbs, cmd, mjs, sh, csx, php, pl, rb, lua, gs, groovy, jsp, applescript, ahk, au3, dockerfile, exs, escript, gd, github_actions, groovy, jsp, lua, mof, msbuild_xml, nsis, perl, php, ruby, terraform_hcl, typescript, wmi_mof, plus <code>polyglot-makefile-*.mk</code>).</li>
+<li><code>artifacts/time_trial_0.bin</code>  178,178 bytes - same shape, AES-encrypted ZIP (pw <code>infected</code>), 16 members.</li>
+<li><code>artifacts/mastery_0.bin</code>     2,338,988 bytes - plain ZIP wrapping 13 nested <code>evidence-*.zip</code> members (bundle-of-variants form).</li>
+</ul>
+<h2 id="recognize-deterministic-path">Recognize - deterministic path</h2>
+<ol>
+<li><code>file single_0.bin</code> -&gt; <code>Zip archive data ... method=AES Encrypted</code>. Standard script-lane carrier.</li>
+<li><code>peel_any.py &lt;artifact&gt;</code> -&gt; <code>zip(aes, password infected)</code> with a per-member type table (<code>powershell</code>, <code>javascript</code>, <code>vbscript</code>, <code>batch</code>, <code>bash</code>, <code>node</code>, <code>polyglot-*</code>). That listing alone identifies the family.</li>
+<li>Family fingerprint: 50-cell polyglot-script library with per-field <code>Material_&lt;id&gt;/Codec_&lt;id&gt;</code> descriptors - the script_inventory family handled every day since D8. Today's new carrier is <code>polyglot-makefile-*.mk</code> (benign-utility, downloader, launcher, staged-chain) added into the same spine; descriptor keys unchanged.</li>
+<li>The in-tree <code>autosolve_script</code> adapter already covers all of that; the only load-bearing step at runtime is the AES unlock with the hard-coded CTF password <code>infected</code>.</li>
+</ol>
+<h2 id="solve-what-the-adapter-actually-did">Solve - what the adapter actually did</h2>
+<ul>
+<li><code>claim_next.py agent-1</code> -&gt; single_0.bin pre-fetched; <code>script_wip.py</code> cloned as the per-CID solver copy.</li>
+<li><code>autosolve_script.run()</code> iterated the ZIP members, peeled the carrier, ran <code>solve_fields_ext</code> on the decoded text, and submitted a single batch:</li>
+<li><code>single_solve: CORRECT in 18.7s</code>.</li>
+<li><code>field_formats.confirm_all banked 44 new token(s)</code> -&gt; fresh makefile-variant field tokens learned on SS and reused for TT/MM.</li>
+<li>Time Trial (178 kB ZIP, 16 polyglot members): <code>field_formats.confirm_all banked 1833 new token(s)</code> -&gt; <code>CORRECT 35.1s [RANKED]</code>.</li>
+<li>Mastery (2.34 MB bundle of 13 nested <code>evidence-*.zip</code>): <code>field_formats.confirm_all banked 23829 new token(s)</code> -&gt; <code>CORRECT 271.0s [RANKED]</code>.</li>
+</ul>
+<p>No per-field extractor edits were needed; the SS adapter answered TT and MM unmodified.</p>
+<h2 id="hiccups-and-how-to-avoid-them-next-time">Hiccups (and how to avoid them next time)</h2>
+<p>Timeline (actual runs for this CID):
+- 09:00  SS CORRECT (18.7s)
+- 09:00  TT HELD - "time_trial contract has no answer IDs in the release assignment" (per-release contract not staged yet; the lane-specific <code>script-analysis-day-29-makefile-variant-diff/time_trial</code> had no answer_ids until a GM.start was made)
+- 09:13  Rerun: TT HELD - "solver copy changed after the prediction was recorded" (mode_prediction.json was bound at 09:00 before any later solver-copy touch invalidated the gate hash)
+- 09:17  Rerun: TT HELD - "gate unavailable - prior mode CORRECT does NOT authorize time_trial without a verified current-mode contract; D29 P0-A fail-closed"
+- 09:28  Rerun: TT HELD - "current GM status unavailable (TimeoutError)" (transient GM read timeout on readiness check)
+- 09:31  Rerun: TT CORRECT (35.1s, RANKED), MM CORRECT (271.0s, RANKED)</p>
+<p>Root causes:
+1. The release assignment arrived with empty <code>answer_ids</code> for the timed modes (<code>n_questions: 0</code>), so the pre-start prediction journal couldn't be populated and the gate kept failing closed. The adapter has a documented bypass ("prediction gate skipped - letting GM.start() provide answer IDs; using the SS adapter"), but it requires the prediction gate to pass once first.
+2. The solver-copy hash churned because the capability layer rewrote <code>script_wip.py</code> on each run start; <code>mode_prediction.py bind</code> had captured the pre-restart hash. The gate correctly refuses to open the timed window on a hash mismatch (prevents spending a variant on an unverified solver).
+3. A single transient <code>TimeoutError</code> on <code>GM.status</code> burned one more restart cycle - the gate is deliberately conservative on readiness.</p>
+<h2 id="recommendations-do-it-faster-next-time">Recommendations - do it faster next time</h2>
+<ol>
+<li><strong>Order of operations</strong>: <code>mode_prediction.py bind</code> must run <strong>after</strong> the final capability-layer rewrite of the solver copy, not before. The claim phase triggers a solver-copy edit that invalidates any prediction journal bound earlier in the same second. Rebind the journal immediately before the first <code>assignment_runner ... --rerun</code>.</li>
+<li><strong>Empty TT/MM contract is normal, not a bug</strong>: when <code>assignment.task.n_questions == 0</code> and <code>mode_entries[].run_for_time_supported</code> is true, the lane adapter is proven on SS and GM.start will provide the answer_ids. The runner's "D29 live override" takes this path once SS is CORRECT - the first HELD on this message is expected and the next <code>--rerun</code> clears it.</li>
+<li><strong>One rerun absorbs a GM TimeoutError</strong>: do not panic; the runner never spent a timed variant during the HELD cycles because the gate failed closed. Rerun once per transient error, not more.</li>
+<li><strong>Recognize the carrier in one step</strong>: <code>peel_any.py &lt;artifact&gt;</code> prints <code>zip(aes, password infected)</code> and the member type table in a single call. That is the only recognition step needed for the entire script_inventory family (and has been since D15).</li>
+<li><strong>Mastery bundle shape</strong>: MM artifact is a plain ZIP of nested <code>evidence-*.zip</code> files; adapter already recurses into each (<code>solve_fields_ext</code> + peeled lane_peel). No per-member extractor needed - trust the banked tokens from the SS and TT passes.</li>
+<li><strong>Novel carrier for Day 29</strong>: <code>polyglot-makefile-*.mk</code> was today's new sub-layer (benign-utility, downloader, launcher, staged-chain). All four slot into the existing descriptor spine with zero adapter changes; this confirms the running hypothesis that bash-advanced/polyglot features are self-describing.</li>
+<li><strong>GM TimeoutError pattern</strong>: the runner's "readiness gate skipped - unreadable: TimeoutError" is survivable; a single <code>--rerun</code> within 60s normally wins. Do not escalate to needuser on a single TimeoutError.</li>
+</ol>
+<h2 id="lessons-banked">Lessons banked</h2>
+<ul>
+<li><code>field_formats.confirm_all</code> banked 44 (SS) + 1,833 (TT) + 23,829 (MM) tokens. The MM run essentially populated the lane's token memory for makefile-variant diffs; future days reusing these ids should be first-contact CORRECT.</li>
+<li>Password <code>infected</code> for AES-encrypted script-lane ZIPs - already standard, confirmed again here.</li>
+<li>D29 P0-A fail-closed gate: documented. Do not try to pre-stage the per-CID contract; let GM.start fill it after SS is CORRECT.</li>
+</ul>
+<h2 id="references">References</h2>
+<ul>
+<li>Adapter: <code>challenges/Day 29/📜 Make It Make Sense/scripts/script_wip.py</code> (per-CID clone of <code>_lib/autosolve_script.py</code>).</li>
+<li>Run log: <code>challenges/Day 29/_board/script-analysis-day-29-makefile-variant-diff.autosolve.agent-1.log</code>.</li>
+<li>Results JSON: <code>challenges/Day 29/_board/script-analysis-day-29-makefile-variant-diff.autosolve.json</code>.</li>
+</ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#flags-all-three-modes-correct">Flags (all three modes CORRECT)</a></li><li class="l2"><a href="#prompt">Prompt</a></li><li class="l2"><a href="#artifacts">Artifacts</a></li><li class="l2"><a href="#recognize-deterministic-path">Recognize - deterministic path</a></li><li class="l2"><a href="#solve-what-the-adapter-actually-did">Solve - what the adapter actually did</a></li><li class="l2"><a href="#hiccups-and-how-to-avoid-them-next-time">Hiccups (and how to avoid them next time)</a></li><li class="l2"><a href="#recommendations-do-it-faster-next-time">Recommendations - do it faster next time</a></li><li class="l2"><a href="#lessons-banked">Lessons banked</a></li><li class="l2"><a href="#references">References</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="../days/day-29.html">&lt; Day 29</a><a href="../challenges/index.html">All write-ups &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

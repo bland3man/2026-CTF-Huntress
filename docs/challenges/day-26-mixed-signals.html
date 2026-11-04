@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mixed Signals - Day 26 write-up</title>
+<meta name="description" content="Day 26 Script Analysis write-up: Challenge id: script analysis day 26 beam message flow Lane: script analysis (homestation owned) Prompt: &quot;An Erlang escript passes messages ">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-26.html">Day 26</a> / <a href="../lanes/script.html">Script Analysis</a> / Mixed Signals</p><p class="telemetry"><span>DAY 26</span><span class="sep">//</span><span>LANE: SCRIPT ANALYSIS</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Mixed Signals</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-script" href="../lanes/script.html">Script Analysis</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose"><h1 id="mixed-signals-day-26-script-analysis">Mixed Signals — Day 26 (script-analysis)</h1>
+<ul>
+<li><strong>Challenge id:</strong> <code>script-analysis-day-26-beam-message-flow</code></li>
+<li><strong>Lane:</strong> script-analysis (homestation-owned)</li>
+<li><strong>Prompt:</strong> <em>"An Erlang escript passes messages between processes, and some of its indicators look suspiciously familiar. Trace the message flow, and separate the true cross-language indicators from deterministic collision decoys planted to look like old friends."</em></li>
+<li><strong>Flags (all three modes CORRECT):</strong></li>
+<li>Single Solve: <code>6878320ea80b7bb2719c1fe33c2ce5e8</code></li>
+<li>Time Trial: <code>a801e376278276793fe7255507a6cc1f</code></li>
+<li><strong>Mastery: <code>b31436e7ebe6f08b633f610df7b2f152</code></strong> (solved 2026-10-26T13:49Z, by <code>the team solver</code>)</li>
+</ul>
+<h2 id="what-the-challenge-actually-is">What the challenge actually is</h2>
+<p>A scaled-up version of the Day-22 "installer-script-chain" script-triage family. Each
+mode is a batch of answer ids, each id derived from a script fixture inside an evidence
+archive. The theme ("Erlang escript / message flow / collision decoys") is <strong>flavour</strong>;
+mechanically every fixture is a single-file descriptor carrier.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Mode</th>
+<th style="text-align: right;">answer ids</th>
+<th>shape</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Single Solve</td>
+<td style="text-align: right;">1615</td>
+<td>scenario ids (<code>resource-*</code>, <code>collection-*</code>, <code>impact-*</code>)</td>
+</tr>
+<tr>
+<td>Time Trial</td>
+<td style="text-align: right;">1677</td>
+<td>one "set" of carrier ids</td>
+</tr>
+<tr>
+<td><strong>Mastery</strong></td>
+<td style="text-align: right;"><strong>16770</strong></td>
+<td><strong>10 sets × 1677</strong>, outer zip of <code>evidence-01.zip … evidence-10.zip</code> (setK ↔ evidence-0K)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Each <code>evidence-0K.zip</code> holds ~170 fixtures across <strong>25+ carriers</strong>: PowerShell, Python,
+JScript/JavaScript/node, VBScript, batch, bash, and the <em>polyglot</em> carriers PHP, Lua,
+Perl, Ruby, TypeScript, AppleScript, AutoIt, AutoHotkey, C# script, Google Apps Script,
+Groovy, GitHub Actions YAML, MSBuild XML, NSIS, WMI MOF, JSP, GDScript, Erlang escript,
+Elixir. Every fixture embeds a <strong>layered-encoded <code>key=value</code> descriptor</strong> (e.g.
+<code>LYR-hex_b64_rev</code>, <code>b32_b64_rev</code>, <code>b64_b32_b64</code>, …). 21 field classes per set:
+<code>campaign, campaign-token, role, steps, attack, obfuscation, url, url-host, stage-count,
+stage-profile, next-language, file-path, path-leaf, indicator, style, feature, primitive,
+carrier, secondary, tertiary, handoff-id</code>.</p>
+<p>The banked extractor (<code>autosolve_script</code> + <code>solve_node_by_node</code>) already resolves <strong>19 of
+21 classes with zero changes</strong> — including the <code>attack</code> precedence graph, campaign
+reconstruction, roles, steps, obfuscation profiles. Single and Time Trial landed CORRECT
+automatically at 09:00. <strong>Mastery did not.</strong></p>
+<h2 id="why-mastery-failed-at-0900-three-root-causes-all-proven">Why Mastery failed at 09:00 — three root causes (all proven)</h2>
+<h3 id="bug-1-setblob-misalignment-at-10-sets-the-big-one">BUG 1 — set/blob misalignment at ≥10 sets (the big one)</h3>
+<p><code>autosolve_script.solve_fields_ext</code> splits the outer zip into per-set blobs and aligns
+them to sets <strong>by index after <code>sorted({set-prefix strings})</code></strong>. Lexicographically that is
+<code>['set1','set10','set2','set3',…,'set9']</code>, while the inner archives sort numerically
+<code>['evidence-01'…'evidence-10']</code>. So <code>set10→evidence-02</code>, <code>set2→evidence-03</code>, … — <strong>9 of 10
+sets read the wrong evidence archive.</strong> Because every set reuses the <em>same file names</em>
+with <em>different bytes</em> (the "collision decoy" theme), the mis-read produces confident,
+plausible, <strong>wrong</strong> answers rather than a crash.</p>
+<p>Measured on the real Mastery bytes (<code>verify_sortbug.py</code>):</p>
+<pre class="code"><code class="lang-text">stock solve_fields_ext on full blob: answered=16770/16770  match_known_good=2506  mismatched=14264
+mismatches per set: set2:1603 set3:1604 set4:1575 set5:1580 set6:1576 set7:1573 set8:1579 set9:1588 set10:1586
+</code></pre>
+<p><strong>85% of answers wrong.</strong> Day 11 had only 2 sets (lexical order == numeric) so the bug was
+dormant until a double-digit set count appeared. The <code>geometry_flags</code> even warned:
+<code>mastery_sets 2 -&gt; 10 (was Day 11)</code>.</p>
+<h3 id="bug-2-sequential-solve-overruns-the-window">BUG 2 — sequential solve overruns the window</h3>
+<p>The 10 sets are analysed one-after-another (~15–18 s each ⇒ 150–180 s for extraction
+alone; the offline stock run exceeded a 120 s timeout). Add download + a 16770-answer
+submit and it does not fit the ~5-min Mastery deadline. The 09:00 worker was torn down by
+the daily manager mid-solve — no autosolve/submit event was ever logged.</p>
+<h3 id="bug-3-descriptor-decode-spill-1-field">BUG 3 — descriptor decode spill (1 field)</h3>
+<p>One <code>csharp_script</code> fixture in set8 decoded with <strong>trailing non-printable bytes after the
+real value</strong>: <code>…/.7e2d2dd8d2ed7742.stage\x00&lt;garbage&gt;</code>. <code>exact_text</code> is graded literally,
+so that single field fails the whole all-or-nothing batch even when the other 16,769 are
+right.</p>
+<blockquote>
+<p>The "collision decoys" in the prompt turned out to be a <strong>red herring for debugging</strong>:
+the decoy <code>file_path</code> values are the <em>correct</em> answers (verified single-field: the
+descriptor value <code>/tmp/huntress-php/.&lt;16hex&gt;.stage</code> is ACCEPTED). The only genuinely
+wrong field was the BUG-3 decode spill. Time was lost chasing a decoy-reconstruction
+rule that did not exist.</p>
+</blockquote>
+<h2 id="how-mastery-was-finished-this-session">How Mastery was finished (this session)</h2>
+<p>A standalone Commander solver (now promoted to <code>challenges/_lib/script_multiset.py</code>):
+1. <code>A.start(gm, …/mastery, for_time=True)</code> — fresh variant via the sanctioned timed-start
+   override (<code>HUNTRESS_TIMED_START=commander-override</code>; 31 variants remained, HOF off so it
+   was an untimed scored attempt — still earns the flag + points).
+2. Expand the outer zip; map <strong>setK → evidence-0K explicitly from each question's own
+   <code>artifact</code> field</strong> (fixes BUG 1).
+3. Solve the 10 sets <strong>in parallel</strong> (fork pool, 32 cores) — each set a single-set
+   mini-start so its internal sort is unambiguous (fixes BUG 2): <strong>18.3 s for all 16,770</strong>.
+4. Sanitise path fields (trim at <code>.stage</code>, drop trailing garbage) — fixes BUG 3.
+5. One submit → <code>result: CORRECT</code>.</p>
+<p>Diagnosis used the untimed attempt's <strong>partial grading</strong> (<code>accepted</code> = all-right subset vs
+<code>incorrect</code>) to localise the wrong class by field-type and then by field — 19/21 classes
+cleared immediately; file-path/path-leaf narrowed to the one csharp field. Validated
+offline: <code>script_multiset.solve</code> reproduces <strong>16770/16770 GM-correct answers in 18.8 s</strong>.</p>
+<h2 id="next-time-this-lane-goes-100-better-recognition-determinism">Next time this lane goes 100× better — recognition + determinism</h2>
+<p><strong>Recognise instantly</strong> (from the prebrief geometry, no bytes needed): answer ids
+namespaced <code>set1. … setN.</code> with <strong>N ≥ 2</strong> and <code>mastery_sets &gt; 2</code>, carriers including the
+polyglot set, descriptors tagged <code>HUNTRESS_ANALYSIS_V1:LYR-&lt;layers&gt;</code>. <code>script_multiset.recognize(start)</code>
+returns this in O(ids).</p>
+<p><strong>Deterministic path</strong> (<code>script_multiset.py</code>, offline-tested, <em>not yet wired into
+production — operator freeze</em>; stage for the post-freeze deploy per the D27 plan):
+- explicit <code>setK→evidence-0K</code> mapping (never index order),
+- parallel per-set extraction (18 s, not 180 s),
+- path/url field sanitiser (BUG-3 guard),
+- falls back to the stock single-set path for legacy 1-set shapes.</p>
+<p><strong>Production fix to fold into <code>autosolve_script.solve_fields_ext</code></strong> (one-line correctness
+fix for BUG 1 even without the parallel rewrite):</p>
+<pre class="code"><code class="lang-python"># was: sets = sorted({ setprefix })          # lexical =&gt; set10 &lt; set2
+# fix: sets = sorted({ setprefix }, key=lambda s: int(re.sub(r'\D','',s) or 0))
+#      and map each set's blob by matching the question `artifact` evidence name,
+#      not by positional index.
+</code></pre>
+<p>Plus the path sanitiser in the generic builder, and (speed) dispatch sets to a fork pool.</p>
+<p>See also: <code>kb/commander_script_analysis_fastpath.md</code> (updated), lessons <code>lessons.py</code>,
+and the engineering note in <code>docs/COMMANDER_CORE.md</code> engineering state.</p>
+<h2 id="artifacts-reproducibility">Artifacts / reproducibility</h2>
+<ul>
+<li>Solver: <code>challenges/_lib/script_multiset.py</code>; test: <code>challenges/_lib/_test_script_multiset.py</code>.</li>
+<li>GM record (authoritative): <code>challenges/Day 26/_gm_record/script-analysis-day-26-beam-message-flow.homestation.jsonl</code>.</li>
+<li>GM-downloaded bytes were purged after solving (per handling policy); the attempt is
+  reproducible from a fresh <code>op=start</code> (31 variants remained).</li>
+</ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#what-the-challenge-actually-is">What the challenge actually is</a></li><li class="l2"><a href="#why-mastery-failed-at-0900-three-root-causes-all-proven">Why Mastery failed at 09:00 — three root causes (all proven)</a></li><li class="l3"><a href="#bug-1-setblob-misalignment-at-10-sets-the-big-one">BUG 1 — set/blob misalignment at ≥10 sets (the big one)</a></li><li class="l3"><a href="#bug-2-sequential-solve-overruns-the-window">BUG 2 — sequential solve overruns the window</a></li><li class="l3"><a href="#bug-3-descriptor-decode-spill-1-field">BUG 3 — descriptor decode spill (1 field)</a></li><li class="l2"><a href="#how-mastery-was-finished-this-session">How Mastery was finished (this session)</a></li><li class="l2"><a href="#next-time-this-lane-goes-100-better-recognition-determinism">Next time this lane goes 100× better — recognition + determinism</a></li><li class="l2"><a href="#artifacts-reproducibility">Artifacts / reproducibility</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="../days/day-26.html">&lt; Day 26</a><a href="../challenges/index.html">All write-ups &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

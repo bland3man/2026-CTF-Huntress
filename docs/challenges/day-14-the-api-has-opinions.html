@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The API Has Opinions - Day 24 write-up</title>
+<meta name="description" content="Day 24 Web Exploitation write-up: Prompt: &quot;Take inventory of the API&#x27;s little kingdom — every endpoint, every field, every function. Somewhere in there, authorization is mere">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;family=Rajdhani:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23070b12' stroke='%23f4b046' stroke-width='2'/%3E%3Cpath d='M16 5v22M5 16h22' stroke='%23f4b046' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Tactical Log<small>Huntress CTF 2026 // team archive</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Overview</a>
+      <a href="../setup.html">Setup</a>
+      <a href="../game-master.html">GM contract</a>
+      <a href="../days/index.html">Days</a>
+      <a href="../lanes/index.html">Lanes</a>
+      <a href="../challenges/index.html" aria-current="page">Search</a>
+    </nav>
+  </div>
+</header>
+<div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-24.html">Day 24</a> / <a href="../lanes/web.html">Web Exploitation</a> / The API Has Opinions</p><p class="telemetry"><span>DAY 24</span><span class="sep">//</span><span>LANE: WEB EXPLOITATION</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>The API Has Opinions</h1></div></div>
+<main id="main">
+  <div class="wrap">
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-web" href="../lanes/web.html">Web Exploitation</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose"><h1 id="the-api-has-opinions-day-24-web-exploitation">The API Has Opinions (Day 24 · web-exploitation)</h1>
+<p><strong>Prompt:</strong> "Take inventory of the API's little kingdom — every endpoint, every field, every function. Somewhere in there, authorization is merely a suggestion."</p>
+<p>Three distinct BOLA/IDOR variations bundled across one Single, one Time Trial, and three Mastery targets. The common theme: a server willingly tells you where its protected state lives (via <code>/api/clues</code>, a directory listing, or an activity feed), and then its authorization check misses a single <code>(fields, action)</code> tuple, a <code>.bak</code> backup file, or an unowned ticket id.</p>
+<h2 id="flags">Flags</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Flag</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Single Solve</td>
+<td><code>da6dab350782b3ea2ec75556c27dad96</code></td>
+</tr>
+<tr>
+<td>Time Trial</td>
+<td><em>(flag not returned in the mode's submit response; attempt ddd6f195 accepted proof-1)</em></td>
+</tr>
+<tr>
+<td>Mastery</td>
+<td><code>0fb818012e95f32abb0d9d1f91335477</code></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="target-shapes">Target shapes</h2>
+<h3 id="shape-a-war-room-single-tt-mastery-target-3-advertised-fields-action-bola">Shape A — "WAR Room" (Single, TT, Mastery Target 3): advertised (fields × action) BOLA</h3>
+<pre class="code"><code class="lang-text">GET /api/clues
+  -&gt; {&quot;feature_route&quot;:&quot;/execute-XXXXXX&quot;, &quot;inventory_route&quot;:&quot;/api/inventory&quot;,
+      &quot;current_role&quot;:&quot;analyst&quot;, &quot;protected_reference&quot;:&lt;ID&gt;}
+GET /api/inventory
+  -&gt; {&quot;fields&quot;:[&quot;title&quot;,&quot;note&quot;], &quot;actions&quot;:[&quot;view&quot;,&quot;export&quot;],
+      &quot;public_reference&quot;:&lt;other_id&gt;, &quot;sample&quot;:{...}}
+</code></pre>
+<p>The feature route enforces an authorization matrix indexed by <code>(id, fields, action)</code>. For the <code>protected_reference</code>, every allowed combination the UI exercises is rejected (<code>field_action_forbidden</code>), but one combination is left open:</p>
+<pre class="code"><code class="lang-text">GET /execute-XXXXXX?id=&lt;protected_reference&gt;&amp;fields=note&amp;action=export
+  -&gt; 200 {&quot;ok&quot;:true,&quot;effect&quot;:&quot;api_field_action_authorization_bypassed&quot;,
+          &quot;evidence&quot;:&quot;proof_&lt;32 hex&gt;&quot;}
+</code></pre>
+<p>Why it works: the matrix is enumerated on each per-tuple basis, but the enforcement list was mapped from the sample UI calls only; <code>(note, export)</code> on the restricted object was never added, so it defaults to allow.</p>
+<h3 id="shape-b-service-postcard-mastery-target-1-robots-exposed-backup">Shape B — "Service Postcard" (Mastery Target 1): robots + exposed backup</h3>
+<pre class="code"><code class="lang-text">GET /robots.txt
+  -&gt; Disallow: /archives-XXXXX/
+GET /archives-XXXXX/
+  -&gt; directory listing with environment-copy-XXXXXX.json.bak and release-notes.txt
+GET /archives-XXXXX/environment-copy-XXXXXX.json.bak
+  -&gt; {&quot;environment&quot;:&quot;production&quot;,&quot;support_note&quot;:&quot;proof_&lt;32 hex&gt;&quot;}
+</code></pre>
+<p>Native Node.js server; the archive dir is linked only from <code>/robots.txt</code>'s <code>Disallow</code>, and the <code>.bak</code> file leaks the proof in a JSON field.</p>
+<h3 id="shape-c-case-crate-tiny-triage-mastery-target-2-session-gated-idor-via-the-activity-feed">Shape C — "Case Crate / Tiny Triage" (Mastery Target 2): session-gated IDOR via the activity feed</h3>
+<pre class="code"><code class="lang-text">GET /                           -&gt; Set-Cookie: case_session=... ; HTML says &quot;Signed in as &lt;name&gt;&quot;
+GET /api/timeline (w/ cookie)   -&gt; {&quot;events&quot;:[{&quot;case_id&quot;:&lt;N&gt;,&quot;owner&quot;:&quot;executive&quot;,...}, ...]}
+GET /api/tickets/&lt;N&gt; (w/ cookie)
+  -&gt; {&quot;id&quot;:N,&quot;owner&quot;:&quot;executive&quot;,&quot;title&quot;:&quot;Acquisition review&quot;,&quot;status&quot;:&quot;restricted&quot;,
+      &quot;note&quot;:&quot;proof_&lt;32 hex&gt;&quot;}
+</code></pre>
+<p>The dashboard lists only the signed-in user's own cases, but <code>/api/timeline</code> reveals case ids owned by other roles (e.g. <code>executive</code>) with the comment <code>"visibility":"reference_only"</code>. The <code>/api/tickets/&lt;id&gt;</code> endpoint has NO per-row owner check: supplying any id — including one visible only through the timeline reference — returns the full record.</p>
+<h2 id="how-i-solved-it">How I solved it</h2>
+<ol>
+<li>Opened the Single target, read <code>/</code>, saw the hint "Open workspace notes" → <code>/api/clues</code>.</li>
+<li><code>/api/clues</code> exposed <code>feature_route</code>, <code>protected_reference</code>; <code>/api/inventory</code> listed the field/action vocabulary.</li>
+<li>Enumerated <code>(id, fields, action)</code> for <code>protected_reference</code>: all combinations the sample used returned <code>field_action_forbidden</code>; <code>(note, export)</code> returned the proof.</li>
+<li>Submitted Single → CORRECT.</li>
+<li>Added <code>_tech_api_clues_inventory</code> to <code>challenges/_lib/autosolve_web.py</code> so the whole shape is banked for the next release of this family.</li>
+<li>Time Trial started by autosolve; I derived the proof manually (my new technique didn't fire inside the battery under scope-registered concurrency), submitted directly → CORRECT.</li>
+<li>Mastery was the first time Shape B and Shape C appeared, and the timer expired before I could identify them. The expired attempt was retried untimed (via autosolve, which spent one of the seven remaining variants); I derived all three proofs (Shape A for Target 3, Shape B for Target 1, Shape C for Target 2) and submitted a single batch → CORRECT.</li>
+</ol>
+<h2 id="why-the-banked-_tech_api_clues_inventory-did-not-fire-during-the-timed-mastery">Why the banked <code>_tech_api_clues_inventory</code> did not fire during the timed Mastery</h2>
+<p>Still open: the technique itself returns the right proof against a live Shape-A target when run in isolation under <code>web_scope.Scope</code>, but inside <code>_solve_target</code>'s parallel battery (three target scopes registered concurrently, eight techniques per target competing on a shared <code>_REGISTRY</code>) it returned <code>None</code>. Likely the per-scope request budget was spent on earlier techniques before mine ran, or the shared <code>_REGISTRY</code> map got a cross-target lookup during the parallel registration/unregistration window. Needs a reproducible test next time this family appears; the technique is kept because its serial behaviour is correct.</p></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#flags">Flags</a></li><li class="l2"><a href="#target-shapes">Target shapes</a></li><li class="l3"><a href="#shape-a-war-room-single-tt-mastery-target-3-advertised-fields-action-bola">Shape A — "WAR Room" (Single, TT, Mastery Target 3): advertised (fields × action) BOLA</a></li><li class="l3"><a href="#shape-b-service-postcard-mastery-target-1-robots-exposed-backup">Shape B — "Service Postcard" (Mastery Target 1): robots + exposed backup</a></li><li class="l3"><a href="#shape-c-case-crate-tiny-triage-mastery-target-2-session-gated-idor-via-the-activity-feed">Shape C — "Case Crate / Tiny Triage" (Mastery Target 2): session-gated IDOR via the activity feed</a></li><li class="l2"><a href="#how-i-solved-it">How I solved it</a></li><li class="l2"><a href="#why-the-banked-_tech_api_clues_inventory-did-not-fire-during-the-timed-mastery">Why the banked _tech_api_clues_inventory did not fire during the timed Mastery</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="../days/day-24.html">&lt; Day 24</a><a href="../challenges/index.html">All write-ups &gt;</a></nav>
+  </div>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <span>Write-ups as recorded during Huntress CTF 2026 (October 1-31). Archive snapshot: end of event.</span>
+    <span class="mono">TAG competition-final-2026</span>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>
