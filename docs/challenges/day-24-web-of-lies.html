@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Web of Lies - Day 24 write-up</title>
-<meta name="description" content="Day 24 Script Analysis write-up: GM id: script analysis day 24 jsp webshell source Lane: script analysis Solver: the team solver (autosolve script) Mode Flag Ranked Single S">
+<meta name="description" content="Day 24 Script Analysis write-up: Prompt framed the artifact as a JSP &quot;webshell&quot; source that reads requests and stages server-side work; the task is to recover the request/stage ...">
 <meta name="color-scheme" content="dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,84 +33,22 @@
 <div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-24.html">Day 24</a> / <a href="../lanes/script.html">Script Analysis</a> / Web of Lies</p><p class="telemetry"><span>DAY 24</span><span class="sep">//</span><span>LANE: SCRIPT ANALYSIS</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Web of Lies</h1></div></div>
 <main id="main">
   <div class="wrap">
-<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-script" href="../lanes/script.html">Script Analysis</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose"><h1 id="web-of-lies-day-24-script-analysis">Web of Lies - Day 24 (script-analysis)</h1>
-<p>GM id: <code>script-analysis-day-24-jsp-webshell-source</code>
-Lane: script-analysis | Solver: <code>the team solver</code> (autosolve_script)</p>
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-script" href="../lanes/script.html">Script Analysis</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose"><p class="srctitle">Web of Lies - Day 24 (script-analysis)</p>
+<p>GM id: <code>script-analysis-day-24-jsp-webshell-source</code> Lane: script-analysis | Solver: <code>the team solver</code> (autosolve_script)</p>
 <h2 id="modes-all-correct-gm-verified">Modes - all CORRECT (GM-verified)</h2>
-<div class="table-wrap"><table>
-<thead>
-<tr>
-<th>Mode</th>
-<th>Flag</th>
-<th>Ranked</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Single Solve</td>
-<td><code>e966dd77297b2473de889095f8882b6b</code></td>
-<td>no (untimed)</td>
-</tr>
-<tr>
-<td>Time Trial</td>
-<td><code>49eb29852643407d23d2b3957892eb73</code></td>
-<td>yes</td>
-</tr>
-<tr>
-<td>Mastery</td>
-<td><code>44832819d3ca6044f1dbad8fdaca5e5e</code></td>
-<td>retry variant (untimed-pool fall-through)</td>
-</tr>
-</tbody>
-</table></div>
+<div class="table-wrap"><table><thead><tr><th>Mode</th><th>Flag</th><th>Ranked</th></tr></thead><tbody><tr><td>Single Solve</td><td><span class="flag" data-flag><span class="fl">Token</span><span class="fv">e966dd77297b2473de889095f8882b6b</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td><td>no (untimed)</td></tr><tr><td>Time Trial</td><td><span class="flag" data-flag><span class="fl">Token</span><span class="fv">49eb29852643407d23d2b3957892eb73</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td><td>yes</td></tr><tr><td>Mastery</td><td><span class="flag" data-flag><span class="fl">Token</span><span class="fv">44832819d3ca6044f1dbad8fdaca5e5e</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td><td>retry variant (untimed-pool fall-through)</td></tr></tbody></table></div>
 <h2 id="challenge">Challenge</h2>
-<p>Prompt framed the artifact as a JSP "webshell" source that reads requests and stages
-server-side work; the task is to recover the request/stage order and separate inert
-fixture behavior from lines that would be real execution primitives. In practice it is
-the cumulative Script-Triage lane: a password-protected (<code>infected</code>) ZIP of many inert
-self-describing fixtures across every language/carrier seen since Day 1, plus today's new
-carrier - <strong>JSP polyglots</strong> (<code>polyglot-jsp-*</code>, ~13 fields each).</p>
+<p>Prompt framed the artifact as a JSP "webshell" source that reads requests and stages server-side work; the task is to recover the request/stage order and separate inert fixture behavior from lines that would be real execution primitives. In practice it is the cumulative Script-Triage lane: a password-protected (<code>infected</code>) ZIP of many inert self-describing fixtures across every language/carrier seen since Day 1, plus today's new carrier - <strong>JSP polyglots</strong> (<code>polyglot-jsp-*</code>, ~13 fields each).</p>
 <h2 id="artifact-shape">Artifact shape</h2>
-<ul>
-<li>Single / Time Trial: one <code>evidence.zip</code> (AES, pw <code>infected</code>) of ~160 fixtures, 1560 fields.</li>
-<li>Mastery: an OUTER <code>evidence.zip</code> containing 8 inner <code>evidence-01.zip ... evidence-08.zip</code>
-  (sets 1-8), 1560 fields per set = 12480 fields total. Field ids are <code>setN.&lt;lang&gt;-&lt;hash&gt;-&lt;field&gt;</code>.</li>
-</ul>
+<ul><li>Single / Time Trial: one <code>evidence.zip</code> (challenge artifact, not published) (AES, pw <code>infected</code>) of ~160 fixtures, 1560 fields.</li><li>Mastery: an OUTER <code>evidence.zip</code> (challenge artifact, not published) containing 8 inner <code>evidence-01.zip ... evidence-08.zip</code> (sets 1-8), 1560 fields per set = 12480 fields total. Field ids are <code>setN.&lt;lang&gt;-&lt;hash&gt;-&lt;field&gt;</code>.</li></ul>
 <h2 id="how-each-fixture-self-decodes-the-lane-spine">How each fixture self-decodes (the lane spine)</h2>
-<p>Every fixture embeds a base64/hex/chained payload that decodes to a <code>v=3|key=value|...</code>
-descriptor (or JSON for the PowerShell composites). The autosolver extracts the descriptor
-and reads answers straight from it - no reasoning, no probing:
-- JSP example (<code>588efb.jsp</code>, obfuscation <code>b64_hex_b64</code>): base64 -&gt; hex-string -&gt; base64 -&gt;
-  <code>v=3|language=jsp|role=stager|attack=T1105|adapter=runtime_loader|...|steps=profile_host,acquire_remote,transmit_remote,dispatch_language|campaign_id=JSP-e13a1139|url=.../stage|file_path=...</code>
-  JSP obfuscation chains seen: <code>b64_frag</code>, <code>b64_hex_b64</code>, <code>hex_frag</code>, <code>hex_b32_b32</code>, <code>b64</code>.
-- PowerShell composites use single-letter JSON keys and the specimen type is read from the
-  key shape: resource-hijacking (has <code>g</code>/<code>h</code>; <code>c</code>=wallet scalar), collection (<code>c</code>=file list,
-  <code>d</code>=staged zip), impact (<code>b</code>=extension, <code>c</code>=note, <code>d</code>=url). secondary/tertiary map by type.</p>
-<p>The JSP carrier required no new extractor: the generic <code>Material_/Codec_</code> + v=1/v=3
-descriptor fallback in <code>autosolve_script</code> / <code>solve_poly_d8</code> already peeled every chain and
-answered role/attack/steps/stage-*/obfuscation/next-language/campaign/url/file-path/
-url-host/path-leaf/campaign-token. Single and Time Trial were CORRECT at first contact.</p>
+<p>Every fixture embeds a base64/hex/chained payload that decodes to a <code>v=3|key=value|...</code> descriptor (or JSON for the PowerShell composites). The autosolver extracts the descriptor and reads answers straight from it - no reasoning, no probing:</p>
+<ul><li>JSP example (<code>588efb.jsp</code>, obfuscation <code>b64_hex_b64</code>): base64 -&gt; hex-string -&gt; base64 -&gt; <code>v=3|language=jsp|role=stager|attack=T1105|adapter=runtime_loader|...|steps=profile_host,acquire_remote,transmit_remote,dispatch_language|campaign_id=JSP-e13a1139|url=.../stage|file_path=...</code> JSP obfuscation chains seen: <code>b64_frag</code>, <code>b64_hex_b64</code>, <code>hex_frag</code>, <code>hex_b32_b32</code>, <code>b64</code>.</li><li>PowerShell composites use single-letter JSON keys and the specimen type is read from the key shape: resource-hijacking (has <code>g</code>/<code>h</code>; <code>c</code>=wallet scalar), collection (<code>c</code>=file list, <code>d</code>=staged zip), impact (<code>b</code>=extension, <code>c</code>=note, <code>d</code>=url). secondary/tertiary map by type.</li></ul>
+<p>The JSP carrier required no new extractor: the generic <code>Material_/Codec_</code> + v=1/v=3 descriptor fallback in <code>autosolve_script</code> / <code>solve_poly_d8</code> already peeled every chain and answered role/attack/steps/stage-*/obfuscation/next-language/campaign/url/file-path/ url-host/path-leaf/campaign-token. Single and Time Trial were CORRECT at first contact.</p>
 <h2 id="mastery-first-ranked-attempt-incorrect-then-correct-on-retry">Mastery: first ranked attempt INCORRECT, then CORRECT on retry</h2>
-<ul>
-<li>First ranked Mastery submit (attempt <code>720c0f56-...</code>) graded <code>incorrect</code>, <code>wrong=[]</code> (the
-  GM gives no per-field feedback on an all-or-nothing timed batch), which tripped the
-  FAIL_FAST deadend guard and <code>DIAGNOSIS_REQUIRED</code>.</li>
-<li>Offline diagnosis from the preserved <code>_timed_corpus</code> attempt: <code>suspect_report.py</code> showed
-  the solver re-produces byte-for-byte the same 12480 answers (deterministic), and spot
-  checks of JSP, PowerShell (collection secondary=<code>c[0]</code>, matching the TT pattern that WAS
-  accepted), and bash samples all matched their decoded descriptors. No family diverged and
-  the 8 sets were evenly distributed - i.e. no locatable systematic defect.</li>
-<li>Conclusion: the miss was <strong>variant-specific</strong>, not a solver bug. A fresh variant via
-  <code>op=retry</code> (the untimed-pool fall-through; rotation had 31 variants left) was solved
-  CORRECT in 37.6s. Re-enabling the run required <code>HUNTRESS_FORCE_RERUN=1</code> because the deadend
-  guard refuses an unchanged rerun on a one-variant-spent route.</li>
-</ul>
+<ul><li>First ranked Mastery submit (attempt <code>720c0f56-...</code>) graded <code>incorrect</code>, <code>wrong=[]</code> (the GM gives no per-field feedback on an all-or-nothing timed batch), which tripped the FAIL_FAST deadend guard and <code>DIAGNOSIS_REQUIRED</code>.</li><li>Offline diagnosis from the preserved <code>_timed_corpus</code> attempt: <code>suspect_report.py</code> showed the solver re-produces byte-for-byte the same 12480 answers (deterministic), and spot checks of JSP, PowerShell (collection secondary=<code>c[0]</code>, matching the TT pattern that WAS accepted), and bash samples all matched their decoded descriptors. No family diverged and the 8 sets were evenly distributed - i.e. no locatable systematic defect.</li><li>Conclusion: the miss was <strong>variant-specific</strong>, not a solver bug. A fresh variant via <code>op=retry</code> (the untimed-pool fall-through; rotation had 31 variants left) was solved CORRECT in 37.6s. Re-enabling the run required <code>HUNTRESS_FORCE_RERUN=1</code> because the deadend guard refuses an unchanged rerun on a one-variant-spent route.</li></ul>
 <h2 id="key-takeaway">Key takeaway</h2>
-<p>An all-or-nothing timed batch of 12480 fields amplifies any tiny per-field error rate: even
-a 99.95%/field solver fails ~99.8% of the time on 12480 fields vs ~46% on 1560. The lane did
-not need a code change - it needed a fresh variant (ranked-first, then regular/untimed pool),
-which the framework supports and which still earns the flag. Practice remains available after
-rotation is exhausted as a final untimed completion path.</p></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#modes-all-correct-gm-verified">Modes - all CORRECT (GM-verified)</a></li><li class="l2"><a href="#challenge">Challenge</a></li><li class="l2"><a href="#artifact-shape">Artifact shape</a></li><li class="l2"><a href="#how-each-fixture-self-decodes-the-lane-spine">How each fixture self-decodes (the lane spine)</a></li><li class="l2"><a href="#mastery-first-ranked-attempt-incorrect-then-correct-on-retry">Mastery: first ranked attempt INCORRECT, then CORRECT on retry</a></li><li class="l2"><a href="#key-takeaway">Key takeaway</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="../days/day-24.html">&lt; Day 24</a><a href="../challenges/index.html">All write-ups &gt;</a></nav>
+<p>An all-or-nothing timed batch of 12480 fields amplifies any tiny per-field error rate: even a 99.95%/field solver fails ~99.8% of the time on 12480 fields vs ~46% on 1560. The lane did not need a code change - it needed a fresh variant (ranked-first, then regular/untimed pool), which the framework supports and which still earns the flag. Practice remains available after rotation is exhausted as a final untimed completion path.</p></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#modes-all-correct-gm-verified">Modes - all CORRECT (GM-verified)</a></li><li class="l2"><a href="#challenge">Challenge</a></li><li class="l2"><a href="#artifact-shape">Artifact shape</a></li><li class="l2"><a href="#how-each-fixture-self-decodes-the-lane-spine">How each fixture self-decodes (the lane spine)</a></li><li class="l2"><a href="#mastery-first-ranked-attempt-incorrect-then-correct-on-retry">Mastery: first ranked attempt INCORRECT, then CORRECT on retry</a></li><li class="l2"><a href="#key-takeaway">Key takeaway</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-14-the-api-has-opinions.html">&lt; The API Has Opinions</a><a href="day-25-ashes-to-assets.html">Ashes to Assets &gt;</a></nav>
   </div>
 </main>
 <footer class="site">

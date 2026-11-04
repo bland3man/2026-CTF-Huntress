@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Built Different - Day 09 write-up</title>
-<meta name="description" content="Day 09 Metadata Forensics write-up: Metadata-bytes family (see docs memory ctf-evidence-note-decoy-family): every answer is a function of the assigned file&#x27;s raw bytes, and ext">
+<meta name="description" content="Day 09 Metadata Forensics write-up: Metadata-bytes family (see docs memory ctf-evidence-note-decoy-family): every answer is a function of the assigned file&#x27;s raw bytes, and ...">
 <meta name="color-scheme" content="dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,7 +34,6 @@
 <main id="main">
   <div class="wrap">
 <div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-metadata" href="../lanes/metadata.html">Metadata Forensics</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
-<h1 id="built-different">Built Different</h1>
 <h2 id="challenge">Challenge</h2>
 <ul><li>Category: Metadata Forensics (Day 09). Game Master ID <code>metadata-forensics-day-09-built-different</code>.</li><li>Prompt: "A software drop contains executables for several architectures, plus decoys wearing executable extensions. Determine what can actually run where."</li><li>Modes: Single Solve, Time Trial, Mastery - all CORRECT (3/3).</li><li>Answer form: 13 per-field answers derived from the assigned bytes (filename, size, md5/sha1/sha256, and format/arch facts). No <code>flag{}</code> wrapper; the GM returns a completion token per mode.</li></ul>
 <h2 id="artifacts">Artifacts</h2>

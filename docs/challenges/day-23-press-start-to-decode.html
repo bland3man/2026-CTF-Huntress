@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Press Start to Decode - Day 23 write-up</title>
-<meta name="description" content="Day 23 Script Analysis write-up: GM id: script analysis day 23 game resource loader Single Solve: 48f24a6f1cdb2bea47dea4b313a60234 Time Trial: 66d9e92d8cca0ac68e3949b5cd1f38">
+<meta name="description" content="Day 23 Script Analysis write-up: Each fixture carries its own self-describing descriptor; the only new thing on Day 23 is the richer set of codecs and the file-naming scheme (. ...">
 <meta name="color-scheme" content="dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,92 +33,19 @@
 <div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-23.html">Day 23</a> / <a href="../lanes/script.html">Script Analysis</a> / Press Start to Decode</p><p class="telemetry"><span>DAY 23</span><span class="sep">//</span><span>LANE: SCRIPT ANALYSIS</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Press Start to Decode</h1></div></div>
 <main id="main">
   <div class="wrap">
-<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-script" href="../lanes/script.html">Script Analysis</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose"><h1 id="press-start-to-decode-day-23-script-analysis">Press Start to Decode (Day 23, script-analysis)</h1>
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-script" href="../lanes/script.html">Script Analysis</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose"><p class="srctitle">Press Start to Decode (Day 23, script-analysis)</p>
 <p>GM id: <code>script-analysis-day-23-game-resource-loader</code></p>
 <h2 id="flags">Flags</h2>
-<ul>
-<li>Single Solve: <code>48f24a6f1cdb2bea47dea4b313a60234</code></li>
-<li>Time Trial:   <code>66d9e92d8cca0ac68e3949b5cd1f38af</code></li>
-<li>Mastery:      <code>b79648c535830fd563b50b82bd1c165c</code></li>
-</ul>
+<ul><li>Single Solve: <span class="flag" data-flag><span class="fl">Token</span><span class="fv">48f24a6f1cdb2bea47dea4b313a60234</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li><li>Time Trial:   <span class="flag" data-flag><span class="fl">Token</span><span class="fv">66d9e92d8cca0ac68e3949b5cd1f38af</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li><li>Mastery:      <span class="flag" data-flag><span class="fl">Token</span><span class="fv">b79648c535830fd563b50b82bd1c165c</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li></ul>
 <h2 id="shape">Shape</h2>
-<p>Prompt: "A GDScript resource loader builds its strings in layers, one power-up at a time." The
-Single Solve was <code>metadata_only</code> (0 fields). Time Trial served a 1495-field evidence.zip with
-~157 inert static-analysis fixtures across every carrier the lane knows plus Day 23's new ones
-(GDScript, csharp_script, Google Apps Script, Groovy, AutoHotkey, AutoIt, AppleScript, MSBuild
-XML, NSIS, GitHub Actions YAML, TypeScript, WMI MOF, msbuild, PHP polyglot, Perl, Ruby, Lua).
-Mastery delivered 7 inner evidence sets packaging the same shape to 10,465 fields.</p>
-<p>Each fixture carries its own self-describing descriptor; the only new thing on Day 23 is the
-richer set of codecs and the file-naming scheme (<code>&lt;6-hex-hash&gt;.&lt;ext&gt;</code> with no <code>polyglot-&lt;lang&gt;-</code>
-prefix).</p>
+<p>Prompt: "A GDScript resource loader builds its strings in layers, one power-up at a time." The Single Solve was <code>metadata_only</code> (0 fields). Time Trial served a 1495-field evidence.zip with ~157 inert static-analysis fixtures across every carrier the lane knows plus Day 23's new ones (GDScript, csharp_script, Google Apps Script, Groovy, AutoHotkey, AutoIt, AppleScript, MSBuild XML, NSIS, GitHub Actions YAML, TypeScript, WMI MOF, msbuild, PHP polyglot, Perl, Ruby, Lua). Mastery delivered 7 inner evidence sets packaging the same shape to 10,465 fields.</p>
+<p>Each fixture carries its own self-describing descriptor; the only new thing on Day 23 is the richer set of codecs and the file-naming scheme (<code>&lt;6-hex-hash&gt;.&lt;ext&gt;</code> with no <code>polyglot-&lt;lang&gt;-</code> prefix).</p>
 <h2 id="what-the-lane-adapter-was-missing">What the lane adapter was missing</h2>
-<ol>
-<li>Day 23 renamed the fixtures. <code>solve_poly_d8.poly_answers</code> looked up a question's file by
-   <code>polyglot-&lt;lang&gt;-&lt;hash&gt;.&lt;ext&gt;</code> prefix; today's zip has <code>&lt;hash&gt;.&lt;ext&gt;</code> only. Added a
-   hash-only fallback (match any file whose basename-without-ext equals the id's trailing
-   <code>[0-9a-f]{4,16}</code> hash) that still returns the right language because the descriptor itself
-   carries <code>language=</code>.</li>
-<li>Several codecs were new to the self-decoding fixtures. Extended <code>bash_adv_decode</code> with
-   <code>decimal_colon</code>, <code>reversed_decimal</code>, <code>decimal</code>, <code>hex_literal</code>, <code>hex_colon</code> and secondary
-   transforms <code>single_byte_xor</code>, <code>repeating_key_xor</code>, <code>add_modulo_256</code> (plus key-as-next-step
-   handling for <code>codec = '&lt;rep&gt;|&lt;xor&gt;|&lt;csv-hex-key&gt;'</code>).</li>
-<li>HUNTRESS_ANALYSIS_V1 added a <code>LYR</code> kind on the Google Apps Script fixtures. The payload
-   names the layers inline (<code>hex_b64_b32</code>, <code>b32_b32_b64</code>, <code>hex_frag_b64</code>, ...), applied in that
-   order to encode. Added LYR to <code>_decode_known</code> + <code>_SPLIT_KINDS</code> and implemented every
-   layer (hex / b64 / b32 / b85 / b16 / rev / frag / zlib / gzip).</li>
-<li><code>MATERIAL_</code>/<code>CODEC_</code> is now matched case-insensitively (upper and title case) with either
-   quote type.</li>
-<li>Several new field shapes appear on top of the base descriptor: <code>url-host</code> (hostname of
-   <code>url</code>), <code>path-leaf</code> (last path segment of <code>file_path</code>), <code>campaign-token</code> (campaign_id after
-   first hyphen), <code>indicator</code> (first non-empty of URL / upload URL / next-stage file / file
-   path / schedule path / recovery-note name / host id), <code>style</code> (three per-language labels
-   joined by <code>|</code>), <code>secondary</code> / <code>tertiary</code> per PowerShell composite specimen type. Added a
-   universal <code>_d23_fill</code> post-processor that derives all of these.</li>
-<li><code>v=2|</code> descriptors (new on Day 23 Python fixtures) were being rejected by the strict
-   <code>.startswith('v=1|')</code> guard in <code>generic_decode</code>. Added <code>v=2|</code> acceptance.</li>
-<li><code>obfuscation</code> / <code>carrier</code> / <code>style</code> / <code>indicator</code> / <code>url-host</code> / <code>path-leaf</code> / <code>secondary</code> /
-   <code>tertiary</code> / <code>campaign-token</code> now use <code>_d23_fill</code> even when SN.build had already set a
-   legacy single-value answer (format changed between days: <code>python-X-obfuscation</code> is now
-   <code>syntax|obfuscation</code>, <code>python-X-carrier</code> is <code>carrier|windows_chain</code>, etc.).</li>
-<li>Attack mapping for <code>polyglot-&lt;lang&gt;</code> launcher / staged_chain / relay uses the plain <code>T1059</code>
-   (confirmed from the accepted-values vocab); plain-language launcher / staged_chain / relay
-   keeps the language-specific <code>T1059.&lt;sub&gt;</code>.</li>
-<li>jscript, batch and vbscript <code>style</code> are derived with the canonical <code>solve_script_inventory.jsstyle</code>
-   / <code>.bctl</code> / <code>.expform</code> and <code>solve_dim_dimmer.vbs_ctl</code> (already in the lane libs &#8212; I was
-   writing one-off heuristics that produced labels outside the GM's vocab).</li>
-<li>The brute-force descriptor hunter for files that bypass the self-describing path handles
-    percent-hex, colon/dash/comma/pipe-separated hex, decimal/hex bracket arrays (including
-    <code>firstPart.concat(secondPart)</code> splits), and base64 (with multi-piece <code>"..." + "..."</code>
-    concatenations). Each payload is tried with identity, single-byte XOR / add / sub (0..255),
-    rolling XOR seeded 0..255, and repeating-key XOR with every short numeric array found
-    in the same file. Validity gate: only a well-formed <code>v=N|k=v|...</code> descriptor is accepted
-    (printable ASCII, lowercase identifier keys, non-empty values). This rejects false-positive
-    decodes (a wrong XOR that happens to produce a <code>v=</code> prefix on garbage) that would
-    otherwise poison the batch.</li>
-<li>PowerShell composite specimen type is detected from the JSON shape: resource-hijacking
-    has <code>g</code> and <code>h</code> fields (c = wallet, h = mutex), collection has <code>c</code> as a list (c[0] = staged
-    file, f = user_agent), impact has <code>c</code> as a scalar note name. Secondary / tertiary select
-    the right field per type.</li>
-<li><code>_start_body</code> now pre-reads status and calls <code>gm.retry</code> when the current attempt already
-    received a submit (detected from the gm_record ledger: a <code>submit</code> for this challenge+mode
-    newer than the last <code>start</code>/<code>retry</code>/<code>practice</code>). Without this the Day 23 route deadlocks:
-    an untimed path op=start on the dead attempt consumes the one authorised timed-write
-    slot before the retry+start branch can run, and the retry is refused.</li>
-<li>Added <code>HUNTRESS_TT_GROUPS=auto</code> to <code>autosolve_script.run</code>'s bisect: it groups the live
-    answers by their trailing suffix and submits one subset per category to a deadline-free
-    attempt (no variant spent). Prioritised list is in HUNTRESS_TT_GROUP_ORDER. This is how
-    I isolated that <code>style</code> and <code>indicator</code> were the two wrong categories after the first full
-    submit returned incorrect.</li>
-</ol>
+<ol><li>Day 23 renamed the fixtures. <code>solve_poly_d8.poly_answers</code> looked up a question's file by <code>polyglot-&lt;lang&gt;-&lt;hash&gt;.&lt;ext&gt;</code> prefix; today's zip has <code>&lt;hash&gt;.&lt;ext&gt;</code> only. Added a hash-only fallback (match any file whose basename-without-ext equals the id's trailing <code>[0-9a-f]{4,16}</code> hash) that still returns the right language because the descriptor itself carries <code>language=</code>.</li><li>Several codecs were new to the self-decoding fixtures. Extended <code>bash_adv_decode</code> with <code>decimal_colon</code>, <code>reversed_decimal</code>, <code>decimal</code>, <code>hex_literal</code>, <code>hex_colon</code> and secondary transforms <code>single_byte_xor</code>, <code>repeating_key_xor</code>, <code>add_modulo_256</code> (plus key-as-next-step handling for <code>codec = '&lt;rep&gt;|&lt;xor&gt;|&lt;csv-hex-key&gt;'</code>).</li><li>HUNTRESS_ANALYSIS_V1 added a <code>LYR</code> kind on the Google Apps Script fixtures. The payload names the layers inline (<code>hex_b64_b32</code>, <code>b32_b32_b64</code>, <code>hex_frag_b64</code>, ...), applied in that order to encode. Added LYR to <code>_decode_known</code> + <code>_SPLIT_KINDS</code> and implemented every layer (hex / b64 / b32 / b85 / b16 / rev / frag / zlib / gzip).</li><li><code>MATERIAL_</code>/<code>CODEC_</code> is now matched case-insensitively (upper and title case) with either quote type.</li><li>Several new field shapes appear on top of the base descriptor: <code>url-host</code> (hostname of <code>url</code>), <code>path-leaf</code> (last path segment of <code>file_path</code>), <code>campaign-token</code> (campaign_id after first hyphen), <code>indicator</code> (first non-empty of URL / upload URL / next-stage file / file path / schedule path / recovery-note name / host id), <code>style</code> (three per-language labels joined by <code>|</code>), <code>secondary</code> / <code>tertiary</code> per PowerShell composite specimen type. Added a universal <code>_d23_fill</code> post-processor that derives all of these.</li><li><code>v=2|</code> descriptors (new on Day 23 Python fixtures) were being rejected by the strict <code>.startswith('v=1|')</code> guard in <code>generic_decode</code>. Added <code>v=2|</code> acceptance.</li><li><code>obfuscation</code> / <code>carrier</code> / <code>style</code> / <code>indicator</code> / <code>url-host</code> / <code>path-leaf</code> / <code>secondary</code> / <code>tertiary</code> / <code>campaign-token</code> now use <code>_d23_fill</code> even when SN.build had already set a legacy single-value answer (format changed between days: <code>python-X-obfuscation</code> is now <code>syntax|obfuscation</code>, <code>python-X-carrier</code> is <code>carrier|windows_chain</code>, etc.).</li><li>Attack mapping for <code>polyglot-&lt;lang&gt;</code> launcher / staged_chain / relay uses the plain <code>T1059</code> (confirmed from the accepted-values vocab); plain-language launcher / staged_chain / relay keeps the language-specific <code>T1059.&lt;sub&gt;</code>.</li><li>jscript, batch and vbscript <code>style</code> are derived with the canonical <code>solve_script_inventory.jsstyle</code> / <code>.bctl</code> / <code>.expform</code> and <code>solve_dim_dimmer.vbs_ctl</code> (already in the lane libs &#8212; I was writing one-off heuristics that produced labels outside the GM's vocab).</li><li>The brute-force descriptor hunter for files that bypass the self-describing path handles percent-hex, colon/dash/comma/pipe-separated hex, decimal/hex bracket arrays (including <code>firstPart.concat(secondPart)</code> splits), and base64 (with multi-piece <code>"..." + "..."</code> concatenations). Each payload is tried with identity, single-byte XOR / add / sub (0..255), rolling XOR seeded 0..255, and repeating-key XOR with every short numeric array found in the same file. Validity gate: only a well-formed <code>v=N|k=v|...</code> descriptor is accepted (printable ASCII, lowercase identifier keys, non-empty values). This rejects false-positive decodes (a wrong XOR that happens to produce a <code>v=</code> prefix on garbage) that would otherwise poison the batch.</li><li>PowerShell composite specimen type is detected from the JSON shape: resource-hijacking has <code>g</code> and <code>h</code> fields (c = wallet, h = mutex), collection has <code>c</code> as a list (c[0] = staged file, f = user_agent), impact has <code>c</code> as a scalar note name. Secondary / tertiary select the right field per type.</li><li><code>_start_body</code> now pre-reads status and calls <code>gm.retry</code> when the current attempt already received a submit (detected from the gm_record ledger: a <code>submit</code> for this challenge+mode newer than the last <code>start</code>/<code>retry</code>/<code>practice</code>). Without this the Day 23 route deadlocks: an untimed path op=start on the dead attempt consumes the one authorised timed-write slot before the retry+start branch can run, and the retry is refused.</li><li>Added <code>HUNTRESS_TT_GROUPS=auto</code> to <code>autosolve_script.run</code>'s bisect: it groups the live answers by their trailing suffix and submits one subset per category to a deadline-free attempt (no variant spent). Prioritised list is in HUNTRESS_TT_GROUP_ORDER. This is how I isolated that <code>style</code> and <code>indicator</code> were the two wrong categories after the first full submit returned incorrect.</li></ol>
 <h2 id="lesson-for-tomorrow">Lesson for tomorrow</h2>
-<p>Day 23 kept the self-describing fixtures but switched to <code>&lt;hash&gt;.&lt;ext&gt;</code> naming and layered
-all three obfuscation codecs on top of each other (hex, b64, b32, repeating-key XOR, rolling
-XOR, base64 chained across quoted-string concatenations, percent-hex). The right first move
-on this family is <code>HUNTRESS_TT_BISECT=1 HUNTRESS_TT_GROUPS=auto</code> on the first spent attempt
-to narrow which suffix category is still wrong &#8212; subset submits to a deadline-free attempt
-cost no variant and localise the bug in one call.</p>
+<p>Day 23 kept the self-describing fixtures but switched to <code>&lt;hash&gt;.&lt;ext&gt;</code> naming and layered all three obfuscation codecs on top of each other (hex, b64, b32, repeating-key XOR, rolling XOR, base64 chained across quoted-string concatenations, percent-hex). The right first move on this family is <code>HUNTRESS_TT_BISECT=1 HUNTRESS_TT_GROUPS=auto</code> on the first spent attempt to narrow which suffix category is still wrong &#8212; subset submits to a deadline-free attempt cost no variant and localise the bug in one call.</p>
 <h2 id="co-authored">Co-Authored</h2>
-<p>Co-Authored-By: Claude Opus 4.7 <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#110;&#111;&#114;&#101;&#112;&#108;&#121;&#64;&#97;&#110;&#116;&#104;&#114;&#111;&#112;&#105;&#99;&#46;&#99;&#111;&#109;">&#110;&#111;&#114;&#101;&#112;&#108;&#121;&#64;&#97;&#110;&#116;&#104;&#114;&#111;&#112;&#105;&#99;&#46;&#99;&#111;&#109;</a></p></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#flags">Flags</a></li><li class="l2"><a href="#shape">Shape</a></li><li class="l2"><a href="#what-the-lane-adapter-was-missing">What the lane adapter was missing</a></li><li class="l2"><a href="#lesson-for-tomorrow">Lesson for tomorrow</a></li><li class="l2"><a href="#co-authored">Co-Authored</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="../days/day-23.html">&lt; Day 23</a><a href="../challenges/index.html">All write-ups &gt;</a></nav>
+<p>Co-Authored-By: Claude Opus 4.7 &lt;[email]&gt;</p></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#flags">Flags</a></li><li class="l2"><a href="#shape">Shape</a></li><li class="l2"><a href="#what-the-lane-adapter-was-missing">What the lane adapter was missing</a></li><li class="l2"><a href="#lesson-for-tomorrow">Lesson for tomorrow</a></li><li class="l2"><a href="#co-authored">Co-Authored</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-13-posted-too-much.html">&lt; Posted Too Much</a><a href="day-11-template-temper.html">Template Temper &gt;</a></nav>
   </div>
 </main>
 <footer class="site">

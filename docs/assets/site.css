@@ -288,6 +288,15 @@ section + section { margin-top: var(--s-7); }
 .prose blockquote {
   margin: 0 0 1em; padding: 10px 16px; border-left: 2px solid var(--teal-dim); background: rgba(69, 220, 203, .05); color: var(--text-2);
 }
+/* Historical working documents carry a "Preserved source note": same banner everywhere. */
+.prose blockquote.preserved {
+  border-left-color: var(--amber); background: var(--amber-glow); font-size: 15px;
+}
+/* The source's own title line when it says more than the page title (GM id, lane, day). */
+.prose p.srctitle {
+  font-family: var(--f-mono); font-size: 13px; letter-spacing: .04em; color: var(--muted); margin: 0 0 1.2em;
+  padding-bottom: 8px; border-bottom: 1px dashed var(--hair-2);
+}
 .prose code {
   font-family: var(--f-mono); font-size: .86em; background: rgba(255, 255, 255, .06); border: 1px solid rgba(255, 255, 255, .07);
   padding: .08em .35em; border-radius: 2px; color: #f1dcb4;

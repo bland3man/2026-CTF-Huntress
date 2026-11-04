@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Resolver Revolt - Day 25 write-up</title>
-<meta name="description" content="Day 25 Web Exploitation write-up: GM id: web exploitation day 18 resolver revolt Modes: Single CORRECT, Time Trial CORRECT, Mastery CORRECT. Flags (GM accepted): Single Solve">
+<meta name="description" content="Day 25 Web Exploitation write-up: caseIndex labels one id as &quot;reference only&quot;, but the case(id) resolver has NO visibility check: it returns the note for that id anyway. Query:">
 <meta name="color-scheme" content="dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,73 +33,33 @@
 <div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-25.html">Day 25</a> / <a href="../lanes/web.html">Web Exploitation</a> / Resolver Revolt</p><p class="telemetry"><span>DAY 25</span><span class="sep">//</span><span>LANE: WEB EXPLOITATION</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Resolver Revolt</h1></div></div>
 <main id="main">
   <div class="wrap">
-<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-web" href="../lanes/web.html">Web Exploitation</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose"><h1 id="resolver-revolt-day-25-web-exploitation">Resolver Revolt (Day 25, web-exploitation)</h1>
-<p>GM id: <code>web-exploitation-day-18-resolver-revolt</code>
-Modes: Single CORRECT, Time Trial CORRECT, Mastery CORRECT.</p>
-<p>Flags (GM-accepted):
-- Single Solve: <code>409465cc336144878ee3b48127c9b6d0</code> (proof_409465cc336144878ee3b48127c9b6d0)
-- Time Trial:   <code>803deff565d5a452657056a7d3ac5132</code> (proof_17c068e938fd4a1181aec2a62ed9f7af)
-- Mastery:      <code>aeff705d9523c117c43759e42edc9e7d</code></p>
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-web" href="../lanes/web.html">Web Exploitation</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose"><p class="srctitle">Resolver Revolt (Day 25, web-exploitation)</p>
+<p>GM id: <code>web-exploitation-day-18-resolver-revolt</code> Modes: Single CORRECT, Time Trial CORRECT, Mastery CORRECT.</p>
+<p>Flags (GM-accepted):</p>
+<ul><li>Single Solve: <span class="flag" data-flag><span class="fl">Token</span><span class="fv">409465cc336144878ee3b48127c9b6d0</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span> (<span class="flag" data-flag><span class="fl">Proof</span><span class="fv">proof_409465cc336144878ee3b48127c9b6d0</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span>)</li><li>Time Trial:   <span class="flag" data-flag><span class="fl">Token</span><span class="fv">803deff565d5a452657056a7d3ac5132</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span> (<span class="flag" data-flag><span class="fl">Proof</span><span class="fv">proof_17c068e938fd4a1181aec2a62ed9f7af</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span>)</li><li>Mastery:      <span class="flag" data-flag><span class="fl">Token</span><span class="fv">aeff705d9523c117c43759e42edc9e7d</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li></ul>
 <h2 id="prompt">Prompt</h2>
 <p>"Discover the schema and reach a resolver whose field-level control is incomplete. Vary the protocol surface without changing the underlying authorization discipline."</p>
 <h2 id="single-and-time-trial-one-target-graph-garden">Single and Time Trial - one target (Graph Garden)</h2>
 <p>Target returns <code>/api/clues</code> with <code>{current_user, feature_route, protected_reference}</code>. <code>feature_route</code> (e.g. <code>/inspect-46c9c6</code>) is the GraphQL endpoint; it refuses <code>GET /graphql</code> but accepts POST at the hashed path.</p>
 <p>Schema (via introspection):</p>
-<pre class="code"><code class="lang-text">type Query { caseIndex: [CaseReference]; case(id: ID): Case }
-type CaseReference { id, title, visibility }   # visibility includes &quot;reference only&quot;
-type Case { id, title, note }                  # note is the proof
-</code></pre>
+<pre class="code"><code>type Query { caseIndex: [CaseReference]; case(id: ID): Case }
+type CaseReference { id, title, visibility }   # visibility includes "reference only"
+type Case { id, title, note }                  # note is the proof</code></pre>
 <p><code>caseIndex</code> labels one id as <code>"reference only"</code>, but the <code>case(id)</code> resolver has NO visibility check: it returns the <code>note</code> for that id anyway. Query:</p>
-<pre class="code"><code class="lang-text">POST /&lt;feature_route&gt;  Content-Type: application/json
-{&quot;query&quot;:&quot;{case(id:\&quot;&lt;protected_reference&gt;\&quot;){note}}&quot;}
-</code></pre>
+<pre class="code"><code>POST /&lt;feature_route&gt;  Content-Type: application/json
+{"query":"{case(id:\"&lt;protected_reference&gt;\"){note}}"}</code></pre>
 <p>The <code>note</code> value is the <code>proof_&lt;hex&gt;</code> answer for proof-1.</p>
-<h2 id="mastery-four-targets-four-protocol-surfaces-same-lesson-incomplete-field-levelauthorization-boundary">Mastery - four targets, four protocol surfaces, same lesson (incomplete field-level/authorization boundary)</h2>
+<h2 id="mastery-four-targets-four-protocol-surfaces-same-lesson-incomplete-field-level-authorization-boundary">Mastery - four targets, four protocol surfaces, same lesson (incomplete field-level/authorization boundary)</h2>
 <p>Target index &#8594; vulnerability class:</p>
-<ul>
-<li><strong>Target 1 - Status Sprout (static Node.js, exposed backup).</strong> <code>robots.txt</code> disallows <code>/releases-&lt;hex&gt;/</code>. That path returns a directory index listing <code>release-settings-&lt;hex&gt;.json.bak</code>, which contains <code>"support_note":"proof_..."</code>.</li>
-<li><strong>Target 2 - Pocket SOC (session cookie + IDOR).</strong> <code>GET /</code> sets <code>case_session=&lt;hex&gt;</code> and shows cases owned by "Riley"; <code>GET /api/activity</code> with the cookie reveals a cross-workspace event referencing <code>case_id</code> 10134 (owner "executive", <code>visibility: "reference_only"</code>). <code>GET /api/incidents/10134</code> with the same cookie returns <code>{"status":"restricted","note":"proof_..."}</code> - the resolver trusts the session for authentication but never checks per-record visibility.</li>
-<li><strong>Target 3 - Search Party (SQL injection in search query).</strong> <code>GET /explore?q=&lt;term&gt;</code> runs a parenthesised, single-quoted LIKE. Payload <code>a') OR 1=1--</code> returns a fourth, otherwise-hidden <code>Record 13188</code> whose body contains the <code>proof_...</code>.</li>
-<li><strong>Target 4 - Query Constellation (same GraphQL pattern as Single/TT).</strong> <code>/api/clues</code> + POST to <code>feature_route</code> + <code>{case(id:"&lt;protected_reference&gt;"){note}}</code>.</li>
-</ul>
+<ul><li><strong>Target 1 - Status Sprout (static Node.js, exposed backup).</strong> <code>robots.txt</code> disallows <code>/releases-&lt;hex&gt;/</code>. That path returns a directory index listing <code>release-settings-&lt;hex&gt;.json.bak</code>, which contains <code>"support_note":"proof_..."</code>.</li><li><strong>Target 2 - Pocket SOC (session cookie + IDOR).</strong> <code>GET /</code> sets <code>case_session=&lt;hex&gt;</code> and shows cases owned by "Riley"; <code>GET /api/activity</code> with the cookie reveals a cross-workspace event referencing <code>case_id</code> 10134 (owner "executive", <code>visibility: "reference_only"</code>). <code>GET /api/incidents/10134</code> with the same cookie returns <code>{"status":"restricted","note":"proof_..."}</code> - the resolver trusts the session for authentication but never checks per-record visibility.</li><li><strong>Target 3 - Search Party (SQL injection in search query).</strong> <code>GET /explore?q=&lt;term&gt;</code> runs a parenthesised, single-quoted LIKE. Payload <code>a') OR 1=1--</code> returns a fourth, otherwise-hidden <code>Record 13188</code> whose body contains the <code>proof_...</code>.</li><li><strong>Target 4 - Query Constellation (same GraphQL pattern as Single/TT).</strong> <code>/api/clues</code> + POST to <code>feature_route</code> + <code>{case(id:"&lt;protected_reference&gt;"){note}}</code>.</li></ul>
 <h2 id="mastery-submit-mapping">Mastery submit mapping</h2>
 <p><code>proof-N</code> maps to <code>Target N</code> in the order the start response reports under <code>targets[]</code>. On the untimed retry attempt I used:</p>
-<div class="table-wrap"><table>
-<thead>
-<tr>
-<th>id</th>
-<th>target name</th>
-<th>class</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>proof-1</td>
-<td>Status Sprout</td>
-<td>robots.txt + exposed backup</td>
-</tr>
-<tr>
-<td>proof-2</td>
-<td>Pocket SOC</td>
-<td>IDOR under valid session</td>
-</tr>
-<tr>
-<td>proof-3</td>
-<td>Search Party</td>
-<td>SQLi (<code>'...)</code>-break + OR 1=1)</td>
-</tr>
-<tr>
-<td>proof-4</td>
-<td>Query Constellation</td>
-<td>GraphQL missing-field-auth</td>
-</tr>
-</tbody>
-</table></div>
+<div class="table-wrap"><table><thead><tr><th>id</th><th>target name</th><th>class</th></tr></thead><tbody><tr><td>proof-1</td><td>Status Sprout</td><td>robots.txt + exposed backup</td></tr><tr><td>proof-2</td><td>Pocket SOC</td><td>IDOR under valid session</td></tr><tr><td>proof-3</td><td>Search Party</td><td>SQLi (<code>'...)</code>-break + OR 1=1)</td></tr><tr><td>proof-4</td><td>Query Constellation</td><td>GraphQL missing-field-auth</td></tr></tbody></table></div>
 <h2 id="how-mastery-was-recovered-after-a-lost-ranked-window">How Mastery was recovered after a lost ranked window</h2>
 <p>The hof_policy chose a ranked (run_for_time) Mastery attempt as soon as Single was CORRECT; proof-1 was accepted but the 135 s deadline passed before I had per-target extractors for the three non-GraphQL surfaces. One ranked variant was lost (7 of 8 remained).</p>
 <p>User authorised using the untimed/practice path. With <code>HUNTRESS_HOF=0</code> set in the environment, <code>autosolve.py 25 web-exploitation-day-18-resolver-revolt web-exploitation</code> chose <code>op=retry</code> without <code>run_for_time</code>, which opened a fresh UNTIMED Mastery attempt (deadline:null, ~30 min inactivity timer). I then enumerated each target off the clock, derived the three remaining proofs, and submitted them in one batch - CORRECT, no extra variants spent.</p>
 <h2 id="lesson-for-the-next-team">Lesson for the next team</h2>
-<p>"Vary the protocol surface" means literally four different stacks per Mastery attempt (static Node, cookie-session REST, SQL-backed search, GraphQL). A ranked attempt is only safe once per-shape extractors are banked; otherwise take the untimed path (the flag and CourseStack points both still land).</p></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#prompt">Prompt</a></li><li class="l2"><a href="#single-and-time-trial-one-target-graph-garden">Single and Time Trial - one target (Graph Garden)</a></li><li class="l2"><a href="#mastery-four-targets-four-protocol-surfaces-same-lesson-incomplete-field-levelauthorization-boundary">Mastery - four targets, four protocol surfaces, same lesson (incomplete field-level/authorization boundary)</a></li><li class="l2"><a href="#mastery-submit-mapping">Mastery submit mapping</a></li><li class="l2"><a href="#how-mastery-was-recovered-after-a-lost-ranked-window">How Mastery was recovered after a lost ranked window</a></li><li class="l2"><a href="#lesson-for-the-next-team">Lesson for the next team</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="../days/day-25.html">&lt; Day 25</a><a href="../challenges/index.html">All write-ups &gt;</a></nav>
+<p>"Vary the protocol surface" means literally four different stacks per Mastery attempt (static Node, cookie-session REST, SQL-backed search, GraphQL). A ranked attempt is only safe once per-shape extractors are banked; otherwise take the untimed path (the flag and CourseStack points both still land).</p></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#prompt">Prompt</a></li><li class="l2"><a href="#single-and-time-trial-one-target-graph-garden">Single and Time Trial - one target (Graph Garden)</a></li><li class="l2"><a href="#mastery-four-targets-four-protocol-surfaces-same-lesson-incomplete-field-level-authorization-boundary">Mastery - four targets, four protocol surfaces, same lesson (incomplete field-level/authorization boundary)</a></li><li class="l2"><a href="#mastery-submit-mapping">Mastery submit mapping</a></li><li class="l2"><a href="#how-mastery-was-recovered-after-a-lost-ranked-window">How Mastery was recovered after a lost ranked window</a></li><li class="l2"><a href="#lesson-for-the-next-team">Lesson for the next team</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-17-reset-expectations.html">&lt; Reset Expectations</a><a href="day-16-shell-company.html">Shell Company &gt;</a></nav>
   </div>
 </main>
 <footer class="site">

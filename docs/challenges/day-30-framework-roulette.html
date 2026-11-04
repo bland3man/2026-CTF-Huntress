@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Framework Roulette - Day 31 write-up</title>
-<meta name="description" content="Day 31 Web Exploitation write-up: GM id: web exploitation day 30 framework roulette Result: all three modes CORRECT by 13:51 ET on release day (Single Solve, Time Trial, Mast">
+<meta name="description" content="Day 31 Web Exploitation write-up: Result: all three modes CORRECT by 13:51 ET on release day (Single Solve, Time Trial, Mastery with six accepted ids). Time Trial and Mastery were ...">
 <meta name="color-scheme" content="dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,37 +33,24 @@
 <div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-31.html">Day 31</a> / <a href="../lanes/web.html">Web Exploitation</a> / Framework Roulette</p><p class="telemetry"><span>DAY 31</span><span class="sep">//</span><span>LANE: WEB EXPLOITATION</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Framework Roulette</h1></div></div>
 <main id="main">
   <div class="wrap">
-<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-web" href="../lanes/web.html">Web Exploitation</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose"><h1 id="framework-roulette-day-31-web-exploitation">Framework Roulette (Day 31, web-exploitation)</h1>
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-web" href="../lanes/web.html">Web Exploitation</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose"><p class="srctitle">Framework Roulette (Day 31, web-exploitation)</p>
 <p>GM id: <code>web-exploitation-day-30-framework-roulette</code></p>
 <p><strong>Result:</strong> all three modes CORRECT by 13:51 ET on release day (Single Solve, Time Trial, Mastery with six accepted ids). Time Trial and Mastery were regular untimed attempts, not ranked. All three submits landed under the team's shared CourseStack account (<code>the team solver</code>) &#8212; the local AI agents' GM records show no submit for this challenge, so the accepted answers came from a different entry point of the same team account.</p>
 <p><strong>What our homestation added afterwards</strong> (now on <code>main</code>): a lane-first family recognizer (<code>web_family_match.py</code>), a deterministic novel-family hold that writes a dense fingerprint instead of re-running the ladder (<code>web_novel_family_hold.py</code>), the enriched <code>kb/web_exploit_families.json</code> family bank, the <code>kb/web_family_index.md</code> lookup tables, and the <code>kb/web_fast_solve_tips_d31.md</code> ten speed lessons. A Framework Roulette-shape start response now ranks <code>sign_only_facade_bypass</code> first.</p>
 <h2 id="shape">Shape</h2>
 <p>The target was an ASP.NET Core Blazor Server application. Read-only clues exposed a <code>feature_route</code> of the form <code>/inspect-xxxxxx</code>, a <code>/blazor</code> component route and a current role of <code>analyst</code>. Error strings such as <code>evaluated_client</code>, <code>gateway_context_rejected</code> and <code>topology_proof_rejected</code> pointed at a gateway that decides trust from forwarded context.</p>
 <h2 id="what-was-tried-luna-vm">What was tried (Luna VM)</h2>
-<ol>
-<li>The exact-id progression runner started Single Solve, then ran the shared proof-recon ladder. It exhausted without a proof.</li>
-<li>The broad live solver battery (<code>HUNTRESS_WEB_LIVE_BATTERY=1</code>) also failed to recognise the target.</li>
-<li>Short one-off probes tested forwarded client address, identity and role headers, encoded claims and JWT-shaped values. None resolved it, and none were saved as solver files.</li>
-<li>A retry against Single Solve was rejected by the Game Master (<code>operation_not_allowed</code>): Single Solve has no retry, so none was issued.</li>
-</ol>
+<ol><li>The exact-id progression runner started Single Solve, then ran the shared proof-recon ladder. It exhausted without a proof.</li><li>The broad live solver battery (<code>HUNTRESS_WEB_LIVE_BATTERY=1</code>) also failed to recognise the target.</li><li>Short one-off probes tested forwarded client address, identity and role headers, encoded claims and JWT-shaped values. None resolved it, and none were saved as solver files.</li><li>A retry against Single Solve was rejected by the Game Master (<code>operation_not_allowed</code>): Single Solve has no retry, so none was issued.</li></ol>
 <h2 id="what-went-wrong">What went wrong</h2>
 <p>The main loss was not HTTP speed. The automated ladder knew many earlier families but had no recogniser for the new Blazor plus forwarded-context shape, so every pass missed and the work fell back to sequential manual probing.</p>
 <h2 id="learned">LEARNED</h2>
-<ul>
-<li>The challenge belongs to the <code>sign_only_facade_bypass</code> family first seen on Day 20 (Administratively Speaking): <code>routes[0].path</code> in the start response is the real target path and must be folded into the base URL before probing.</li>
-<li>A forwarded-header recogniser must not require a <code>deployment: trusted_reverse_proxy</code> field; this variant did not carry one.</li>
-<li>When every recogniser misses, stop and write a dense hold record instead of re-running the ladder.</li>
-</ul>
+<ul><li>The challenge belongs to the <code>sign_only_facade_bypass</code> family first seen on Day 20 (Administratively Speaking): <code>routes[0].path</code> in the start response is the real target path and must be folded into the base URL before probing.</li><li>A forwarded-header recogniser must not require a <code>deployment: trusted_reverse_proxy</code> field; this variant did not carry one.</li><li>When every recogniser misses, stop and write a dense hold record instead of re-running the ladder.</li></ul>
 <h2 id="implemented">IMPLEMENTED</h2>
-<ul>
-<li><code>web_family_match.match_family()</code> scores families from title, prompt, framework, error strings and <code>routes[]</code>, and returns the top family in milliseconds.</li>
-<li><code>web_novel_family_hold.dump()</code> writes a fingerprint file when all recognisers miss, so no retry or scope budget is burned.</li>
-<li>Enriched <code>kb/web_exploit_families.json</code> and <code>kb/web_family_index.md</code>.</li>
-</ul>
+<ul><li><code>web_family_match.match_family()</code> scores families from title, prompt, framework, error strings and <code>routes[]</code>, and returns the top family in milliseconds.</li><li><code>web_novel_family_hold.dump()</code> writes a fingerprint file when all recognisers miss, so no retry or scope budget is burned.</li><li>Enriched <code>kb/web_exploit_families.json</code> and <code>kb/web_family_index.md</code>.</li></ul>
 <h2 id="tested">TESTED</h2>
 <p>Offline fixtures in <code>_test_web_family_match.py</code> and <code>_test_web_novel_family_hold.py</code> check that a Framework Roulette-shaped start response ranks <code>sign_only_facade_bypass</code> first.</p>
 <h2 id="remaining">REMAINING</h2>
-<p>The teammate's final target-level exploit trace was not preserved, so the exact final request sequence is not recorded here. No Framework Roulette-specific adapter exists in the registry.</p></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#shape">Shape</a></li><li class="l2"><a href="#what-was-tried-luna-vm">What was tried (Luna VM)</a></li><li class="l2"><a href="#what-went-wrong">What went wrong</a></li><li class="l2"><a href="#learned">LEARNED</a></li><li class="l2"><a href="#implemented">IMPLEMENTED</a></li><li class="l2"><a href="#tested">TESTED</a></li><li class="l2"><a href="#remaining">REMAINING</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="../days/day-31.html">&lt; Day 31</a><a href="../challenges/index.html">All write-ups &gt;</a></nav>
+<p>The teammate's final target-level exploit trace was not preserved, so the exact final request sequence is not recorded here. No Framework Roulette-specific adapter exists in the registry.</p></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#shape">Shape</a></li><li class="l2"><a href="#what-was-tried-luna-vm">What was tried (Luna VM)</a></li><li class="l2"><a href="#what-went-wrong">What went wrong</a></li><li class="l2"><a href="#learned">LEARNED</a></li><li class="l2"><a href="#implemented">IMPLEMENTED</a></li><li class="l2"><a href="#tested">TESTED</a></li><li class="l2"><a href="#remaining">REMAINING</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-31-final-boss.html">&lt; Final Boss</a><a href="day-31-full-stack-incident.html">Full Stack Incident &gt;</a></nav>
   </div>
 </main>
 <footer class="site">

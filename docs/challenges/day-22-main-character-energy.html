@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Main Character Energy - Day 22 write-up</title>
-<meta name="description" content="Day 22 Metadata Forensics write-up: Recognize: metadata-forensics family, &quot;Determine &lt;format&gt;.&lt;field&gt; for &lt;file&gt;&quot; question shape. The field key names the extractor. Bind/Extrac">
+<meta name="description" content="Day 22 Metadata Forensics write-up: Recognize: metadata-forensics family, &quot;Determine . for &quot; question shape. The field key names the extractor. Bind/Extract: the autosolver read the ...">
 <meta name="color-scheme" content="dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,8 +33,7 @@
 <div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-22.html">Day 22</a> / <a href="../lanes/metadata.html">Metadata Forensics</a> / Main Character Energy</p><p class="telemetry"><span>DAY 22</span><span class="sep">//</span><span>LANE: METADATA FORENSICS</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Main Character Energy</h1></div></div>
 <main id="main">
   <div class="wrap">
-<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-metadata" href="../lanes/metadata.html">Metadata Forensics</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
-<h1 id="main-character-energy-metadata-forensics-day-22">Main Character Energy (metadata-forensics, Day 22)</h1>
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-metadata" href="../lanes/metadata.html">Metadata Forensics</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose"><p class="srctitle">Main Character Energy (metadata-forensics, Day 22)</p>
 <p>Entry id: metadata-forensics-day-22-main-character-energy Agent: agent-4 (lane metadata-forensics)</p>
 <h2 id="result">Result</h2>
 <p>All three modes were solved by the lane's banked autosolver (autosolve_metadata.py) before any manual work. No extractor changes were needed. No manual GM calls were made by the agent.</p>
@@ -43,7 +42,7 @@
 <h2 id="method">Method</h2>
 <ul><li>Recognize: metadata-forensics family, "Determine &lt;format&gt;.&lt;field&gt; for &lt;file&gt;" question shape. The field key names the extractor.</li><li>Bind/Extract: the autosolver read the answer from the claimed artifact's raw bytes using the registered handler (legacy_deterministic path, no new capabilities).</li><li>Validate/Submit: one submit per mode under the GM's answer_ids; the GM result was the verification.</li><li>Evidence: SURE (accepted by the GM in all three modes).</li></ul>
 <h2 id="notes">Notes</h2>
-<ul><li>Today's layer was not predicted by the progression table (no candidate matched), but the existing spine covered it.</li><li>Source of the results: Day 22/_board/metadata-forensics-day-22-main-character-energy.autosolve.json and timeline.jsonl.</li></ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#result">Result</a></li><li class="l2"><a href="#method">Method</a></li><li class="l2"><a href="#notes">Notes</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-22-deflated-ego.html">&lt; Deflated Ego</a><a href="day-22-next-next-finish.html">Next Next Finish &gt;</a></nav>
+<ul><li>Today's layer was not predicted by the progression table (no candidate matched), but the existing spine covered it.</li><li>Source of the results: Day 22/_board/metadata-forensics-day-22-main-character-energy.autosolve.json and timeline.jsonl.</li></ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#result">Result</a></li><li class="l2"><a href="#method">Method</a></li><li class="l2"><a href="#notes">Notes</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-09-forged-with-care.html">&lt; Forged With Care</a><a href="day-22-next-next-finish.html">Next Next Finish &gt;</a></nav>
   </div>
 </main>
 <footer class="site">

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Hex Appeal - Day 03 write-up</title>
-<meta name="description" content="Day 03 Warmups write-up: Category: Encoding/Decoding (Hex, Base64, ROT13) Hint interpretation: &quot;Sixteen&quot; = base 16 = hexadecimal Primary approach: Multi-layer decodi">
+<meta name="description" content="Day 03 Warmups write-up: Hint parsing: &quot;Sixteen fingers&quot; directly points to hexadecimal encoding Dynamic artifacts: Each mode has different assigned bytes; answers differ ...">
 <meta name="color-scheme" content="dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,7 +34,6 @@
 <main id="main">
   <div class="wrap">
 <div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-warmups" href="../lanes/warmups.html">Warmups</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
-<h1 id="hex-appeal">Hex Appeal</h1>
 <h2 id="challenge">Challenge</h2>
 <ul><li><strong>Lane:</strong> Warmups</li><li><strong>Mode:</strong> Single Solve / Time Trial / Mastery</li><li><strong>IDs:</strong> warmups-day-03 / warmups-day-03/time_trial / warmups-day-03/mastery</li><li><strong>Prompt:</strong> "Sixteen seems like a perfectly reasonable number of fingers."</li><li><strong>Objective:</strong> Decode the assigned blob(s) completely. Extract answer slugs in the specified format.</li><li><strong>Answer Format:</strong> Three lowercase words separated by hyphens, followed by a hyphen and a two-digit number</li></ul>
 <h2 id="triage">Triage</h2>
@@ -62,17 +61,17 @@ Output (ASCII): Nice work decoding this warmup!...nimble-scooter-boulder-88</cod
 <ol><li>proud-prairie-ember-43</li><li>deft-prairie-clover-22</li><li>quick-harbor-whale-34</li><li>peppy-sparrow-pebble-74</li><li>lively-clock-dune-98</li><li>brave-summit-nugget-64</li><li>jazzy-cactus-tiger-69</li><li>sunny-river-bison-95</li><li>perky-island-ripple-54</li><li>witty-chimney-butter-59</li><li>fancy-canoe-bison-59</li><li>spry-crater-turtle-67</li><li>dashing-rainbow-tiger-74</li></ol>
 <p><strong>Flag:</strong> <span class="flag" data-flag><span class="fl">Token</span><span class="fv">f1b18b8c4242fd0e4c419478fdf90bfa</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></p>
 <h2 id="minimal-reproduction">Minimal Reproduction</h2>
-<pre class="code"><code class="lang-bash"></code></pre>
-<h1 id="single-solve-decode">Single Solve decode</h1>
-<p>blob_hex="4e69636520776f726b20646563..." echo -n "$blob_hex" | xxd -r -p</p>
-<h1 id="output-nice-work-decoding-this-warmup-nimble-scooter-boulder-88">Output: "Nice work decoding this warmup!...nimble-scooter-boulder-88"</h1>
-<h1 id="extract-slug-and-submit">Extract slug and submit</h1>
-<h1 id="mastery-decode-example-for-set1">Mastery decode (example for set1)</h1>
-<p>blob_b64="Tmljzswu..." echo -n "$blob_b64" | base64 -d</p>
-<h1 id="decode-each-line-based-on-its-encoding-format">Decode each line based on its encoding format</h1>
-<h1 id="submit-all-13-answers-as-a-bundle">Submit all 13 answers as a bundle</h1>
-<pre class="code"><code>
-</code></pre>
+<pre class="code"><code class="lang-bash"># Single Solve decode
+blob_hex="4e69636520776f726b20646563..."
+echo -n "$blob_hex" | xxd -r -p
+# Output: "Nice work decoding this warmup!...nimble-scooter-boulder-88"
+# Extract slug and submit
+
+# Mastery decode (example for set1)
+blob_b64="Tmljzswu..."
+echo -n "$blob_b64" | base64 -d
+# Decode each line based on its encoding format
+# Submit all 13 answers as a bundle</code></pre>
 <h2 id="lessons-learned">Lessons Learned</h2>
 <ol><li><strong>Hint parsing:</strong> "Sixteen fingers" directly points to hexadecimal encoding</li><li><strong>Dynamic artifacts:</strong> Each mode has different assigned bytes; answers differ but format is consistent</li><li><strong>Multi-encoding:</strong> Mastery uses multiple encodings in a single blob (Base64, ROT13, hex)</li><li><strong>Bundle challenges:</strong> Mastery-mode challenges can have multiple answer fields, each requiring separate decoding</li><li><strong>Format stability:</strong> Once locked on Single Solve, the three-words-two-digit format applies to all modes</li><li><strong>Encoding detection:</strong>
 <ul><li>Base64: Starts with A-Z, a-z, 0-9, +, /, =</li><li>ROT13: Look for common words rotated (e.g., "guvf" = "this")</li><li>Hex: All hex digits (0-9a-f)</li></ul></li></ol>

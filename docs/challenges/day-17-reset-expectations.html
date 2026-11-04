@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Reset Expectations - Day 25 write-up</title>
-<meta name="description" content="Day 25 Web Exploitation write-up: Agent: agent 7. All three modes CORRECT (Single Solve, Time Trial, Mastery). Prompt: &quot;Forgot your password? This recovery flow forgot its ma">
+<meta name="description" content="Day 25 Web Exploitation write-up: Each target advertises its own routes: GET /api/clues -&gt; {feature_route (submit), secondary_route (result), recovery_guide_route} GET ...">
 <meta name="color-scheme" content="dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,59 +33,40 @@
 <div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-25.html">Day 25</a> / <a href="../lanes/web.html">Web Exploitation</a> / Reset Expectations</p><p class="telemetry"><span>DAY 25</span><span class="sep">//</span><span>LANE: WEB EXPLOITATION</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Reset Expectations</h1></div></div>
 <main id="main">
   <div class="wrap">
-<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-web" href="../lanes/web.html">Web Exploitation</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose"><h1 id="day-25-reset-expectations-web-exploitation">Day 25 - Reset Expectations (Web Exploitation)</h1>
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-web" href="../lanes/web.html">Web Exploitation</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose"><p class="srctitle">Day 25 - Reset Expectations (Web Exploitation)</p>
 <p>Agent: agent-7. All three modes CORRECT (Single Solve, Time Trial, Mastery).</p>
 <h2 id="challenge-shape">Challenge shape</h2>
 <p>Prompt: "Forgot your password? This recovery flow forgot its manners. Walk the reset process sideways and wake up in somebody else's account."</p>
 <p>Single Solve was one Symfony-styled target with a two-step password recovery flow. Time Trial was the same shape on a mutated instance. Mastery bundled FOUR distinct web apps, each with its own vuln class; only Target 4 was the recovery flow.</p>
 <h2 id="single-solve-time-trial-account-recovery-idor">Single Solve / Time Trial - Account Recovery IDOR</h2>
-<p>Each target advertises its own routes:
-- <code>GET /api/clues</code> -&gt; <code>{feature_route (submit), secondary_route (result), recovery_guide_route}</code>
-- <code>GET /api/recovery</code> -&gt; <code>{request_route, redeem_route, account_parameter, token_parameter, accounts[]}</code>
-  where <code>accounts</code> is a list of <code>{id, label, self_service}</code> pairs. The self-service account is the attacker's analyst; the non-self-service one is the Executive.</p>
-<p>Flow:
-1. <code>GET {request_route}?account_id={self_id}</code> -&gt; JSON <code>{ok, account_id, token, redeem_route}</code>.
-2. <code>GET {redeem_route}?account_id={executive_id}&amp;token={token}</code> -&gt; JSON <code>{ok, effect: "synthetic_account_recovery", account_id: executive_id, evidence: "proof_..."}</code>.</p>
+<p>Each target advertises its own routes:</p>
+<ul><li><code>GET /api/clues</code> -&gt; <code>{feature_route (submit), secondary_route (result), recovery_guide_route}</code></li><li><code>GET /api/recovery</code> -&gt; <code>{request_route, redeem_route, account_parameter, token_parameter, accounts[]}</code> where <code>accounts</code> is a list of <code>{id, label, self_service}</code> pairs. The self-service account is the attacker's analyst; the non-self-service one is the Executive.</li></ul>
+<p>Flow:</p>
+<ol><li><code>GET {request_route}?account_id={self_id}</code> -&gt; JSON <code>{ok, account_id, token, redeem_route}</code>.</li><li><code>GET {redeem_route}?account_id={executive_id}&amp;token={token}</code> -&gt; JSON <code>{ok, effect: "synthetic_account_recovery", account_id: executive_id, evidence: "proof_..."}</code>.</li></ol>
 <p>The server validates the self-service gate only on the request step and binds the token to the account that was sent in. The redeem step trusts the account_id in the query and re-derives nothing from the token, so a legitimately minted analyst token lets you redeem into any account.</p>
-<p>Single Solve proof: <code>proof_5ad1884a069c45bb9524d4b5fab7e108</code>
-Time Trial proof (per-run, auto-solved): recorded in the autosolve record.</p>
+<p>Single Solve proof: <span class="flag" data-flag><span class="fl">Proof</span><span class="fv">proof_5ad1884a069c45bb9524d4b5fab7e108</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span> Time Trial proof (per-run, auto-solved): recorded in the autosolve record.</p>
 <h2 id="mastery-four-independent-apps">Mastery - four independent apps</h2>
 <p>Each <code>target-N</code> was a fully different app; only <code>routes[].path</code> was advisory metadata (not required to reach the API). Working exploit per target:</p>
-<h3 id="target-1-status-sprout-nodejs-robotstxt-leak">Target 1 - Status Sprout (Node.js) - robots.txt leak</h3>
+<h3 id="target-1-status-sprout-node-js-robots-txt-leak">Target 1 - Status Sprout (Node.js) - robots.txt leak</h3>
 <p><code>GET /robots.txt</code> reveals <code>Disallow: /releases-bdf42/</code>. Directory indexing serves a backup JSON file.</p>
-<pre class="code"><code class="lang-text">GET /releases-bdf42/environment-copy-ef6f12.json.bak
--&gt; {&quot;environment&quot;:&quot;production&quot;,&quot;support_note&quot;:&quot;proof_fc0fcffc5162491fba54eae012ff64ef&quot;}
-</code></pre>
+<pre class="code"><code>GET /releases-bdf42/environment-copy-ef6f12.json.bak
+-&gt; {"environment":"production","support_note":"<span class="flag" data-flag><span class="fv">proof_fc0fcffc5162491fba54eae012ff64ef</span></span>"}</code></pre>
 <h3 id="target-2-tiny-triage-case-id-idor-via-activity-feed">Target 2 - Tiny Triage - case-id IDOR via activity feed</h3>
 <p>The home page sets a <code>case_session</code> cookie automatically ("Signed in as Riley"). The owner's three cases are shown, but <code>GET /api/events</code> leaks a fourth case id outside Riley's workspace with <code>visibility: "reference_only"</code> (executive-owner case 13987). The ticket detail endpoint does NOT re-check ownership:</p>
-<pre class="code"><code class="lang-text">GET /api/tickets/13987
--&gt; {&quot;id&quot;:13987,&quot;owner&quot;:&quot;executive&quot;,&quot;title&quot;:&quot;Executive escalation&quot;,&quot;status&quot;:&quot;restricted&quot;,&quot;note&quot;:&quot;proof_0e514722a54c4406848d1c60890b3ee5&quot;}
-</code></pre>
-<h3 id="target-3-search-party-sqli-prefix-or-11-">Target 3 - Search Party - SQLi (prefix <code>) OR 1=1--</code>)</h3>
+<pre class="code"><code>GET /api/tickets/13987
+-&gt; {"id":13987,"owner":"executive","title":"Executive escalation","status":"restricted","note":"<span class="flag" data-flag><span class="fv">proof_0e514722a54c4406848d1c60890b3ee5</span></span>"}</code></pre>
+<h3 id="target-3-search-party-sqli-prefix-or-1-1">Target 3 - Search Party - SQLi (prefix <code>) OR 1=1--</code>)</h3>
 <p><code>/lookup?q=...</code> returns matching records. Payload <code>?q=') OR 1=1--</code> fully escapes the <code>(category=? AND ...)</code> style predicate and lists every record, including the hidden <code>restricted</code> row:</p>
-<pre class="code"><code class="lang-text">category=restricted, title=&quot;Private escalation&quot;, body=&quot;proof_efe8b1d34473489593c33a35d5a091e5&quot;
-</code></pre>
+<pre class="code"><code>category=restricted, title="Private escalation", body="<span class="flag" data-flag><span class="fv">proof_efe8b1d34473489593c33a35d5a091e5</span></span>"</code></pre>
 <h3 id="target-4-reset-expectations-same-shape-as-single-solve">Target 4 - Reset Expectations (same shape as Single Solve)</h3>
-<p>Same two-step recovery flow; the mutated routes still followed the <code>/api/clues</code> -&gt; <code>/api/recovery</code> discovery. Mint a token for the self-service account, then redeem it with the Executive account id. Proof: <code>proof_21e16f1c275146738fdae7b80a52103e</code>.</p>
+<p>Same two-step recovery flow; the mutated routes still followed the <code>/api/clues</code> -&gt; <code>/api/recovery</code> discovery. Mint a token for the self-service account, then redeem it with the Executive account id. Proof: <span class="flag" data-flag><span class="fl">Proof</span><span class="fv">proof_21e16f1c275146738fdae7b80a52103e</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span>.</p>
 <h2 id="submitted-answers-gm-accepted">Submitted answers (GM-accepted)</h2>
-<ul>
-<li>Single Solve <code>proof-1</code> = <code>proof_5ad1884a069c45bb9524d4b5fab7e108</code> -&gt; CORRECT</li>
-<li>Time Trial (ranked, same single-target shape) -&gt; CORRECT by autosolve in 9.0s</li>
-<li>Mastery</li>
-<li><code>proof-1</code> = <code>proof_fc0fcffc5162491fba54eae012ff64ef</code></li>
-<li><code>proof-2</code> = <code>proof_0e514722a54c4406848d1c60890b3ee5</code></li>
-<li><code>proof-3</code> = <code>proof_efe8b1d34473489593c33a35d5a091e5</code></li>
-<li><code>proof-4</code> = <code>proof_21e16f1c275146738fdae7b80a52103e</code>
-  -&gt; CORRECT</li>
-</ul>
+<ul><li>Single Solve <code>proof-1</code> = <span class="flag" data-flag><span class="fl">Proof</span><span class="fv">proof_5ad1884a069c45bb9524d4b5fab7e108</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span> -&gt; CORRECT</li><li>Time Trial (ranked, same single-target shape) -&gt; CORRECT by autosolve in 9.0s</li><li>Mastery
+<ul><li><code>proof-1</code> = <span class="flag" data-flag><span class="fl">Proof</span><span class="fv">proof_fc0fcffc5162491fba54eae012ff64ef</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li><li><code>proof-2</code> = <span class="flag" data-flag><span class="fl">Proof</span><span class="fv">proof_0e514722a54c4406848d1c60890b3ee5</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li><li><code>proof-3</code> = <span class="flag" data-flag><span class="fl">Proof</span><span class="fv">proof_efe8b1d34473489593c33a35d5a091e5</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li><li><code>proof-4</code> = <span class="flag" data-flag><span class="fl">Proof</span><span class="fv">proof_21e16f1c275146738fdae7b80a52103e</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span> -&gt; CORRECT</li></ul></li></ul>
 <h2 id="automation-landed">Automation landed</h2>
-<p>Added <code>_tech_reset_expectations</code> to <code>challenges/_lib/autosolve_web.py</code> so the <code>/api/clues</code> -&gt; <code>/api/recovery</code> -&gt; mint-then-swap chain runs in the shared technique battery for Reset Expectations variants. Also extended <code>_lfi_handler</code> to fold the per-target <code>routes[].path</code> into the base <code>target_url</code> so a Mastery with route-prefixed apps is reachable through the same dispatcher. For the non-Reset Mastery targets the existing battery (robots recon, API clues inventory, SQLi via body scan, etc.) covers the vulns, with the fresh technique as the recovery-specific win.</p>
+<p>Added <code>_tech_reset_expectations</code> to <a href="../files/day-25/day-17-reset-expectations/challenges/_lib/autosolve_web.py"><code>challenges/_lib/autosolve_web.py</code></a> so the <code>/api/clues</code> -&gt; <code>/api/recovery</code> -&gt; mint-then-swap chain runs in the shared technique battery for Reset Expectations variants. Also extended <code>_lfi_handler</code> to fold the per-target <code>routes[].path</code> into the base <code>target_url</code> so a Mastery with route-prefixed apps is reachable through the same dispatcher. For the non-Reset Mastery targets the existing battery (robots recon, API clues inventory, SQLi via body scan, etc.) covers the vulns, with the fresh technique as the recovery-specific win.</p>
 <h2 id="notes-lessons">Notes / lessons</h2>
-<ul>
-<li>Mastery here is a lane sampler, NOT variants of one bug: four different web stacks with distinct vulns on a single timer. Treat each target as a fresh RECOGNIZE/BIND/EXTRACT.</li>
-<li>A technique that only handles the Single's shape will leave Mastery HELD. Script every target class or let the battery cover them.</li>
-<li>Session cookies are implicit (set on first <code>/</code>): tooling needs a cookie jar, not stateless curls.</li>
-</ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#challenge-shape">Challenge shape</a></li><li class="l2"><a href="#single-solve-time-trial-account-recovery-idor">Single Solve / Time Trial - Account Recovery IDOR</a></li><li class="l2"><a href="#mastery-four-independent-apps">Mastery - four independent apps</a></li><li class="l3"><a href="#target-1-status-sprout-nodejs-robotstxt-leak">Target 1 - Status Sprout (Node.js) - robots.txt leak</a></li><li class="l3"><a href="#target-2-tiny-triage-case-id-idor-via-activity-feed">Target 2 - Tiny Triage - case-id IDOR via activity feed</a></li><li class="l3"><a href="#target-3-search-party-sqli-prefix-or-11-">Target 3 - Search Party - SQLi (prefix ) OR 1=1--)</a></li><li class="l3"><a href="#target-4-reset-expectations-same-shape-as-single-solve">Target 4 - Reset Expectations (same shape as Single Solve)</a></li><li class="l2"><a href="#submitted-answers-gm-accepted">Submitted answers (GM-accepted)</a></li><li class="l2"><a href="#automation-landed">Automation landed</a></li><li class="l2"><a href="#notes-lessons">Notes / lessons</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="../days/day-25.html">&lt; Day 25</a><a href="../challenges/index.html">All write-ups &gt;</a></nav>
+<ul><li>Mastery here is a lane sampler, NOT variants of one bug: four different web stacks with distinct vulns on a single timer. Treat each target as a fresh RECOGNIZE/BIND/EXTRACT.</li><li>A technique that only handles the Single's shape will leave Mastery HELD. Script every target class or let the battery cover them.</li><li>Session cookies are implicit (set on first <code>/</code>): tooling needs a cookie jar, not stateless curls.</li></ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#challenge-shape">Challenge shape</a></li><li class="l2"><a href="#single-solve-time-trial-account-recovery-idor">Single Solve / Time Trial - Account Recovery IDOR</a></li><li class="l2"><a href="#mastery-four-independent-apps">Mastery - four independent apps</a></li><li class="l3"><a href="#target-1-status-sprout-node-js-robots-txt-leak">Target 1 - Status Sprout (Node.js) - robots.txt leak</a></li><li class="l3"><a href="#target-2-tiny-triage-case-id-idor-via-activity-feed">Target 2 - Tiny Triage - case-id IDOR via activity feed</a></li><li class="l3"><a href="#target-3-search-party-sqli-prefix-or-1-1">Target 3 - Search Party - SQLi (prefix ) OR 1=1--)</a></li><li class="l3"><a href="#target-4-reset-expectations-same-shape-as-single-solve">Target 4 - Reset Expectations (same shape as Single Solve)</a></li><li class="l2"><a href="#submitted-answers-gm-accepted">Submitted answers (GM-accepted)</a></li><li class="l2"><a href="#automation-landed">Automation landed</a></li><li class="l2"><a href="#notes-lessons">Notes / lessons</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-25-out-of-bounds.html">&lt; Out of Bounds</a><a href="day-18-resolver-revolt.html">Resolver Revolt &gt;</a></nav>
   </div>
 </main>
 <footer class="site">

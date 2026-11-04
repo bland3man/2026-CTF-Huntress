@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Picture This - Day 04 write-up</title>
-<meta name="description" content="Day 04 Metadata Forensics write-up: Metadata forensics on a JPEG. The relevant ground truth is the SOF (Start Of Frame) segment, which holds the real pixel dimensions regardles">
+<meta name="description" content="Day 04 Metadata Forensics write-up: Metadata forensics on a JPEG. The relevant ground truth is the SOF (Start Of Frame) segment, which holds the real pixel dimensions regardless of ...">
 <meta name="color-scheme" content="dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,12 +34,11 @@
 <main id="main">
   <div class="wrap">
 <div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-metadata" href="../lanes/metadata.html">Metadata Forensics</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
-<h1 id="picture-this">Picture This</h1>
 <h2 id="challenge">Challenge</h2>
 <ul><li>Lane: Metadata Forensics (Day 04), GM id <code>metadata-forensics-day-04-picture-this</code></li><li>Prompt: "A dozen photographs have been resized, renamed, and shuffled. Reconstruct their true dimensions and find the image whose presentation does not match its structure."</li><li>Question shape: <code>Determine jpeg.sof_dimensions_pixels for camera-001.jpg.</code></li><li>Modes: Single Solve, Time Trial, Mastery (all reported CORRECT by the Game Master on 2026-10-04).</li></ul>
 <h2 id="artifacts">Artifacts</h2>
-<div class="table-wrap"><table><thead><tr><th>File</th><th>Size</th><th>SHA-256</th></tr></thead><tbody><tr><td><code>picture_this.zip</code> (challenge artifact, not published)</td><td>1698 B</td><td><code>27bf2675d0c7e6cbd642180cfb8edd38157f75de3c09f5001d5623487c821ba6</code></td></tr><tr><td><code>camera-001.jpg</code> (not found in any source) (only member)</td><td>3025 B</td><td><code>bc79a152e217a8e4178a25fcefcaf02dfb2884d37ec4e8881e7d1909a3488318</code></td></tr></tbody></table></div>
-<p>Important scope note: the saved zip contains ONE image (<code>camera-001.jpg</code> (not found in any source)), not the dozen described in the prompt. The dozen-image set (Mastery) is attempt-specific and was never saved locally, so per-image values for the other photos and the "mismatched presentation" outlier cannot be derived from available bytes.</p>
+<div class="table-wrap"><table><thead><tr><th>File</th><th>Size</th><th>SHA-256</th></tr></thead><tbody><tr><td><code>picture_this.zip</code> (challenge artifact, not published)</td><td>1698 B</td><td><code>27bf2675d0c7e6cbd642180cfb8edd38157f75de3c09f5001d5623487c821ba6</code></td></tr><tr><td><code>camera-001.jpg</code> (only member)</td><td>3025 B</td><td><code>bc79a152e217a8e4178a25fcefcaf02dfb2884d37ec4e8881e7d1909a3488318</code></td></tr></tbody></table></div>
+<p>Important scope note: the saved zip contains ONE image (<code>camera-001.jpg</code>), not the dozen described in the prompt. The dozen-image set (Mastery) is attempt-specific and was never saved locally, so per-image values for the other photos and the "mismatched presentation" outlier cannot be derived from available bytes.</p>
 <h2 id="triage">Triage</h2>
 <p>Metadata forensics on a JPEG. The relevant ground truth is the SOF (Start Of Frame) segment, which holds the real pixel dimensions regardless of filename or any EXIF/JFIF claims. Solver: <a href="../files/day-04/day-04-picture-this/scripts/sof_dims.py"><code>scripts/sof_dims.py</code></a> (walks marker segments, reads SOFn, reports sizes/hashes; accepts a file, directory or zip).</p>
 <h2 id="investigation">Investigation</h2>
@@ -50,10 +49,10 @@
   SOF 0xc0: 257x146 (WxH) prec=8 comps=3</code></pre>
 <p>Manual cross-check of the hex dump at offset 0x88: <code>ff c0 00 11 08 00 92 01 01 03 01 22 00 02 11 01 03 11 01</code></p>
 <ul><li><code>ffc0</code> = baseline DCT SOF0, length 0x11, precision 8</li><li>height = <code>0x0092</code> = 146</li><li>width = <code>0x0101</code> = 257</li><li>3 components; component 1 sampling <code>0x22</code> (2x2, i.e. 4:2:0), components 2 and 3 <code>0x11</code></li></ul>
-<p>Structure observations for <code>camera-001.jpg</code> (not found in any source): no APP0/JFIF, no APP1/EXIF, no COM segment; only DQT, SOF0, DHT, SOS. So there is no competing metadata claim in this file; the SOF is the sole source of dimensions. Note the SOF values are non-multiples of 16 (257x146), consistent with a genuinely resized image (4:2:0 MCU grid 17 x 10 MCUs = 272x160 padded).</p>
+<p>Structure observations for <code>camera-001.jpg</code>: no APP0/JFIF, no APP1/EXIF, no COM segment; only DQT, SOF0, DHT, SOS. So there is no competing metadata claim in this file; the SOF is the sole source of dimensions. Note the SOF values are non-multiples of 16 (257x146), consistent with a genuinely resized image (4:2:0 MCU grid 17 x 10 MCUs = 272x160 padded).</p>
 <h2 id="flag-recovery">Flag Recovery</h2>
-<p>Derived value for the question shape <code>jpeg.sof_dimensions_pixels</code>, <code>camera-001.jpg</code> (not found in any source): width x height = <strong>257x146</strong> (this matches the "SOF=WxH e.g. 257x146" noted in the day's manager log from the live solve). The exact answer string format accepted by the GM (e.g. <code>257x146</code>) was taken from that log, not re-verified here since no submission was made.</p>
-<p>Not derived (data unavailable locally): the other eleven photos' dimensions and the presentation/structure-mismatched outlier (would be found by comparing each file's EXIF/JFIF-declared or filename-implied size against its SOF size using <code>sof_dims.py</code> (not found in any source) on the full set). The original completion tokens were never captured and cannot be recovered from the GM afterward.</p>
+<p>Derived value for the question shape <code>jpeg.sof_dimensions_pixels</code>, <code>camera-001.jpg</code>: width x height = <strong>257x146</strong> (this matches the "SOF=WxH e.g. 257x146" noted in the day's manager log from the live solve). The exact answer string format accepted by the GM (e.g. <code>257x146</code>) was taken from that log, not re-verified here since no submission was made.</p>
+<p>Not derived (data unavailable locally): the other eleven photos' dimensions and the presentation/structure-mismatched outlier (would be found by comparing each file's EXIF/JFIF-declared or filename-implied size against its SOF size using <code>sof_dims.py</code> on the full set). The original completion tokens were never captured and cannot be recovered from the GM afterward.</p>
 <h2 id="flag">Flag</h2>
 <p>No completion token is available. Derived technical answer for the one available artifact:</p>
 <pre class="code"><code>camera-001.jpg  SOF0 width=257 height=146  -&gt;  257x146</code></pre>

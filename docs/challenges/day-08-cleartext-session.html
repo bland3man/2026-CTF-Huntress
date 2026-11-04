@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cleartext Session - Day 08 write-up</title>
-<meta name="description" content="Day 08 Mobile Android write-up: Mobile-android lane. The claim-time per-lane autosolver (autosolvemobile.compute) solved Single Solve directly from the APK bytes over the b">
+<meta name="description" content="Day 08 Mobile Android write-up: Mobile-android lane. The claim-time per-lane autosolver (autosolve_mobile.compute) solved Single Solve directly from the APK bytes over the bearer ...">
 <meta name="color-scheme" content="dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,14 +34,13 @@
 <main id="main">
   <div class="wrap">
 <div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-mobile" href="../lanes/mobile.html">Mobile Android</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
-<h1 id="cleartext-session">Cleartext Session</h1>
 <h2 id="challenge">Challenge</h2>
 <ul><li>Category/lane: Mobile Android (Day 08)</li><li>GM id: <code>mobile-android-day-08-cleartext-session</code></li><li>Prompt: "Recover a synthetic session from allowed cleartext traffic and replay it against the backend."</li><li>Case: MOB-08-9DC6C997E6, package <code>com.huntress.mobile.d08.v9dc6c997e65d</code></li><li>Answer format: <code>ANS-</code> followed by exactly 16 uppercase hexadecimal characters; exact normalization.</li><li>Modes: Single Solve, Time Trial, Mastery.</li></ul>
 <h2 id="artifacts">Artifacts</h2>
 <ul><li><code>_stage/Cleartext_Session/artifact_0.bin</code> (challenge artifact, not published) = <code>cleartext_session.apk</code> (challenge artifact, not published)
 <ul><li>size 12704, sha256 <code>60fb542da7a218f5ea4ccd7a9c6015b6349753b46aae9093729ca8be0020bad8</code></li></ul></li></ul>
 <h2 id="triage">Triage</h2>
-<p>Mobile-android lane. The claim-time per-lane autosolver (<code>autosolve_mobile.compute</code> (reference kept as plain text; not an eligible file type)) solved Single Solve directly from the APK bytes over the bearer GM, returning a backend answer code in the <code>ANS-&lt;16 hex&gt;</code> shape. Single Solve CORRECT at 13:00:04Z.</p>
+<p>Mobile-android lane. The claim-time per-lane autosolver (<code>autosolve_mobile.compute</code>) solved Single Solve directly from the APK bytes over the bearer GM, returning a backend answer code in the <code>ANS-&lt;16 hex&gt;</code> shape. Single Solve CORRECT at 13:00:04Z.</p>
 <h2 id="investigation">Investigation</h2>
 <p>Time Trial and Mastery would not start. Over the bearer-token GM (public HTTPS, the default path):</p>
 <ul><li><code>start &lt;id&gt;/time_trial</code> -&gt; <code>HTTP 503 {"error":"training_rotation_invalid"}</code></li><li><code>start &lt;id&gt;/mastery</code>    -&gt; <code>HTTP 503 {"error":"training_rotation_invalid"}</code></li><li><code>retry</code>                 -&gt; <code>409 start_required</code></li><li><code>practice</code>              -&gt; <code>405 operation_not_allowed</code></li></ul>
@@ -50,14 +49,8 @@
 <p>So a timed route called WITHOUT <code>run_for_time</code> falls back to the UNtimed "training" pool, and that pool was exhausted/invalid -&gt; the 503. It was never a global outage: the Day 08 binary lane's Time Trial <code>start</code> succeeded in the same minute (its training pool still had variants).</p>
 <p>The fix is to opt into the ranked timed pool:</p>
 <pre class="code"><code class="lang-python">gm._post(op="start", challenge="mobile-android-day-08-cleartext-session/time_trial", run_for_time=True)
-</code></pre>
-<h1 id="gt-result-correct-variant-fresh-true-ranked-attempts-remaining-32">-&gt; result CORRECT, variant_fresh True, ranked_attempts_remaining 32</h1>
-<pre class="code"><code>
-Both Time Trial and Mastery provisioned a fresh variant and graded CORRECT. (On the base id with no
-`/time_trial` suffix, `run_for_time:true` is rejected with `timed_intent_not_available`, confirming the flag
-belongs only on the timed routes - single-solve/non-timed routes must not receive it.)
-
-</code></pre>
+# -&gt; result CORRECT, variant_fresh True, ranked_attempts_remaining 32</code></pre>
+<p>Both Time Trial and Mastery provisioned a fresh variant and graded CORRECT. (On the base id with no <code>/time_trial</code> suffix, <code>run_for_time:true</code> is rejected with <code>timed_intent_not_available</code>, confirming the flag belongs only on the timed routes - single-solve/non-timed routes must not receive it.)</p>
 <h2 id="flag-recovery">Flag Recovery</h2>
 <p>Authoritative <code>op=list</code> for Day 08 after the fix:</p>
 <pre class="code"><code>mobile-android-day-08-cleartext-session             single_solve solved:True  Blandman3 13:00:04Z
@@ -70,7 +63,7 @@ Time Trial:   CORRECT (GM-graded, ranked pool)
 Mastery:      CORRECT (GM-graded, ranked pool)</code></pre>
 <p>All three modes solved per the GM scoreboard.</p>
 <h2 id="minimal-reproduction">Minimal Reproduction</h2>
-<ol><li>Single Solve: claim -&gt; <code>autosolve_mobile</code> computes the backend answer code from the APK bytes, submit.</li><li>Time Trial / Mastery: <code>start</code> the <code>/time_trial</code> and <code>/mastery</code> routes **with <code>run_for_time:true</code>** (the untimed training pool is exhausted; the ranked timed pool is fresh). Solve each assigned variant from its own bytes and submit under the exact answer_ids; Mastery is a bundle (<code>set1.answer</code> (reference kept as plain text; not an eligible file type), <code>set2.answer</code> (reference kept as plain text; not an eligible file type), ...).</li></ol>
+<ol><li>Single Solve: claim -&gt; <code>autosolve_mobile</code> computes the backend answer code from the APK bytes, submit.</li><li>Time Trial / Mastery: <code>start</code> the <code>/time_trial</code> and <code>/mastery</code> routes <strong>with <code>run_for_time:true</code></strong> (the untimed training pool is exhausted; the ranked timed pool is fresh). Solve each assigned variant from its own bytes and submit under the exact answer_ids; Mastery is a bundle (<code>set1.answer</code>, <code>set2.answer</code>, ...).</li></ol>
 <h2 id="lessons-learned">Lessons Learned</h2>
 <ul><li><code>training_rotation_invalid</code> on a timed <code>start</code> is a <strong>pool selection</strong> problem, not a server outage. Re-issue <code>start</code> with <code>run_for_time:true</code> on the same timed route.</li><li>Banked into <a href="../files/day-08/day-08-cleartext-session/challenges/_lib/ctf_gm.py"><code>challenges/_lib/ctf_gm.py</code></a> <code>GM.start()</code>: it now auto-opts into <code>run_for_time:true</code> whenever a timed route returns <code>training_rotation_invalid</code>, so autosolve/fastpath inherit the fix.</li><li>Read the GM openapi before declaring something unfixable - the dual-pool contract was documented there the whole time.</li></ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#challenge">Challenge</a></li><li class="l2"><a href="#artifacts">Artifacts</a></li><li class="l2"><a href="#triage">Triage</a></li><li class="l2"><a href="#investigation">Investigation</a></li><li class="l2"><a href="#flag-recovery">Flag Recovery</a></li><li class="l2"><a href="#flag">Flag</a></li><li class="l2"><a href="#minimal-reproduction">Minimal Reproduction</a></li><li class="l2"><a href="#lessons-learned">Lessons Learned</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-07-webview-bridge.html">&lt; WebView Bridge</a><a href="day-08-entity-relations.html">Entity Relations &gt;</a></nav>
   </div>

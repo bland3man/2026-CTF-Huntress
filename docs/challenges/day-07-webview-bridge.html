@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>WebView Bridge - Day 07 write-up</title>
-<meta name="description" content="Day 07 Mobile Android write-up: Reconstructed from state.json and the saved solver (scripts/solvewebviewbridge.py):">
+<meta name="description" content="Day 07 Mobile Android write-up: Reconstructed from state.json and the saved solver (scripts/solve_webview_bridge.py):">
 <meta name="color-scheme" content="dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,16 +34,15 @@
 <main id="main">
   <div class="wrap">
 <div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-mobile" href="../lanes/mobile.html">Mobile Android</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
-<h1 id="webview-bridge">WebView Bridge</h1>
 <h2 id="challenge">Challenge</h2>
 <p>Category: mobile-android (GM id <code>mobile-android-day-07-webview-bridge</code>). Day 07.</p>
 <h2 id="artifacts">Artifacts</h2>
 <p>One or more APK files delivered by the GM (Mastery delivers multiple APKs, one answer per APK).</p>
 <h2 id="investigation">Investigation</h2>
 <p>Reconstructed from <a href="../files/day-07/day-07-webview-bridge/state.json"><code>state.json</code></a> and the saved solver (<a href="../files/day-07/day-07-webview-bridge/scripts/solve_webview_bridge.py"><code>scripts/solve_webview_bridge.py</code></a>):</p>
-<ul><li>Each APK (a zip container) holds a <code>huntress_puzzle.json</code> (not found in any source) asset (matched by filename suffix, wherever it lives inside the archive).</li><li>That JSON has a <code>codec</code> field naming its own encoding and a <code>data</code> field holding the encoded payload - a self-describing-codec shape (compare the Day 06/07 script-inventory family's <code>Material_/Codec_</code> pattern, though this is a distinct, simpler per-puzzle convention: one JSON file, one named codec, not a multi-step pipeline).</li><li>The solver supports every codec value seen across attempts: <code>caesar</code> (ASCII shift by <code>-key</code> - i.e. <code>chr(ord(c) - key)</code> per character), <code>reverse</code>/<code>rev</code>, <code>rot13</code>, <code>base64</code>/<code>b64</code>, <code>hex</code>, and <code>plain</code>/<code>identity</code>/<code>none</code>. The attempt actually solved used <code>codec=caesar, key=10</code>.</li><li>Decoding the <code>data</code> field under the named codec yields the answer directly, in the form <code>ANS-&lt;16 hex chars&gt;</code>.</li><li>Mastery delivers several APKs; each gets its own <code>answer_id</code> (<code>set1.answer...</code> etc.), one decode per APK.</li></ul>
+<ul><li>Each APK (a zip container) holds a <code>huntress_puzzle.json</code> asset (matched by filename suffix, wherever it lives inside the archive).</li><li>That JSON has a <code>codec</code> field naming its own encoding and a <code>data</code> field holding the encoded payload - a self-describing-codec shape (compare the Day 06/07 script-inventory family's <code>Material_/Codec_</code> pattern, though this is a distinct, simpler per-puzzle convention: one JSON file, one named codec, not a multi-step pipeline).</li><li>The solver supports every codec value seen across attempts: <code>caesar</code> (ASCII shift by <code>-key</code> - i.e. <code>chr(ord(c) - key)</code> per character), <code>reverse</code>/<code>rev</code>, <code>rot13</code>, <code>base64</code>/<code>b64</code>, <code>hex</code>, and <code>plain</code>/<code>identity</code>/<code>none</code>. The attempt actually solved used <code>codec=caesar, key=10</code>.</li><li>Decoding the <code>data</code> field under the named codec yields the answer directly, in the form <code>ANS-&lt;16 hex chars&gt;</code>.</li><li>Mastery delivers several APKs; each gets its own <code>answer_id</code> (<code>set1.answer...</code> etc.), one decode per APK.</li></ul>
 <h2 id="flag-recovery">Flag Recovery</h2>
-<p>The answer is the decoded <code>data</code> string (format <code>ANS-&lt;16 hex&gt;</code>) from each APK's <code>huntress_puzzle.json</code> (not found in any source), decoded under whichever <code>codec</code> that specific attempt's JSON names - never hardcode a single codec, always read it from the file.</p>
+<p>The answer is the decoded <code>data</code> string (format <code>ANS-&lt;16 hex&gt;</code>) from each APK's <code>huntress_puzzle.json</code>, decoded under whichever <code>codec</code> that specific attempt's JSON names - never hardcode a single codec, always read it from the file.</p>
 <h2 id="minimal-reproduction">Minimal Reproduction</h2>
 <pre class="code"><code>python3 scripts/solve_webview_bridge.py &lt;mode entry id&gt; [&lt;mode entry id&gt; ...]</code></pre>
 <p>Derives the answer fresh from each attempt's own APK and submits via <a href="../files/day-07/day-07-webview-bridge/challenges/_lib/ctf_gm.py"><code>challenges/_lib/ctf_gm.py</code></a>'s <code>GM()</code>/<code>solve_mode()</code>.</p>

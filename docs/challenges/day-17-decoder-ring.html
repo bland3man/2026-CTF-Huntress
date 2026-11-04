@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Decoder Ring - Day 17 write-up</title>
-<meta name="description" content="Day 17 Binary RE write-up: Mastery returns zero per-field feedback on an incorrect whole submit. But a partial submit that is 100% correct for every included field ret">
+<meta name="description" content="Day 17 Binary RE write-up: Mastery returns zero per-field feedback on an incorrect whole submit. But a partial submit that is 100% correct for every included field returns ...">
 <meta name="color-scheme" content="dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,7 +34,6 @@
 <main id="main">
   <div class="wrap">
 <div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-binary" href="../lanes/binary.html">Binary RE</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
-<h1 id="decoder-ring-day-17">Decoder Ring (Day 17)</h1>
 <h2 id="challenge">Challenge</h2>
 <ul><li><strong>Event:</strong> Huntress CTF 2026, Day 17 (2026-10-17)</li><li><strong>GM id:</strong> <code>binary-reverse-engineering-day-17-encoded-configuration-recovery</code></li><li><strong>Category:</strong> Binary Reverse Engineering - multi-day retrospective + XOR config recovery across 17 encoded binaries in one archive</li><li><strong>Prompt:</strong> "The configuration is encoded, but the decoder ships with the binary - a ring waiting for its secret. Recover the reversible decoder and read what it was hiding."</li></ul>
 <h2 id="artifact">Artifact</h2>
@@ -66,7 +65,7 @@ rules (applied in order):
 <h2 id="mastery-localization-method">Mastery localization method</h2>
 <p>Mastery returns zero per-field feedback on an <code>incorrect</code> whole submit. But a partial submit that is <strong>100% correct for every included field</strong> returns <code>accepted</code> with <code>accepted_ids</code> and <code>remaining</code>. So the oracle is: submit a small, high-confidence subset first (we used <code>d08/d09/d11/d13 = base64</code> as the trusted 240-field baseline), then add one <code>dNN</code> group at a time. Each successful partial narrows the search; each <code>incorrect</code> localizes to that group. We went from 1020 unknowns to 8 unknowns in 15 submits with no attempts spent.</p>
 <h2 id="live-results-2026-10-17">Live results (2026-10-17)</h2>
-<ul><li><strong>Single Solve (CORRECT):</strong> <code>2026-10-17T16:16:43Z</code></li><li><strong>Time Trial (CORRECT, RANKED):</strong> 36.9 s by <code>teammate</code></li><li><strong>Mastery (CORRECT):</strong> <code>2026-10-17T17:20:12Z</code> by <code>teammate</code>
+<ul><li><strong>Single Solve (CORRECT):</strong> <code>2026-10-17T16:16:43Z</code></li><li><strong>Time Trial (CORRECT, RANKED):</strong> 36.9 s by <code>the team solver</code></li><li><strong>Mastery (CORRECT):</strong> <code>2026-10-17T17:20:12Z</code> by <code>the team solver</code>
 <ul><li><strong>Flag:</strong> <span class="flag" data-flag><span class="fl">Token</span><span class="fv">baf352c3dcb43a86667b296ddde0e055</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li></ul></li></ul>
 <h2 id="solver-changes">Solver changes</h2>
 <ul><li><a href="../files/day-17/day-17-decoder-ring/challenges/_lib/autosolve_binary.py"><code>challenges/_lib/autosolve_binary.py</code></a>:

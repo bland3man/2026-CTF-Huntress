@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Escape Room - Day 09 write-up</title>
-<meta name="description" content="Day 09 Warmups write-up: Warmup-decode family. The title is the hint: the day&#x27;s new layer is escape sequences - the &quot;characters would like to escape&quot; means the blob ">
+<meta name="description" content="Day 09 Warmups write-up: Warmup-decode family. The title is the hint: the day&#x27;s new layer is escape sequences - the &quot;characters would like to escape&quot; means the blob is an ...">
 <meta name="color-scheme" content="dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,7 +34,6 @@
 <main id="main">
   <div class="wrap">
 <div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-warmups" href="../lanes/warmups.html">Warmups</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
-<h1 id="escape-room">Escape Room</h1>
 <h2 id="challenge">Challenge</h2>
 <ul><li>Category: Warmups (Day 09). Game Master ID <code>warmups-day-09</code>.</li><li>Prompt: "These characters would very much like to escape."</li><li>Modes: Single Solve, Time Trial, Mastery - all CORRECT (3/3).</li><li>Answer form: one field, <code>message</code>, the fully decoded string from the assigned blob.</li></ul>
 <h2 id="artifacts">Artifacts</h2>
@@ -42,14 +41,14 @@
 <h2 id="triage">Triage</h2>
 <p>Warmup-decode family. The title is the hint: the day's new layer is <strong>escape sequences</strong> - the "characters would like to escape" means the blob is an escaped encoding (e.g. backslash/hex/unicode/HTML escapes) to unescape, on top of the usual base/rot/xor chain.</p>
 <h2 id="investigation">Investigation</h2>
-<p>Solved by the generic adapter <a href="../files/day-09/day-09-escape-room/challenges/_lib/autosolve_warmups.py"><code>challenges/_lib/autosolve_warmups.py</code></a> / <code>decode_chain.py</code> (not found in any source) at claim: it auto-peels the encoding chain (base64/32/45/58/62/85, hex, binary, octal, rot13/47, caesar, xor, zlib/gzip/bz2/lzma) and the escape-sequence layer, then submits the final non-empty decoded line as <code>message</code>.</p>
+<p>Solved by the generic adapter <a href="../files/day-09/day-09-escape-room/challenges/_lib/autosolve_warmups.py"><code>challenges/_lib/autosolve_warmups.py</code></a> / <code>decode_chain.py</code> at claim: it auto-peels the encoding chain (base64/32/45/58/62/85, hex, binary, octal, rot13/47, caesar, xor, zlib/gzip/bz2/lzma) and the escape-sequence layer, then submits the final non-empty decoded line as <code>message</code>.</p>
 <h2 id="flags-gm-completion-tokens">Flags (GM completion tokens)</h2>
 <ul class="flag-list"><li><span class="count">mastery</span> <span class="flag" data-flag><span class="fl">Token</span><span class="fv">3e881cefa3e58316fc88ddecfb5966bc</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li></ul>
 <p>(Single Solve and Time Trial also CORRECT per the done-ledger; their per-mode tokens were not captured in the autosolve record.)</p>
 <h2 id="minimal-reproduction">Minimal Reproduction</h2>
 <p><code>wsl python3 challenges/_lib/decode_chain.py &lt;assigned blob&gt; --slug</code> then submit the final decoded line as <code>message</code>.</p>
 <h2 id="lessons-learned">Lessons Learned</h2>
-<ul><li>"Escape" in a warmup title = an escape-sequence decode layer. decode_chain handles it automatically; worth confirming the escape layer is registered for the warmup adapter so future escape-themed warmups stay zero-touch.</li></ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#challenge">Challenge</a></li><li class="l2"><a href="#artifacts">Artifacts</a></li><li class="l2"><a href="#triage">Triage</a></li><li class="l2"><a href="#investigation">Investigation</a></li><li class="l2"><a href="#flags-gm-completion-tokens">Flags (GM completion tokens)</a></li><li class="l2"><a href="#minimal-reproduction">Minimal Reproduction</a></li><li class="l2"><a href="#lessons-learned">Lessons Learned</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-09-built-different.html">&lt; Built Different</a><a href="day-09-forged-with-care.html">Forged With Care &gt;</a></nav>
+<ul><li>"Escape" in a warmup title = an escape-sequence decode layer. decode_chain handles it automatically; worth confirming the escape layer is registered for the warmup adapter so future escape-themed warmups stay zero-touch.</li></ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#challenge">Challenge</a></li><li class="l2"><a href="#artifacts">Artifacts</a></li><li class="l2"><a href="#triage">Triage</a></li><li class="l2"><a href="#investigation">Investigation</a></li><li class="l2"><a href="#flags-gm-completion-tokens">Flags (GM completion tokens)</a></li><li class="l2"><a href="#minimal-reproduction">Minimal Reproduction</a></li><li class="l2"><a href="#lessons-learned">Lessons Learned</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-09-built-different.html">&lt; Built Different</a><a href="day-09-nimble.html">Nimble &gt;</a></nav>
   </div>
 </main>
 <footer class="site">

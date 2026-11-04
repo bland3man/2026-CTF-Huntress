@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Fetch Quest - Day 24 write-up</title>
-<meta name="description" content="Day 24 Web Exploitation write-up: Lane: web exploitation Challenge id: web exploitation day 15 fetch quest Agent: agent 7 Date solved: 2026 10 24 Modes: Single Solve, Time Tr">
+<meta name="description" content="Day 24 Web Exploitation write-up: Mastery is the real test: each of the 4 targets is a different web vuln bundled under the SSRF &quot;Fetch Quest&quot; theme. The Single and Time Trial ...">
 <meta name="color-scheme" content="dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,125 +33,37 @@
 <div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-24.html">Day 24</a> / <a href="../lanes/web.html">Web Exploitation</a> / Fetch Quest</p><p class="telemetry"><span>DAY 24</span><span class="sep">//</span><span>LANE: WEB EXPLOITATION</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Fetch Quest</h1></div></div>
 <main id="main">
   <div class="wrap">
-<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-web" href="../lanes/web.html">Web Exploitation</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose"><h1 id="day-24-fetch-quest-web-exploitation">Day 24 - Fetch Quest (web-exploitation)</h1>
-<p><strong>Lane:</strong> web-exploitation
-<strong>Challenge id:</strong> <code>web-exploitation-day-15-fetch-quest</code>
-<strong>Agent:</strong> agent-7
-<strong>Date solved:</strong> 2026-10-24</p>
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-web" href="../lanes/web.html">Web Exploitation</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose"><p class="srctitle">Day 24 - Fetch Quest (web-exploitation)</p>
+<p><strong>Lane:</strong> web-exploitation <strong>Challenge id:</strong> <code>web-exploitation-day-15-fetch-quest</code> <strong>Agent:</strong> agent-7 <strong>Date solved:</strong> 2026-10-24</p>
 <p>Modes: Single Solve, Time Trial, Mastery - all CORRECT.</p>
 <h2 id="flags-gm-accepted">Flags (GM-accepted)</h2>
-<ul>
-<li>Single Solve: <code>proof_06d6fc5eaa4145b49168905928a249a9</code></li>
-<li>Time Trial: <code>41746d57287daf77a149aa6dff8d808f</code> (ranked, Hall-of-Fame eligible)</li>
-<li>Mastery: <code>4ef696f9f521f9ebcdbca108e0560023</code></li>
-</ul>
+<ul><li>Single Solve: <span class="flag" data-flag><span class="fl">Proof</span><span class="fv">proof_06d6fc5eaa4145b49168905928a249a9</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li><li>Time Trial: <span class="flag" data-flag><span class="fl">Token</span><span class="fv">41746d57287daf77a149aa6dff8d808f</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span> (ranked, Hall-of-Fame eligible)</li><li>Mastery: <span class="flag" data-flag><span class="fl">Token</span><span class="fv">4ef696f9f521f9ebcdbca108e0560023</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li></ul>
 <h2 id="prompt-verbatim">Prompt (verbatim)</h2>
-<blockquote>
-<p>The server will fetch anything you point it at - including places you can't reach yourself.
-Send it on a quest to the internal service and collect what it brings back.</p>
-</blockquote>
+<blockquote><p>The server will fetch anything you point it at - including places you can't reach yourself. Send it on a quest to the internal service and collect what it brings back.</p></blockquote>
 <h2 id="shape">Shape</h2>
-<ul>
-<li>Single Solve: 1 live target with <code>proof-1</code>.</li>
-<li>Time Trial: 1 live target, <code>proof-1</code>, server-enforced countdown.</li>
-<li>Mastery: 4 live targets <code>proof-1 .. proof-4</code>, each a different web vulnerability under one timer.</li>
-</ul>
-<p>Each <code>start</code> returns a <code>targets[]</code> array (per-mode fresh URLs) and a <code>routes[]</code> array hinting the
-"internal" paths that only the server can reach for its own target.</p>
+<ul><li>Single Solve: 1 live target with <code>proof-1</code>.</li><li>Time Trial: 1 live target, <code>proof-1</code>, server-enforced countdown.</li><li>Mastery: 4 live targets <code>proof-1 .. proof-4</code>, each a different web vulnerability under one timer.</li></ul>
+<p>Each <code>start</code> returns a <code>targets[]</code> array (per-mode fresh URLs) and a <code>routes[]</code> array hinting the "internal" paths that only the server can reach for its own target.</p>
 <h2 id="solve-path-per-mastery-variant-most-general-shape">Solve path (per Mastery variant - most general shape)</h2>
-<p>Mastery is the real test: each of the 4 targets is a different web vuln bundled under the SSRF
-"Fetch Quest" theme. The Single and Time Trial variants are the same 4 archetypes, drawn in
-isolation.</p>
-<h3 id="target-1-service-postcard-nodejs-exposed-deploy-archive">Target 1 - "Service Postcard" (Node.js, exposed deploy archive)</h3>
-<ul>
-<li><code>GET /robots.txt</code> -&gt; <code>Disallow: /snapshots-&lt;hex&gt;/</code></li>
-<li><code>GET /snapshots-&lt;hex&gt;/</code> lists <code>deployment-notes-&lt;hex&gt;.json.bak</code>.</li>
-<li><code>GET /snapshots-&lt;hex&gt;/deployment-notes-&lt;hex&gt;.json.bak</code> returns
-  <code>{"environment":"production","support_note":"proof_HEX"}</code>.</li>
-</ul>
-<p>The banked <code>robots_recon</code> technique in <code>autosolve_web.py</code> already walks Disallow directories and
-visits every linked file, so Target 1 is solved automatically.</p>
-<h3 id="target-2-incident-picnic-aspnet-idor-with-issued-session-cookie">Target 2 - "Incident Picnic" (ASP.NET, IDOR with issued session cookie)</h3>
-<ul>
-<li><code>GET /</code> sets <code>Set-Cookie: case_session=&lt;hex&gt;; HttpOnly; SameSite=Lax</code> - the browser auto-logs
-  you in as "Morgan".</li>
-<li>Morgan's own cases (<code>3186 / 4727 / 5554</code>) are visible, but <code>/api/history</code> reveals
-  <code>{"case_id": 11387, "owner":"executive", "visibility":"reference_only"}</code>.</li>
-<li><code>GET /api/incidents/11387</code> with the issued cookie -&gt; <code>{"note": "...proof_HEX..."}</code>.</li>
-</ul>
-<p>The banked solver's HTTP primitive (<code>web_scope.registered_get</code>) refuses cookie headers, so this
-had to be driven by a tiny per-target cookie-jar helper (see <code>scripts/t2_cookie.py</code>).</p>
+<p>Mastery is the real test: each of the 4 targets is a different web vuln bundled under the SSRF "Fetch Quest" theme. The Single and Time Trial variants are the same 4 archetypes, drawn in isolation.</p>
+<h3 id="target-1-service-postcard-node-js-exposed-deploy-archive">Target 1 - "Service Postcard" (Node.js, exposed deploy archive)</h3>
+<ul><li><code>GET /robots.txt</code> -&gt; <code>Disallow: /snapshots-&lt;hex&gt;/</code></li><li><code>GET /snapshots-&lt;hex&gt;/</code> lists <code>deployment-notes-&lt;hex&gt;.json.bak</code>.</li><li><code>GET /snapshots-&lt;hex&gt;/deployment-notes-&lt;hex&gt;.json.bak</code> returns <code>{"environment":"production","support_note":"proof_HEX"}</code>.</li></ul>
+<p>The banked <code>robots_recon</code> technique in <code>autosolve_web.py</code> already walks Disallow directories and visits every linked file, so Target 1 is solved automatically.</p>
+<h3 id="target-2-incident-picnic-asp-net-idor-with-issued-session-cookie">Target 2 - "Incident Picnic" (ASP.NET, IDOR with issued session cookie)</h3>
+<ul><li><code>GET /</code> sets <code>Set-Cookie: case_session=&lt;hex&gt;; HttpOnly; SameSite=Lax</code> - the browser auto-logs you in as "Morgan".</li><li>Morgan's own cases (<code>3186 / 4727 / 5554</code>) are visible, but <code>/api/history</code> reveals <code>{"case_id": 11387, "owner":"executive", "visibility":"reference_only"}</code>.</li><li><code>GET /api/incidents/11387</code> with the issued cookie -&gt; <code>{"note": "...proof_HEX..."}</code>.</li></ul>
+<p>The banked solver's HTTP primitive (<code>web_scope.registered_get</code>) refuses cookie headers, so this had to be driven by a tiny per-target cookie-jar helper (see <code>scripts/t2_cookie.py</code>).</p>
 <h3 id="target-3-query-me-this-flask-sql-injection-on-q">Target 3 - "Query Me This" (Flask, SQL injection on <code>?q</code>)</h3>
-<ul>
-<li><code>/lookup?q=persistence</code> returns 1 record; <code>?q=%25</code> returns 3 (SQL LIKE wildcard).</li>
-<li>Classic SQLi probe <code>?q=</code> + <code>' OR 1=1--</code> returned nothing: looks parameterised.</li>
-<li>The giveaway: <code>?q=</code> + <code>'||'</code> ALSO returned all 3 - SQLite string concat <code>||</code> closed the raw
-  single-quote in a non-parameterised <code>f"...WHERE pill LIKE '%{q}%' OR title LIKE '%{q}%' OR body LIKE '%{q}%'"</code>.</li>
-<li>Confirmed with 4-column UNION probe: <code>?q=') UNION SELECT 1,2,3,4--</code> returned
-  <code>pill=3, title=2, body=4, meta=Record 1</code> -&gt; the live query is wrapped in parentheses
-  (<code>WHERE (pill LIKE '%?%' OR title LIKE '%?%' OR body LIKE '%?%')</code>) and has 4 selected cols.</li>
-<li>Schema dump: <code>?q=') UNION SELECT 1, name, type, sql FROM sqlite_master--</code> reveals one table
-  <code>articles(id INTEGER PRIMARY KEY, title TEXT, topic TEXT, summary TEXT, visibility TEXT)</code>.</li>
-<li>Dump: <code>?q=') UNION SELECT id, title, topic, summary FROM articles--</code> returns a hidden row
-  "Restricted detection draft" with <code>summary = proof_HEX</code>.</li>
-</ul>
-<h3 id="target-4-url-valet-aspnet-core-minimal-api-textbook-ssrf">Target 4 - "URL Valet" (ASP.NET Core Minimal API, textbook SSRF)</h3>
-<ul>
-<li><code>GET /api/clues</code> -&gt; <code>{"feature_route":"/action-...","secondary_route":"/account-..."}</code>.</li>
-<li>Direct <code>GET /account-...</code> -&gt; 403 "internal_only".</li>
-<li><code>GET /action-...?url=http://127.0.0.1:8080/account-...</code> -&gt; <code>{"evidence":"proof_HEX"}</code>.</li>
-</ul>
+<ul><li><code>/lookup?q=persistence</code> returns 1 record; <code>?q=%25</code> returns 3 (SQL LIKE wildcard).</li><li>Classic SQLi probe <code>?q=</code> + <code>' OR 1=1--</code> returned nothing: looks parameterised.</li><li>The giveaway: <code>?q=</code> + <code>'||'</code> ALSO returned all 3 - SQLite string concat <code>||</code> closed the raw single-quote in a non-parameterised <code>f"...WHERE pill LIKE '%{q}%' OR title LIKE '%{q}%' OR body LIKE '%{q}%'"</code>.</li><li>Confirmed with 4-column UNION probe: <code>?q=') UNION SELECT 1,2,3,4--</code> returned <code>pill=3, title=2, body=4, meta=Record 1</code> -&gt; the live query is wrapped in parentheses (<code>WHERE (pill LIKE '%?%' OR title LIKE '%?%' OR body LIKE '%?%')</code>) and has 4 selected cols.</li><li>Schema dump: <code>?q=') UNION SELECT 1, name, type, sql FROM sqlite_master--</code> reveals one table <code>articles(id INTEGER PRIMARY KEY, title TEXT, topic TEXT, summary TEXT, visibility TEXT)</code>.</li><li>Dump: <code>?q=') UNION SELECT id, title, topic, summary FROM articles--</code> returns a hidden row "Restricted detection draft" with <code>summary = proof_HEX</code>.</li></ul>
+<h3 id="target-4-url-valet-asp-net-core-minimal-api-textbook-ssrf">Target 4 - "URL Valet" (ASP.NET Core Minimal API, textbook SSRF)</h3>
+<ul><li><code>GET /api/clues</code> -&gt; <code>{"feature_route":"/action-...","secondary_route":"/account-..."}</code>.</li><li>Direct <code>GET /account-...</code> -&gt; 403 "internal_only".</li><li><code>GET /action-...?url=http://127.0.0.1:8080/account-...</code> -&gt; <code>{"evidence":"proof_HEX"}</code>.</li></ul>
 <h2 id="what-the-banked-autosolver-did-and-what-i-had-to-add">What the banked autosolver did and what I had to add</h2>
-<p>Starting state: <code>AUTOSOLVE single_solve: gate_blocked NO_CAPABILITY</code>. No bank handler existed
-for the SSRF <code>/api/clues -&gt; /action-X?url=</code> idiom, so the Single Solve had no derivation path.</p>
-<p>Added <code>_tech_ssrf_fetch_quest</code> to <code>_TECHNIQUES</code> in <code>challenges/_lib/autosolve_web.py</code> - it reads
-<code>/api/clues</code>, picks <code>feature_route</code> + <code>secondary_route</code>, and dispatches a per-target SSRF probe
-against a short list of likely internal hostnames (<code>127.0.0.1:8080</code>, <code>localhost:8080</code>, etc.) via
-the scope-enforced <code>_http_get</code>. With that in place, autosolve won the Single and the ranked Time
-Trial on the next run.</p>
-<p>Mastery still half-solved: <code>_TECHNIQUES</code> has <code>body_scan / common_paths / robots_recon / lfi_* /
-proof_recon_ladder / ssrf_fetch_quest</code>, so T1 (robots_recon) and T4 (ssrf_fetch_quest) landed,
-but T2 (cookie-authenticated IDOR) and T3 (SQLi UNION dump) have no equivalent bank handler
-yet. I derived proof-2 and proof-3 by hand with the scripts under <code>scripts/</code> and submitted them
-into the SAME live Mastery attempt (the first autosolve submit was partial -
-<code>accepted (2 accepted, 2 remaining)</code> - which left the attempt open).</p>
+<p>Starting state: <code>AUTOSOLVE single_solve: gate_blocked NO_CAPABILITY</code>. No bank handler existed for the SSRF <code>/api/clues -&gt; /action-X?url=</code> idiom, so the Single Solve had no derivation path.</p>
+<p>Added <code>_tech_ssrf_fetch_quest</code> to <code>_TECHNIQUES</code> in <a href="../files/day-24/day-15-fetch-quest/challenges/_lib/autosolve_web.py"><code>challenges/_lib/autosolve_web.py</code></a> - it reads <code>/api/clues</code>, picks <code>feature_route</code> + <code>secondary_route</code>, and dispatches a per-target SSRF probe against a short list of likely internal hostnames (<code>127.0.0.1:8080</code>, <code>localhost:8080</code>, etc.) via the scope-enforced <code>_http_get</code>. With that in place, autosolve won the Single and the ranked Time Trial on the next run.</p>
+<p>Mastery still half-solved: <code>_TECHNIQUES</code> has <code>body_scan / common_paths / robots_recon / lfi_* / proof_recon_ladder / ssrf_fetch_quest</code>, so T1 (robots_recon) and T4 (ssrf_fetch_quest) landed, but T2 (cookie-authenticated IDOR) and T3 (SQLi UNION dump) have no equivalent bank handler yet. I derived proof-2 and proof-3 by hand with the scripts under <code>scripts/</code> and submitted them into the SAME live Mastery attempt (the first autosolve submit was partial - <code>accepted (2 accepted, 2 remaining)</code> - which left the attempt open).</p>
 <h2 id="files">Files</h2>
-<ul>
-<li><code>start.json</code>, <code>start_mastery.json</code> - captured target scopes for <code>web_request.py</code>.</li>
-<li><code>scripts/probe.py</code>, <code>scripts/probe_all.py</code>, <code>scripts/probe_t.py</code>, <code>scripts/probe_detail.py</code>,
-  <code>scripts/probe_sql.py</code>, <code>scripts/probe_sql2.py</code> - target recon.</li>
-<li><code>scripts/t2_cookie.py</code> - IDOR with session cookie (urllib + CookieJar, direct scope).</li>
-<li><code>scripts/t3_sqli.py</code>, <code>scripts/t3_sqli2.py</code>, <code>scripts/t3_dump.py</code>, <code>scripts/t3_articles.py</code> -
-  SQLi UNION dump that extracted the hidden article row.</li>
-<li><code>../_lib/autosolve_web.py</code> - added <code>_tech_ssrf_fetch_quest</code>.</li>
-</ul>
+<ul><li><code>start.json</code>, <code>start_mastery.json</code> - captured target scopes for <code>web_request.py</code>.</li><li><code>scripts/probe.py</code>, <code>scripts/probe_all.py</code>, <code>scripts/probe_t.py</code>, <code>scripts/probe_detail.py</code>, <code>scripts/probe_sql.py</code>, <code>scripts/probe_sql2.py</code> - target recon.</li><li><code>scripts/t2_cookie.py</code> - IDOR with session cookie (urllib + CookieJar, direct scope).</li><li><code>scripts/t3_sqli.py</code>, <code>scripts/t3_sqli2.py</code>, <code>scripts/t3_dump.py</code>, <code>scripts/t3_articles.py</code> - SQLi UNION dump that extracted the hidden article row.</li><li><code>../_lib/autosolve_web.py</code> - added <code>_tech_ssrf_fetch_quest</code>.</li></ul>
 <h2 id="lessons-learned-what-to-automate-next-time">Lessons learned / what to automate next time</h2>
-<ol>
-<li>The web-exploitation Mastery bundles <strong>unrelated</strong> vuln classes under one SSRF-themed
-   banner. The autosolver's "pick-one battery per target" model is correct, but the battery is
-   missing two universal web techniques:
-   - <strong>Cookie-first IDOR</strong>: capture <code>Set-Cookie</code> from <code>/</code>, replay to <code>/api/...</code> with incrementing
-     numeric ids OR with ids leaked by <code>/api/history</code>-style endpoints.
-   - <strong>UNION-based SQLi</strong>: on any <code>?q=</code> style search, detect the SQL-concat tell (<code>'||'</code> returns
-     all rows), then probe <code>') UNION SELECT 1..N--</code> for the column count, dump <code>sqlite_master</code>,
-     dump the discovered table.
-   Both should be added as new <code>_TECHNIQUES</code> entries - they are generic enough to pay off on any
-   future Flask or ASP.NET CTF web target.</li>
-<li><code>web_scope.registered_get</code> refuses <code>Cookie</code> headers by design. For solvers that need an
-   issued cookie, we need a scope-respecting primitive that pins a per-origin cookie jar from
-   the target's own <code>Set-Cookie</code>. Nothing untrusted is being forwarded cross-origin, so this is
-   a safe extension.</li>
-<li>The SQLi tell <code>'||'</code> -&gt; all rows is a 2-char hypothesis test with ZERO cost. Add it to the
-   lane prebrief: if "nothing matched" turns into "everything matched", we know the search is
-   raw string concat with sqlite and can proceed straight to column counting.</li>
-<li><code>autosolve_web.compute()</code> guards the live battery behind <code>HUNTRESS_WEB_LIVE_BATTERY=1</code>. In
-   production (Go.ps1) that is set, but when running by hand I almost missed it; worth adding
-   a one-line banner in <code>autosolve.py</code> saying "web live battery: ON/OFF" before each run so
-   the gate reason is obvious.</li>
-<li>The partial-submit path (Mastery accepting 2/4 and leaving the attempt open) saved a
-   variant: when AUTOSOLVE says "accepted (N accepted, M remaining)", DO NOT retry/restart -
-   submit the remaining <code>proof-k</code> ids by hand onto the SAME attempt_id.</li>
-</ol></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#flags-gm-accepted">Flags (GM-accepted)</a></li><li class="l2"><a href="#prompt-verbatim">Prompt (verbatim)</a></li><li class="l2"><a href="#shape">Shape</a></li><li class="l2"><a href="#solve-path-per-mastery-variant-most-general-shape">Solve path (per Mastery variant - most general shape)</a></li><li class="l3"><a href="#target-1-service-postcard-nodejs-exposed-deploy-archive">Target 1 - "Service Postcard" (Node.js, exposed deploy archive)</a></li><li class="l3"><a href="#target-2-incident-picnic-aspnet-idor-with-issued-session-cookie">Target 2 - "Incident Picnic" (ASP.NET, IDOR with issued session cookie)</a></li><li class="l3"><a href="#target-3-query-me-this-flask-sql-injection-on-q">Target 3 - "Query Me This" (Flask, SQL injection on ?q)</a></li><li class="l3"><a href="#target-4-url-valet-aspnet-core-minimal-api-textbook-ssrf">Target 4 - "URL Valet" (ASP.NET Core Minimal API, textbook SSRF)</a></li><li class="l2"><a href="#what-the-banked-autosolver-did-and-what-i-had-to-add">What the banked autosolver did and what I had to add</a></li><li class="l2"><a href="#files">Files</a></li><li class="l2"><a href="#lessons-learned-what-to-automate-next-time">Lessons learned / what to automate next time</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="../days/day-24.html">&lt; Day 24</a><a href="../challenges/index.html">All write-ups &gt;</a></nav>
+<ol><li>The web-exploitation Mastery bundles <strong>unrelated</strong> vuln classes under one SSRF-themed banner. The autosolver's "pick-one battery per target" model is correct, but the battery is missing two universal web techniques:
+<ul><li><strong>Cookie-first IDOR</strong>: capture <code>Set-Cookie</code> from <code>/</code>, replay to <code>/api/...</code> with incrementing numeric ids OR with ids leaked by <code>/api/history</code>-style endpoints.</li><li><strong>UNION-based SQLi</strong>: on any <code>?q=</code> style search, detect the SQL-concat tell (<code>'||'</code> returns all rows), then probe <code>') UNION SELECT 1..N--</code> for the column count, dump <code>sqlite_master</code>, dump the discovered table. Both should be added as new <code>_TECHNIQUES</code> entries - they are generic enough to pay off on any future Flask or ASP.NET CTF web target.</li></ul></li><li><code>web_scope.registered_get</code> refuses <code>Cookie</code> headers by design. For solvers that need an issued cookie, we need a scope-respecting primitive that pins a per-origin cookie jar from the target's own <code>Set-Cookie</code>. Nothing untrusted is being forwarded cross-origin, so this is a safe extension.</li><li>The SQLi tell <code>'||'</code> -&gt; all rows is a 2-char hypothesis test with ZERO cost. Add it to the lane prebrief: if "nothing matched" turns into "everything matched", we know the search is raw string concat with sqlite and can proceed straight to column counting.</li><li><code>autosolve_web.compute()</code> guards the live battery behind <code>HUNTRESS_WEB_LIVE_BATTERY=1</code>. In production (Go.ps1) that is set, but when running by hand I almost missed it; worth adding a one-line banner in <code>autosolve.py</code> saying "web live battery: ON/OFF" before each run so the gate reason is obvious.</li><li>The partial-submit path (Mastery accepting 2/4 and leaving the attempt open) saved a variant: when AUTOSOLVE says "accepted (N accepted, M remaining)", DO NOT retry/restart - submit the remaining <code>proof-k</code> ids by hand onto the SAME attempt_id.</li></ol></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#flags-gm-accepted">Flags (GM-accepted)</a></li><li class="l2"><a href="#prompt-verbatim">Prompt (verbatim)</a></li><li class="l2"><a href="#shape">Shape</a></li><li class="l2"><a href="#solve-path-per-mastery-variant-most-general-shape">Solve path (per Mastery variant - most general shape)</a></li><li class="l3"><a href="#target-1-service-postcard-node-js-exposed-deploy-archive">Target 1 - &quot;Service Postcard&quot; (Node.js, exposed deploy archive)</a></li><li class="l3"><a href="#target-2-incident-picnic-asp-net-idor-with-issued-session-cookie">Target 2 - &quot;Incident Picnic&quot; (ASP.NET, IDOR with issued session cookie)</a></li><li class="l3"><a href="#target-3-query-me-this-flask-sql-injection-on-q">Target 3 - &quot;Query Me This&quot; (Flask, SQL injection on ?q)</a></li><li class="l3"><a href="#target-4-url-valet-asp-net-core-minimal-api-textbook-ssrf">Target 4 - &quot;URL Valet&quot; (ASP.NET Core Minimal API, textbook SSRF)</a></li><li class="l2"><a href="#what-the-banked-autosolver-did-and-what-i-had-to-add">What the banked autosolver did and what I had to add</a></li><li class="l2"><a href="#files">Files</a></li><li class="l2"><a href="#lessons-learned-what-to-automate-next-time">Lessons learned / what to automate next time</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-24-event-horizon.html">&lt; Event Horizon</a><a href="day-24-spot-the-difference.html">Spot the Difference &gt;</a></nav>
   </div>
 </main>
 <footer class="site">

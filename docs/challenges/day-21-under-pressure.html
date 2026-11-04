@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Under Pressure - Day 21 write-up</title>
-<meta name="description" content="Day 21 Warmups write-up: The warmups adapter (challenges/lib/autosolvewarmups.py) walks each set&#x27;s lines against a fixed positional decoder ladder in LADDERNAMES. Li">
+<meta name="description" content="Day 21 Warmups write-up: The warmups adapter (challenges/_lib/autosolve_warmups.py) walks each set&#x27;s lines against a fixed positional decoder ladder in LADDER_NAMES. Line ...">
 <meta name="color-scheme" content="dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,8 +33,7 @@
 <div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-21.html">Day 21</a> / <a href="../lanes/warmups.html">Warmups</a> / Under Pressure</p><p class="telemetry"><span>DAY 21</span><span class="sep">//</span><span>LANE: WARMUPS</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Under Pressure</h1></div></div>
 <main id="main">
   <div class="wrap">
-<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-warmups" href="../lanes/warmups.html">Warmups</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
-<h1 id="under-pressure-day-21-warmups">Under Pressure (Day 21, warmups)</h1>
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-warmups" href="../lanes/warmups.html">Warmups</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose"><p class="srctitle">Under Pressure (Day 21, warmups)</p>
 <p>GM id: <code>warmups-day-21</code>. Name: <code>&#128118; Under Pressure</code>. Statement SHA-1: <code>5c951cd4c65bf33ed5b23eb43f89b33f760ed9c3</code>. Mastery blob: 103 sets, each with 21 numbered lines; the first <code>set*.message</code> sits at line 1, each other field is a positional encoding of the one plaintext.</p>
 <h2 id="result">Result</h2>
 <p>All three modes CORRECT, accepted by the GM (solved_by Blandman3):</p>
@@ -45,12 +44,12 @@
 <h2 id="the-decoder-gap">The decoder gap</h2>
 <p>Lines 19, 20, 21 of each set were, respectively:</p>
 <ul><li><code>utf-16-le</code> of the plaintext, encoded as a lowercase hex string carrying its BOM</li><li><code>utf-16-be</code> of the plaintext, encoded as a lowercase hex string carrying its BOM</li><li><code>gzip</code> of the plaintext bytes, then base64 (standard, with padding)</li></ul>
-<p>The three decoders were added to <code>LADDER_NAMES</code> (positions 19..21) and to the dispatch table in <code>autosolve_warmups.py</code> (not found in any source):</p>
+<p>The three decoders were added to <code>LADDER_NAMES</code> (positions 19..21) and to the dispatch table in <code>autosolve_warmups.py</code>:</p>
 <ul><li><code>utf16lehex</code>: <code>bytes.fromhex(s).decode("utf-16-le")</code> and discard the BOM</li><li><code>utf16behex</code>: <code>bytes.fromhex(s).decode("utf-16-be")</code> and discard the BOM</li><li><code>gzipb64</code>: <code>gzip.decompress(base64.b64decode(s)).decode("utf-8")</code></li></ul>
 <p>Offline, the fix read all 103 sets of the expired blob without a miss.</p>
 <h2 id="retry-route-fix">Retry route fix</h2>
 <p>Autosolve's post-ranked-failure path (<code>_fallback_with_live_status</code> in <a href="../files/day-21/day-21-under-pressure/challenges/_lib/autosolve.py"><code>challenges/_lib/autosolve.py</code></a>) refused to send a continuation when the GM status was <code>expired</code> without a <code>next_op</code> field &#8212; the state this attempt was left in. The project already has one rule for the first write (<code>first_op_from_status</code>), test-pinned, which treats <code>expired</code> + <code>unique_attempts_remaining &gt;= 1</code> as <code>retry</code>.</p>
-<p>The fallback was changed to use that same rule. A regression test for the Day 21 state (<code>expired</code>, 255 variants left, no <code>next_op</code> &#8594; <code>retry</code>) was added to <code>_test_route_first_write.py</code> (not found in any source). Both <code>_test_route_first_write.py</code> (not found in any source) and <code>_test_autosolve_fallback.py</code> (not found in any source) pass.</p>
+<p>The fallback was changed to use that same rule. A regression test for the Day 21 state (<code>expired</code>, 255 variants left, no <code>next_op</code> &#8594; <code>retry</code>) was added to <code>_test_route_first_write.py</code>. Both <code>_test_route_first_write.py</code> and <code>_test_autosolve_fallback.py</code> pass.</p>
 <p>With the fix in, one more <code>autosolve.py 21 warmups-day-21 warmups</code> call opened a fresh variant through <code>op=retry</code> and the adapter solved it in 3.3 s.</p>
 <h2 id="lessons">Lessons</h2>
 <ul><li>A positional ladder is a hard contract. A new day can extend it; the fix is adding the decoder and its position, not guessing from the bytes.</li><li>One rule for the first write. The project has <code>first_op_from_status</code>; the fallback must call it, so a <code>expired</code> + fresh-variants state picks <code>retry</code> without needing a <code>next_op</code> from the GM.</li><li>The first ranked Mastery window was lost to the ladder gap; the retry recovered the mode but not the Hall-of-Fame credit. The decoder is now ready for the next time this layer appears.</li></ul>

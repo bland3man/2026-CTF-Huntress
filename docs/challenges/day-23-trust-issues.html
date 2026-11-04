@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Trust Issues - Day 23 write-up</title>
-<meta name="description" content="Day 23 Binary RE write-up: GM id: binary reverse engineering day 23 anti analysis recognition This binary doesn&#x27;t trust you. It checks the clock, sniffs the environmen">
+<meta name="description" content="Day 23 Binary RE write-up: Pipeline flow (all three modes solved by the team solver): Single Solve: CORRECT in 11.7 s (untimed, static artifact). Time Trial: ranked, EARLY ...">
 <meta name="color-scheme" content="dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,29 +33,17 @@
 <div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-23.html">Day 23</a> / <a href="../lanes/binary.html">Binary RE</a> / Trust Issues</p><p class="telemetry"><span>DAY 23</span><span class="sep">//</span><span>LANE: BINARY RE</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Trust Issues</h1></div></div>
 <main id="main">
   <div class="wrap">
-<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-binary" href="../lanes/binary.html">Binary RE</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose"><h1 id="trust-issues-day-23-binary-reverse-engineering">Trust Issues - Day 23 (binary-reverse-engineering)</h1>
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-binary" href="../lanes/binary.html">Binary RE</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose"><p class="srctitle">Trust Issues - Day 23 (binary-reverse-engineering)</p>
 <p>GM id: <code>binary-reverse-engineering-day-23-anti-analysis-recognition</code></p>
 <h2 id="prompt">Prompt</h2>
 <p>This binary doesn't trust you. It checks the clock, sniffs the environment, and takes different branches when it thinks it's being watched. Spot every predicate and force the truth out.</p>
 <h2 id="solution">Solution</h2>
-<p>The Day 23 twist is anti-analysis recognition: the artifact carries the usual
-~17-slot HCFG config record plus timing/environment predicates. Classification
-is by bytes (not extension) with the ELF &lt;-&gt; native-PE rotation already handled
-by the banked <code>autosolve_binary</code> spine, so every answer is derivable from the
-staged bytes without executing the sample.</p>
-<p>Pipeline flow (all three modes solved by <code>the team solver</code>):
-- Single Solve: CORRECT in 11.7 s (untimed, static artifact).
-- Time Trial: ranked, EARLY start (prior Single CORRECT live), CORRECT in 8.3 s.
-- Mastery: ranked, EARLY start, CORRECT in 83.3 s.</p>
-<p>No new field shape appeared today - the banked HCFG scan + binary_facts /
-hdr_struct / malware_id adapters covered every id. Static-only; no sample ever
-executed.</p>
+<p>The Day 23 twist is anti-analysis recognition: the artifact carries the usual ~17-slot HCFG config record plus timing/environment predicates. Classification is by bytes (not extension) with the ELF &lt;-&gt; native-PE rotation already handled by the banked <code>autosolve_binary</code> spine, so every answer is derivable from the staged bytes without executing the sample.</p>
+<p>Pipeline flow (all three modes solved by <code>the team solver</code>):</p>
+<ul><li>Single Solve: CORRECT in 11.7 s (untimed, static artifact).</li><li>Time Trial: ranked, EARLY start (prior Single CORRECT live), CORRECT in 8.3 s.</li><li>Mastery: ranked, EARLY start, CORRECT in 83.3 s.</li></ul>
+<p>No new field shape appeared today - the banked HCFG scan + binary_facts / hdr_struct / malware_id adapters covered every id. Static-only; no sample ever executed.</p>
 <h2 id="flags-gm-accepted">Flags (GM accepted)</h2>
-<ul>
-<li>Single Solve: <code>484ea4c9c31e7c86bfb68211a2134f56</code></li>
-<li>Time Trial:   <code>74f658e2dcbe3a601dc65ceb43098fb1</code></li>
-<li>Mastery:      <code>9c2e74dfb576306734220dee14cf4467</code></li>
-</ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#prompt">Prompt</a></li><li class="l2"><a href="#solution">Solution</a></li><li class="l2"><a href="#flags-gm-accepted">Flags (GM accepted)</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="../days/day-23.html">&lt; Day 23</a><a href="../challenges/index.html">All write-ups &gt;</a></nav>
+<ul><li>Single Solve: <span class="flag" data-flag><span class="fl">Token</span><span class="fv">484ea4c9c31e7c86bfb68211a2134f56</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li><li>Time Trial:   <span class="flag" data-flag><span class="fl">Token</span><span class="fv">74f658e2dcbe3a601dc65ceb43098fb1</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li><li>Mastery:      <span class="flag" data-flag><span class="fl">Token</span><span class="fv">9c2e74dfb576306734220dee14cf4467</span><button type="button" class="fc" hidden aria-label="Copy value">Copy</button></span></li></ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#prompt">Prompt</a></li><li class="l2"><a href="#solution">Solution</a></li><li class="l2"><a href="#flags-gm-accepted">Flags (GM accepted)</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="day-11-template-temper.html">&lt; Template Temper</a><a href="day-24-emulator-alibi.html">Emulator Alibi &gt;</a></nav>
   </div>
 </main>
 <footer class="site">

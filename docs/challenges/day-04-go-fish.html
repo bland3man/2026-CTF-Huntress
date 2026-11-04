@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Go Fish - Day 04 write-up</title>
-<meta name="description" content="Day 04 Binary RE write-up: Same family as Day 03 &quot;Table Manners&quot; (dual-format RE inventory); new layer = the Go ELF. KB match: dualformatre. Reused the banked solver, ">
+<meta name="description" content="Day 04 Binary RE write-up: Same family as Day 03 &quot;Table Manners&quot; (dual-format RE inventory); new layer = the Go ELF. KB match: dual_format_re. Reused the banked solver ...">
 <meta name="color-scheme" content="dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,7 +34,6 @@
 <main id="main">
   <div class="wrap">
 <div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-binary" href="../lanes/binary.html">Binary RE</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
-<h1 id="go-fish">Go Fish</h1>
 <h2 id="challenge">Challenge</h2>
 <p>Binary reverse engineering, Huntress CTF 2026 Day 04 (lane: binary-reverse-engineering, 32 fields). Prompt: "Go binaries are chatty: they ship with build info, function names, and file paths baked right in. Fish them out and map what this one was built to do." Modes: Single Solve (static), Time Trial, Mastery (2 evidence sets). Scored per field by the Game Master (partial credit, accepted fields accumulate).</p>
 <h2 id="artifacts">Artifacts</h2>

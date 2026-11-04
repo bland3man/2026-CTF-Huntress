@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Whats in the Box - Day 08 write-up</title>
-<meta name="description" content="Day 08 Metadata Forensics write-up: File-type-driven metadata extraction, one field per answerid. The only new work over prior days is the nested ZIP: parse its End Of Central ">
+<meta name="description" content="Day 08 Metadata Forensics write-up: File-type-driven metadata extraction, one field per answer_id. The only new work over prior days is the nested ZIP: parse its End Of Central ...">
 <meta name="color-scheme" content="dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,7 +34,6 @@
 <main id="main">
   <div class="wrap">
 <div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-metadata" href="../lanes/metadata.html">Metadata Forensics</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
-<h1 id="what-s-in-the-box">What's in the Box?</h1>
 <h2 id="challenge">Challenge</h2>
 <ul><li>Category / lane: Metadata Forensics (Huntress CTF 2026, Day 08)</li><li>GM id: <code>metadata-forensics-day-08-whats-in-the-box</code></li><li>Prompt: "The count was only the beginning. Inventory every stored path, preserve directory context, and identify the archive whose names reveal an impossible provenance claim."</li><li>Modes: Single Solve, Time Trial, Mastery</li><li>Answers are submitted as per-field <code>answer_ids</code> through the Game Master; flags are returned by the GM on a correct submission.</li></ul>
 <p>This challenge extends the Day 02-07 metadata-forensics lane with one new layer: ZIP end-of-central-directory inspection (<code>zip.eocd_total_entries</code> and <code>zip.central_directory_member_names</code>), including an archive nested inside the bundle.</p>
@@ -51,7 +50,7 @@ evidence-drop-001.zip   (nested archive)</code></pre>
 <h2 id="investigation">Investigation</h2>
 <p>All values derived from the real downloaded bytes (never retyped):</p>
 <p>evidence-note.txt</p>
-<ul><li>filename: <code>evidence-note.txt</code> (not found in any source)</li><li>size: <code>33</code> bytes</li><li>MD5: <code>cd836b3a174d0ab06510b15c8a9877a0</code></li><li>SHA-1: <code>44afd711074d6af55f5f3c17766a71322993d036</code></li><li>SHA-256: <code>017617c9fe59ab6cc5fab5a6672ca02b7d12b09988a429e022654451d84b1a40</code></li><li>first 16 bytes (hex): <code>43617365204139373036454146314535</code></li><li>UTF-8 BOM present: <code>false</code></li></ul>
+<ul><li>filename: <code>evidence-note.txt</code></li><li>size: <code>33</code> bytes</li><li>MD5: <code>cd836b3a174d0ab06510b15c8a9877a0</code></li><li>SHA-1: <code>44afd711074d6af55f5f3c17766a71322993d036</code></li><li>SHA-256: <code>017617c9fe59ab6cc5fab5a6672ca02b7d12b09988a429e022654451d84b1a40</code></li><li>first 16 bytes (hex): <code>43617365204139373036454146314535</code></li><li>UTF-8 BOM present: <code>false</code></li></ul>
 <p>image / document headers</p>
 <ul><li>camera-001.jpg JPEG SOF dimensions: <code>257x146</code></li><li>panel-001.png PNG IHDR dimensions: <code>269x153</code></li><li>document-001.pdf header version: <code>%PDF-1.4</code></li></ul>
 <p>nested archive evidence-drop-001.zip (the new layer)</p>

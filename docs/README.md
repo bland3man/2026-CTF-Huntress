@@ -19,4 +19,4 @@ No challenge files, binaries or archives are included; only rendered text.
 - Online: open the Pages site above.
 - Locally: open `index.html` in any browser. All links are relative, so it also works straight from disk.
 
-216 HTML pages, plain HTML/CSS with a small optional script for search and copy buttons. Everything works without JavaScript.
+233 HTML pages, plain HTML/CSS with a small optional script for search and copy buttons. Everything works without JavaScript.

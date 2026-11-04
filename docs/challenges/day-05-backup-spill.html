@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Backup Spill - Day 05 write-up</title>
-<meta name="description" content="Day 05 Mobile Android write-up: Per the established pattern for these fixture APKs: check assets/.json first before any decompilation - the dex is small and decorative, the">
+<meta name="description" content="Day 05 Mobile Android write-up: Per the established pattern for these fixture APKs: check assets/.json first before any decompilation - the dex is small and decorative, the real ...">
 <meta name="color-scheme" content="dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,15 +34,14 @@
 <main id="main">
   <div class="wrap">
 <div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-mobile" href="../lanes/mobile.html">Mobile Android</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose">
-<h1 id="backup-spill">Backup Spill</h1>
 <h2 id="challenge">Challenge</h2>
 <ul><li>Category: Mobile Android (Day 05), GM id <code>mobile-android-day-05-backup-spill</code></li><li>Prompt: "Extract synthetic application state admitted by a flawed backup boundary."</li><li>Question shape: <code>For case MOB-05-&lt;id&gt; in package com.huntress.mobile.d05.v&lt;id&gt; ... Submit only the exact backend answer code returned for this case.</code></li><li>Flag format: <code>ANS-</code> followed by exactly 16 uppercase hex characters (answer code, not <code>flag{}</code>)</li><li>Same recurring family as Day 04's "Pending Intent Relay": a small synthetic fixture APK whose real answer is bundled in a JSON puzzle asset, not derived by exploiting the themed Android mechanic (a "flawed backup boundary" here, a "mutable PendingIntent relay" on Day 04) at runtime.</li></ul>
 <h2 id="artifacts">Artifacts</h2>
-<ul><li><code>backup_spill.apk</code> (challenge artifact, not published) - <code>AndroidManifest.xml</code> (reference kept as plain text; not an eligible file type), <code>classes.dex</code> (challenge artifact, not published), <code>assets/huntress_puzzle.json</code> (not found in any source), fixture-signed <code>META-INF</code>.</li></ul>
+<ul><li><code>backup_spill.apk</code> (challenge artifact, not published) - <code>AndroidManifest.xml</code>, <code>classes.dex</code> (challenge artifact, not published), <code>assets/huntress_puzzle.json</code>, fixture-signed <code>META-INF</code>.</li></ul>
 <h2 id="triage">Triage</h2>
 <p>Per the established pattern for these fixture APKs: check <code>assets/*.json</code> first before any decompilation - the dex is small and decorative, the real answer lives in the bundled puzzle asset.</p>
 <h2 id="investigation">Investigation</h2>
-<ol><li>Unzip the APK; read <code>assets/huntress_puzzle.json</code> (not found in any source):
+<ol><li>Unzip the APK; read <code>assets/huntress_puzzle.json</code>:
 <pre class="code"><code class="lang-json">{"schema": "huntress.mobile.puzzle.v1", "day": 5, "codec": "split",
  "data": "", "parts": ["0A353BE7B", "ANS-5", "709E18"], "order": [2, 0, 1]}</code></pre></li><li><code>codec = "split"</code>: the real string is <code>parts</code> reassembled in the order given by <code>order</code> - <code>order[i]</code> is the position of <code>parts[i]</code> in the final string, so sort indices by their <code>order</code> value and concatenate:
 <pre class="code"><code class="lang-python">parts, order = p["parts"], p["order"]
