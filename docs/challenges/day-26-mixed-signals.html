@@ -33,7 +33,7 @@
 <div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-26.html">Day 26</a> / <a href="../lanes/script.html">Script Analysis</a> / Mixed Signals</p><p class="telemetry"><span>DAY 26</span><span class="sep">//</span><span>LANE: SCRIPT ANALYSIS</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Mixed Signals</h1></div></div>
 <main id="main">
   <div class="wrap">
-<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-script" href="../lanes/script.html">Script Analysis</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose"><h1 id="mixed-signals-day-26-script-analysis">Mixed Signals — Day 26 (script-analysis)</h1>
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-script" href="../lanes/script.html">Script Analysis</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose"><h1 id="mixed-signals-day-26-script-analysis">Mixed Signals &#8212; Day 26 (script-analysis)</h1>
 <ul>
 <li><strong>Challenge id:</strong> <code>script-analysis-day-26-beam-message-flow</code></li>
 <li><strong>Lane:</strong> script-analysis (homestation-owned)</li>
@@ -70,7 +70,7 @@ mechanically every fixture is a single-file descriptor carrier.</p>
 <tr>
 <td><strong>Mastery</strong></td>
 <td style="text-align: right;"><strong>16770</strong></td>
-<td><strong>10 sets × 1677</strong>, outer zip of <code>evidence-01.zip … evidence-10.zip</code> (setK ↔ evidence-0K)</td>
+<td><strong>10 sets &#215; 1677</strong>, outer zip of <code>evidence-01.zip &#8230; evidence-10.zip</code> (setK &#8596; evidence-0K)</td>
 </tr>
 </tbody>
 </table></div>
@@ -79,20 +79,20 @@ JScript/JavaScript/node, VBScript, batch, bash, and the <em>polyglot</em> carrie
 Perl, Ruby, TypeScript, AppleScript, AutoIt, AutoHotkey, C# script, Google Apps Script,
 Groovy, GitHub Actions YAML, MSBuild XML, NSIS, WMI MOF, JSP, GDScript, Erlang escript,
 Elixir. Every fixture embeds a <strong>layered-encoded <code>key=value</code> descriptor</strong> (e.g.
-<code>LYR-hex_b64_rev</code>, <code>b32_b64_rev</code>, <code>b64_b32_b64</code>, …). 21 field classes per set:
+<code>LYR-hex_b64_rev</code>, <code>b32_b64_rev</code>, <code>b64_b32_b64</code>, &#8230;). 21 field classes per set:
 <code>campaign, campaign-token, role, steps, attack, obfuscation, url, url-host, stage-count,
 stage-profile, next-language, file-path, path-leaf, indicator, style, feature, primitive,
 carrier, secondary, tertiary, handoff-id</code>.</p>
 <p>The banked extractor (<code>autosolve_script</code> + <code>solve_node_by_node</code>) already resolves <strong>19 of
-21 classes with zero changes</strong> — including the <code>attack</code> precedence graph, campaign
+21 classes with zero changes</strong> &#8212; including the <code>attack</code> precedence graph, campaign
 reconstruction, roles, steps, obfuscation profiles. Single and Time Trial landed CORRECT
 automatically at 09:00. <strong>Mastery did not.</strong></p>
-<h2 id="why-mastery-failed-at-0900-three-root-causes-all-proven">Why Mastery failed at 09:00 — three root causes (all proven)</h2>
-<h3 id="bug-1-setblob-misalignment-at-10-sets-the-big-one">BUG 1 — set/blob misalignment at ≥10 sets (the big one)</h3>
+<h2 id="why-mastery-failed-at-0900-three-root-causes-all-proven">Why Mastery failed at 09:00 &#8212; three root causes (all proven)</h2>
+<h3 id="bug-1-setblob-misalignment-at-10-sets-the-big-one">BUG 1 &#8212; set/blob misalignment at &#8805;10 sets (the big one)</h3>
 <p><code>autosolve_script.solve_fields_ext</code> splits the outer zip into per-set blobs and aligns
 them to sets <strong>by index after <code>sorted({set-prefix strings})</code></strong>. Lexicographically that is
-<code>['set1','set10','set2','set3',…,'set9']</code>, while the inner archives sort numerically
-<code>['evidence-01'…'evidence-10']</code>. So <code>set10→evidence-02</code>, <code>set2→evidence-03</code>, … — <strong>9 of 10
+<code>['set1','set10','set2','set3',&#8230;,'set9']</code>, while the inner archives sort numerically
+<code>['evidence-01'&#8230;'evidence-10']</code>. So <code>set10&#8594;evidence-02</code>, <code>set2&#8594;evidence-03</code>, &#8230; &#8212; <strong>9 of 10
 sets read the wrong evidence archive.</strong> Because every set reuses the <em>same file names</em>
 with <em>different bytes</em> (the "collision decoy" theme), the mis-read produces confident,
 plausible, <strong>wrong</strong> answers rather than a crash.</p>
@@ -103,14 +103,14 @@ mismatches per set: set2:1603 set3:1604 set4:1575 set5:1580 set6:1576 set7:1573 
 <p><strong>85% of answers wrong.</strong> Day 11 had only 2 sets (lexical order == numeric) so the bug was
 dormant until a double-digit set count appeared. The <code>geometry_flags</code> even warned:
 <code>mastery_sets 2 -&gt; 10 (was Day 11)</code>.</p>
-<h3 id="bug-2-sequential-solve-overruns-the-window">BUG 2 — sequential solve overruns the window</h3>
-<p>The 10 sets are analysed one-after-another (~15–18 s each ⇒ 150–180 s for extraction
+<h3 id="bug-2-sequential-solve-overruns-the-window">BUG 2 &#8212; sequential solve overruns the window</h3>
+<p>The 10 sets are analysed one-after-another (~15&#8211;18 s each &#8658; 150&#8211;180 s for extraction
 alone; the offline stock run exceeded a 120 s timeout). Add download + a 16770-answer
 submit and it does not fit the ~5-min Mastery deadline. The 09:00 worker was torn down by
-the daily manager mid-solve — no autosolve/submit event was ever logged.</p>
-<h3 id="bug-3-descriptor-decode-spill-1-field">BUG 3 — descriptor decode spill (1 field)</h3>
+the daily manager mid-solve &#8212; no autosolve/submit event was ever logged.</p>
+<h3 id="bug-3-descriptor-decode-spill-1-field">BUG 3 &#8212; descriptor decode spill (1 field)</h3>
 <p>One <code>csharp_script</code> fixture in set8 decoded with <strong>trailing non-printable bytes after the
-real value</strong>: <code>…/.7e2d2dd8d2ed7742.stage\x00&lt;garbage&gt;</code>. <code>exact_text</code> is graded literally,
+real value</strong>: <code>&#8230;/.7e2d2dd8d2ed7742.stage\x00&lt;garbage&gt;</code>. <code>exact_text</code> is graded literally,
 so that single field fails the whole all-or-nothing batch even when the other 16,769 are
 right.</p>
 <blockquote>
@@ -122,27 +122,27 @@ rule that did not exist.</p>
 </blockquote>
 <h2 id="how-mastery-was-finished-this-session">How Mastery was finished (this session)</h2>
 <p>A standalone Commander solver (now promoted to <code>challenges/_lib/script_multiset.py</code>):
-1. <code>A.start(gm, …/mastery, for_time=True)</code> — fresh variant via the sanctioned timed-start
+1. <code>A.start(gm, &#8230;/mastery, for_time=True)</code> &#8212; fresh variant via the sanctioned timed-start
    override (<code>HUNTRESS_TIMED_START=commander-override</code>; 31 variants remained, HOF off so it
-   was an untimed scored attempt — still earns the flag + points).
-2. Expand the outer zip; map <strong>setK → evidence-0K explicitly from each question's own
+   was an untimed scored attempt &#8212; still earns the flag + points).
+2. Expand the outer zip; map <strong>setK &#8594; evidence-0K explicitly from each question's own
    <code>artifact</code> field</strong> (fixes BUG 1).
-3. Solve the 10 sets <strong>in parallel</strong> (fork pool, 32 cores) — each set a single-set
+3. Solve the 10 sets <strong>in parallel</strong> (fork pool, 32 cores) &#8212; each set a single-set
    mini-start so its internal sort is unambiguous (fixes BUG 2): <strong>18.3 s for all 16,770</strong>.
-4. Sanitise path fields (trim at <code>.stage</code>, drop trailing garbage) — fixes BUG 3.
-5. One submit → <code>result: CORRECT</code>.</p>
+4. Sanitise path fields (trim at <code>.stage</code>, drop trailing garbage) &#8212; fixes BUG 3.
+5. One submit &#8594; <code>result: CORRECT</code>.</p>
 <p>Diagnosis used the untimed attempt's <strong>partial grading</strong> (<code>accepted</code> = all-right subset vs
-<code>incorrect</code>) to localise the wrong class by field-type and then by field — 19/21 classes
+<code>incorrect</code>) to localise the wrong class by field-type and then by field &#8212; 19/21 classes
 cleared immediately; file-path/path-leaf narrowed to the one csharp field. Validated
 offline: <code>script_multiset.solve</code> reproduces <strong>16770/16770 GM-correct answers in 18.8 s</strong>.</p>
-<h2 id="next-time-this-lane-goes-100-better-recognition-determinism">Next time this lane goes 100× better — recognition + determinism</h2>
+<h2 id="next-time-this-lane-goes-100-better-recognition-determinism">Next time this lane goes 100&#215; better &#8212; recognition + determinism</h2>
 <p><strong>Recognise instantly</strong> (from the prebrief geometry, no bytes needed): answer ids
-namespaced <code>set1. … setN.</code> with <strong>N ≥ 2</strong> and <code>mastery_sets &gt; 2</code>, carriers including the
+namespaced <code>set1. &#8230; setN.</code> with <strong>N &#8805; 2</strong> and <code>mastery_sets &gt; 2</code>, carriers including the
 polyglot set, descriptors tagged <code>HUNTRESS_ANALYSIS_V1:LYR-&lt;layers&gt;</code>. <code>script_multiset.recognize(start)</code>
 returns this in O(ids).</p>
 <p><strong>Deterministic path</strong> (<code>script_multiset.py</code>, offline-tested, <em>not yet wired into
-production — operator freeze</em>; stage for the post-freeze deploy per the D27 plan):
-- explicit <code>setK→evidence-0K</code> mapping (never index order),
+production &#8212; operator freeze</em>; stage for the post-freeze deploy per the D27 plan):
+- explicit <code>setK&#8594;evidence-0K</code> mapping (never index order),
 - parallel per-set extraction (18 s, not 180 s),
 - path/url field sanitiser (BUG-3 guard),
 - falls back to the stock single-set path for legacy 1-set shapes.</p>
@@ -162,7 +162,7 @@ and the engineering note in <code>docs/COMMANDER_CORE.md</code> engineering stat
 <li>GM record (authoritative): <code>challenges/Day 26/_gm_record/script-analysis-day-26-beam-message-flow.homestation.jsonl</code>.</li>
 <li>GM-downloaded bytes were purged after solving (per handling policy); the attempt is
   reproducible from a fresh <code>op=start</code> (31 variants remained).</li>
-</ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#what-the-challenge-actually-is">What the challenge actually is</a></li><li class="l2"><a href="#why-mastery-failed-at-0900-three-root-causes-all-proven">Why Mastery failed at 09:00 — three root causes (all proven)</a></li><li class="l3"><a href="#bug-1-setblob-misalignment-at-10-sets-the-big-one">BUG 1 — set/blob misalignment at ≥10 sets (the big one)</a></li><li class="l3"><a href="#bug-2-sequential-solve-overruns-the-window">BUG 2 — sequential solve overruns the window</a></li><li class="l3"><a href="#bug-3-descriptor-decode-spill-1-field">BUG 3 — descriptor decode spill (1 field)</a></li><li class="l2"><a href="#how-mastery-was-finished-this-session">How Mastery was finished (this session)</a></li><li class="l2"><a href="#next-time-this-lane-goes-100-better-recognition-determinism">Next time this lane goes 100× better — recognition + determinism</a></li><li class="l2"><a href="#artifacts-reproducibility">Artifacts / reproducibility</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="../days/day-26.html">&lt; Day 26</a><a href="../challenges/index.html">All write-ups &gt;</a></nav>
+</ul></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#what-the-challenge-actually-is">What the challenge actually is</a></li><li class="l2"><a href="#why-mastery-failed-at-0900-three-root-causes-all-proven">Why Mastery failed at 09:00 &#8212; three root causes (all proven)</a></li><li class="l3"><a href="#bug-1-setblob-misalignment-at-10-sets-the-big-one">BUG 1 &#8212; set/blob misalignment at &#8805;10 sets (the big one)</a></li><li class="l3"><a href="#bug-2-sequential-solve-overruns-the-window">BUG 2 &#8212; sequential solve overruns the window</a></li><li class="l3"><a href="#bug-3-descriptor-decode-spill-1-field">BUG 3 &#8212; descriptor decode spill (1 field)</a></li><li class="l2"><a href="#how-mastery-was-finished-this-session">How Mastery was finished (this session)</a></li><li class="l2"><a href="#next-time-this-lane-goes-100-better-recognition-determinism">Next time this lane goes 100&#215; better &#8212; recognition + determinism</a></li><li class="l2"><a href="#artifacts-reproducibility">Artifacts / reproducibility</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="../days/day-26.html">&lt; Day 26</a><a href="../challenges/index.html">All write-ups &gt;</a></nav>
   </div>
 </main>
 <footer class="site">

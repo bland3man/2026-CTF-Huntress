@@ -55,7 +55,7 @@ type Case { id, title, note }                  # note is the proof
 </code></pre>
 <p>The <code>note</code> value is the <code>proof_&lt;hex&gt;</code> answer for proof-1.</p>
 <h2 id="mastery-four-targets-four-protocol-surfaces-same-lesson-incomplete-field-levelauthorization-boundary">Mastery - four targets, four protocol surfaces, same lesson (incomplete field-level/authorization boundary)</h2>
-<p>Target index → vulnerability class:</p>
+<p>Target index &#8594; vulnerability class:</p>
 <ul>
 <li><strong>Target 1 - Status Sprout (static Node.js, exposed backup).</strong> <code>robots.txt</code> disallows <code>/releases-&lt;hex&gt;/</code>. That path returns a directory index listing <code>release-settings-&lt;hex&gt;.json.bak</code>, which contains <code>"support_note":"proof_..."</code>.</li>
 <li><strong>Target 2 - Pocket SOC (session cookie + IDOR).</strong> <code>GET /</code> sets <code>case_session=&lt;hex&gt;</code> and shows cases owned by "Riley"; <code>GET /api/activity</code> with the cookie reveals a cross-workspace event referencing <code>case_id</code> 10134 (owner "executive", <code>visibility: "reference_only"</code>). <code>GET /api/incidents/10134</code> with the same cookie returns <code>{"status":"restricted","note":"proof_..."}</code> - the resolver trusts the session for authentication but never checks per-record visibility.</li>

